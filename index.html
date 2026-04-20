@@ -423,7 +423,19 @@
                             </div>
                             {/* ---------------------------------- */}
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-6">
+                                {/* --- ALUTH: Desktop Navigation Icons --- */}
+                                <div className="hidden md:flex items-center gap-6 mr-2 border-r border-slate-200 pr-6">
+                                    <button onClick={() => { setView('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
+                                        <i data-lucide="home" className="w-6 h-6"></i>
+                                    </button>
+                                    <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
+                                        <i data-lucide="bell" className="w-6 h-6"></i>
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                                    </button>
+                                </div>
+                                {/* --------------------------------------- */}
+
                                 {!user || user.isAnonymous ? (
                                     <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-7 py-3 rounded-2xl font-bold text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">SIGN IN</button>
                                 ) : (
@@ -447,6 +459,7 @@
                                         <div className="relative group shadow-sm">
                                             <i data-lucide="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
                                             <input 
+                                                id="mobile-search-input"
                                                 type="text" 
                                                 placeholder="Search Creators..." 
                                                 className="w-full bg-white border border-slate-200 rounded-[2.5rem] py-5 pl-14 pr-6 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 font-bold text-sm tracking-wide transition-all shadow-md"
@@ -554,6 +567,40 @@
                                 </div>
                                 <button onClick={() => setView('home')} className="w-full py-7 bg-slate-100 text-slate-400 rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[10px] mt-10">Return to Global Stream</button>
                             </div>
+                        ) : view === 'notifications' ? (
+                            <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
+                                <div className="flex items-center gap-4 mb-10 px-4">
+                                    <div className="w-14 h-14 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 shadow-inner">
+                                        <i data-lucide="bell" className="w-7 h-7"></i>
+                                    </div>
+                                    <div className="text-left">
+                                        <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Alerts</h2>
+                                        <p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-1">System Intelligence</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm p-4 space-y-2">
+                                    <div className="flex items-start gap-4 p-5 hover:bg-slate-50 rounded-[2.5rem] transition-colors cursor-pointer group">
+                                        <div className="w-12 h-12 rounded-[1.2rem] bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                                            <i data-lucide="zap" className="w-6 h-6"></i>
+                                        </div>
+                                        <div className="flex-1 text-left pt-1">
+                                            <p className="text-[15px] font-extrabold text-slate-900 leading-snug">Welcome to Nexus Network!</p>
+                                            <p className="text-sm font-medium text-slate-500 mt-1">Your creator profile is successfully established and synchronized.</p>
+                                            <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mt-2">Just now</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4 p-5 hover:bg-slate-50 rounded-[2.5rem] transition-colors cursor-pointer group">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=System" className="w-12 h-12 rounded-[1.2rem] bg-slate-100 flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform border border-slate-200 object-cover" />
+                                        <div className="flex-1 text-left pt-1">
+                                            <p className="text-[15px] font-extrabold text-slate-900 leading-snug">Nexus System Protocol</p>
+                                            <p className="text-sm font-medium text-slate-500 mt-1">Start transmitting your AI prompts to gain global influence and followers.</p>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">2 hours ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onClick={() => setView('home')} className="w-full py-7 bg-slate-100 text-slate-400 rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[10px] mt-8">Return to Global Stream</button>
+                            </div>
                         ) : (
                             <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
                                 <div className="bg-white rounded-[4rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
@@ -592,10 +639,19 @@
                         )}
                     </main>
 
-                    <div className="fixed bottom-0 w-full mobile-bottom-bar px-14 py-7 flex justify-around items-center md:hidden z-40">
-                         <i data-lucide="home" className={`w-8 cursor-pointer transition-all ${view==='home'?'text-blue-600 scale-110':'text-slate-300'}`} onClick={()=>{ setView('home'); setSelectedUser(null); }}></i>
-                         <div onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login', error: ''}); else setPostModal({ ...postModal, open: true }); }} className="w-16 h-16 btn-nexus-main rounded-[2.2rem] flex items-center justify-center text-white -mt-24 shadow-2xl active:scale-90 transition-transform cursor-pointer border-4 border-white"><i data-lucide="plus" className="w-9 h-9"></i></div>
-                         <i data-lucide="user" className={`w-8 cursor-pointer transition-all ${(view==='profile' || view==='public_profile')?'text-blue-600 scale-110':'text-slate-300'}`} onClick={()=>{ setView('profile'); setSelectedUser(null); }}></i>
+                    <div className="fixed bottom-0 w-full mobile-bottom-bar px-8 py-5 flex justify-between items-center md:hidden z-40">
+                         <i data-lucide="home" className={`w-6 cursor-pointer transition-all ${view==='home'?'text-blue-600 scale-110':'text-slate-400'}`} onClick={()=>{ setView('home'); setSelectedUser(null); }}></i>
+                         
+                         <i data-lucide="search" className={`w-6 cursor-pointer transition-all ${view==='search'?'text-blue-600 scale-110':'text-slate-400'}`} onClick={()=>{ setView('home'); setTimeout(()=> document.getElementById('mobile-search-input')?.focus(), 100); }}></i>
+                         
+                         <div onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login', error: ''}); else setPostModal({ ...postModal, open: true }); }} className="w-14 h-14 btn-nexus-main rounded-[1.8rem] flex items-center justify-center text-white -mt-12 shadow-2xl active:scale-90 transition-transform cursor-pointer border-4 border-white"><i data-lucide="plus" className="w-7 h-7"></i></div>
+                         
+                         <div className="relative">
+                             <i data-lucide="bell" className={`w-6 cursor-pointer transition-all ${view==='notifications'?'text-blue-600 scale-110':'text-slate-400'}`} onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); }}></i>
+                             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                         </div>
+                         
+                         <i data-lucide="user" className={`w-6 cursor-pointer transition-all ${(view==='profile' || view==='public_profile')?'text-blue-600 scale-110':'text-slate-400'}`} onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }}></i>
                     </div>
 
                     {/* Modals: Auth, Edit Profile, Post, Comment */}
