@@ -115,10 +115,15 @@
                 if (!isReady || !user || user.isAnonymous) return;
                 const { db, appId, doc, onSnapshot } = window.fb;
                 const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
+                const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid);
+                
                 const unsubscribeProfile = onSnapshot(profileRef, (snap) => {
                     if (snap.exists()) setProfileData(prev => ({ ...prev, ...snap.data() }));
                 });
-                return () => unsubscribeProfile();
+                const unsubscribeStats = onSnapshot(statsRef, (snap) => {
+                    if (snap.exists()) setProfileData(prev => ({ ...prev, ...snap.data() }));
+                });
+                return () => { unsubscribeProfile(); unsubscribeStats(); };
             }, [isReady, user]);
 
             // Fetch Global Feed
@@ -178,26 +183,29 @@
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
                 if (!selectedUser) return;
 
-                const { db, appId, doc, setDoc, deleteDoc, updateDoc, increment } = window.fb;
+                const { db, appId, doc, setDoc, deleteDoc, increment, serverTimestamp } = window.fb;
                 const followId = `${user.uid}_${selectedUser.id}`;
                 const followRef = doc(db, 'artifacts', appId, 'public', 'data', 'follows', followId);
-                const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
-                const targetProfileRef = doc(db, 'artifacts', appId, 'users', selectedUser.id, 'profile', 'info');
+                
+                // Public stats වලට ලියන නිසා දැන් කිසිම error එකක් එන්නේ නෑ 🚀
+                const myStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid);
+                const targetStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', selectedUser.id);
 
                 try {
                     if (isFollowing) {
                         await deleteDoc(followRef);
-                        await updateDoc(myProfileRef, { followingCount: increment(-1) });
-                        await updateDoc(targetProfileRef, { followersCount: increment(-1) });
+                        await setDoc(myStatsRef, { followingCount: increment(-1) }, { merge: true });
+                        await setDoc(targetStatsRef, { followersCount: increment(-1) }, { merge: true });
+                        setSelectedUser(prev => ({ ...prev, followersCount: Math.max(0, (prev.followersCount || 0) - 1) }));
                     } else {
-                        await setDoc(followRef, { followerId: user.uid, followingId: selectedUser.id, timestamp: serverTimestamp() });
-                        await updateDoc(myProfileRef, { followingCount: increment(1) });
-                        await updateDoc(targetProfileRef, { followersCount: increment(1) });
+                        await setDoc(followRef, { followerId: user.uid, followingId: selectedUser.id, timestamp: serverTimestamp() }, { merge: true });
+                        await setDoc(myStatsRef, { followingCount: increment(1) }, { merge: true });
+                        await setDoc(targetStatsRef, { followersCount: increment(1) }, { merge: true });
+                        setSelectedUser(prev => ({ ...prev, followersCount: (prev.followersCount || 0) + 1 }));
                     }
-                    // Refresh selected user data to show new count
-                    const updatedTarget = await getDoc(targetProfileRef);
-                    setSelectedUser(prev => ({ ...prev, ...updatedTarget.data() }));
-                } catch (e) { console.error(e); }
+                } catch (e) { 
+                    console.error("Follow error:", e); 
+                }
             };
 
             const handleAuth = async (e) => {
@@ -228,16 +236,25 @@
             };
 
             const openPublicProfile = async (targetUserId) => {
-                if (targetUserId === user?.uid) return setView('profile');
+                if (targetUserId === user?.uid) {
+                    setView('profile');
+                    setSelectedUser(null);
+                    return;
+                }
                 const { db, appId, doc, getDoc } = window.fb;
                 try {
                     const profileRef = doc(db, 'artifacts', appId, 'users', targetUserId, 'profile', 'info');
+                    const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', targetUserId);
+                    
                     const profileSnap = await getDoc(profileRef);
+                    const statsSnap = await getDoc(statsRef);
+                    
                     if (profileSnap.exists()) {
-                        setSelectedUser({ id: targetUserId, ...profileSnap.data() });
+                        const statsData = statsSnap.exists() ? statsSnap.data() : { followersCount: 0, followingCount: 0 };
+                        setSelectedUser({ id: targetUserId, ...profileSnap.data(), ...statsData });
                         setView('public_profile');
                     }
-                } catch (e) { console.error(e); }
+                } catch (e) { console.error("Profile load error:", e); }
             };
 
             const saveProfileUpdates = async (e) => {
