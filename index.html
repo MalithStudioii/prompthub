@@ -81,13 +81,13 @@
         const App = () => {
             const [isReady, setIsReady] = useState(false);
             const [user, setUser] = useState(null);
-            const [profileData, setProfileData] = useState({ bio: '', name: '', photoURL: '', followersCount: 0, followingCount: 0 });
+            const [profileData, setProfileData] = useState({ bio: '', name: '', photoURL: '', coverURL: '', country: '', city: '', workplace: '', contactNo: '', isLocked: false, followersCount: 0, followingCount: 0 });
             const [view, setView] = useState('home'); 
             const [posts, setPosts] = useState([]);
             const [loading, setLoading] = useState(true);
             const [authModal, setAuthModal] = useState({ open: false, mode: 'login', email: '', password: '', name: '', error: '' });
             const [postModal, setPostModal] = useState({ open: false, prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' });
-            const [editProfileModal, setEditProfileModal] = useState({ open: false, name: '', bio: '', photoURL: '', imageFile: null });
+            const [editProfileModal, setEditProfileModal] = useState({ open: false, name: '', bio: '', photoURL: '', coverURL: '', imageFile: null, coverFile: null, country: '', city: '', workplace: '', contactNo: '', isLocked: false });
             const [copiedId, setCopiedId] = useState(null);
             
             const [selectedUser, setSelectedUser] = useState(null);
@@ -215,7 +215,9 @@
                             name: loggedInUser.displayName,
                             email: loggedInUser.email,
                             photoURL: loggedInUser.photoURL,
+                            coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
                             bio: 'Elite AI Creator exploring the Nexus.',
+                            country: '', city: '', workplace: '', contactNo: '', isLocked: false,
                             createdAt: serverTimestamp(),
                             provider: 'google'
                         });
@@ -305,18 +307,32 @@
                 try {
                     setUploading(true);
                     let finalPhotoURL = editProfileModal.photoURL;
+                    let finalCoverURL = editProfileModal.coverURL;
                     
-                    // If a file was selected, upload it to ImgBB first
                     if (editProfileModal.imageFile) {
                         const uploadedUrl = await uploadToImgBB(editProfileModal.imageFile);
                         if(uploadedUrl) finalPhotoURL = uploadedUrl;
                     }
+                    if (editProfileModal.coverFile) {
+                        const uploadedCoverUrl = await uploadToImgBB(editProfileModal.coverFile);
+                        if(uploadedCoverUrl) finalCoverURL = uploadedCoverUrl;
+                    }
 
                     const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
-                    await updateDoc(profileRef, { name: editProfileModal.name, bio: editProfileModal.bio, photoURL: finalPhotoURL });
+                    await updateDoc(profileRef, { 
+                        name: editProfileModal.name, 
+                        bio: editProfileModal.bio, 
+                        photoURL: finalPhotoURL,
+                        coverURL: finalCoverURL,
+                        country: editProfileModal.country,
+                        city: editProfileModal.city,
+                        workplace: editProfileModal.workplace,
+                        contactNo: editProfileModal.contactNo,
+                        isLocked: editProfileModal.isLocked
+                    });
                     await updateProfile(auth.currentUser, { displayName: editProfileModal.name, photoURL: finalPhotoURL });
                     
-                    setEditProfileModal({ ...editProfileModal, open: false, imageFile: null });
+                    setEditProfileModal({ ...editProfileModal, open: false, imageFile: null, coverFile: null });
                 } catch (e) { 
                     console.error(e); 
                     alert("Error updating profile.");
@@ -569,11 +585,17 @@
                         ) : view === 'profile' ? (
                             <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
                                 <div className="bg-white rounded-[4rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
-                                    <div className="h-44 profile-banner relative"><div className="absolute inset-0 bg-black/10"></div></div>
+                                    <div className="h-44 profile-banner relative bg-slate-800">
+                                        {profileData.coverURL && <img src={profileData.coverURL} className="w-full h-full object-cover opacity-80" />}
+                                        <div className="absolute inset-0 bg-black/10"></div>
+                                    </div>
                                     <div className="px-12 pb-14 relative flex flex-col items-center">
                                         <div className="flex flex-col items-center -mt-20">
-                                            <img src={profileData.photoURL || user?.photoURL} className="w-44 h-44 rounded-[3.5rem] border-8 border-white shadow-2xl bg-white object-cover mb-6" />
-                                            <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter uppercase leading-none">{profileData.name || user?.displayName}</h2>
+                                            <img src={profileData.photoURL || user?.photoURL} className="w-44 h-44 rounded-[3.5rem] border-8 border-white shadow-2xl bg-white object-cover mb-6 relative z-10" />
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">{profileData.name || user?.displayName}</h2>
+                                                {profileData.isLocked && <i data-lucide="lock" className="w-5 h-5 text-blue-600"></i>}
+                                            </div>
                                             <p className="text-blue-600 font-black text-[11px] mb-6 tracking-[0.4em] uppercase">{user?.email}</p>
                                             
                                             <div className="flex gap-8 mb-8">
@@ -581,9 +603,17 @@
                                                 <div className="text-center border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900 leading-none">{profileData.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Following</p></div>
                                             </div>
 
-                                            <div className="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-50 max-w-md mb-10"><p className="text-slate-500 font-medium text-sm leading-relaxed italic">"{profileData.bio}"</p></div>
+                                            <div className="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-50 max-w-md w-full mb-8">
+                                                <p className="text-slate-500 font-medium text-sm leading-relaxed italic mb-4">"{profileData.bio}"</p>
+                                                <div className="flex flex-col gap-3 text-left border-t border-slate-100 pt-4">
+                                                    {(profileData.city || profileData.country) && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><i data-lucide="map-pin" className="w-4 h-4 text-blue-500"></i> {profileData.city}{profileData.city && profileData.country ? ', ' : ''}{profileData.country}</div>}
+                                                    {profileData.workplace && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><i data-lucide="briefcase" className="w-4 h-4 text-blue-500"></i> {profileData.workplace}</div>}
+                                                    {profileData.contactNo && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><i data-lucide="phone" className="w-4 h-4 text-blue-500"></i> {profileData.contactNo}</div>}
+                                                </div>
+                                            </div>
+
                                             <div className="flex gap-4 w-full justify-center">
-                                                <button onClick={() => setEditProfileModal({ open: true, name: profileData.name, bio: profileData.bio, photoURL: profileData.photoURL, imageFile: null })} className="bg-slate-900 text-white px-12 py-4.5 rounded-[2rem] font-black text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> Edit Profile</button>
+                                                <button onClick={() => setEditProfileModal({ open: true, name: profileData.name, bio: profileData.bio, photoURL: profileData.photoURL, coverURL: profileData.coverURL || '', country: profileData.country || '', city: profileData.city || '', workplace: profileData.workplace || '', contactNo: profileData.contactNo || '', isLocked: profileData.isLocked || false, imageFile: null, coverFile: null })} className="bg-slate-900 text-white px-12 py-4.5 rounded-[2rem] font-black text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> Edit Profile</button>
                                                 <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 px-8 py-4.5 rounded-[2rem] hover:bg-red-50 transition-colors">Sign Out</button>
                                             </div>
                                         </div>
@@ -643,18 +673,38 @@
                         ) : (
                             <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
                                 <div className="bg-white rounded-[4rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
-                                    <div className="h-44 profile-banner relative"></div>
+                                    <div className="h-44 profile-banner relative bg-slate-800">
+                                        {selectedUser.coverURL && <img src={selectedUser.coverURL} className="w-full h-full object-cover opacity-80" />}
+                                    </div>
                                     <div className="px-12 pb-14 relative flex flex-col items-center">
                                         <div className="flex flex-col items-center -mt-20">
-                                            <img src={selectedUser.photoURL} className="w-44 h-44 rounded-[3.5rem] border-8 border-white shadow-2xl bg-white object-cover mb-6" />
-                                            <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter uppercase leading-none">{selectedUser.name}</h2>
+                                            <img src={selectedUser.photoURL} className="w-44 h-44 rounded-[3.5rem] border-8 border-white shadow-2xl bg-white object-cover mb-6 relative z-10" />
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">{selectedUser.name}</h2>
+                                                {selectedUser.isLocked && <i data-lucide="lock" className="w-5 h-5 text-blue-600"></i>}
+                                            </div>
                                             
-                                            <div className="flex gap-8 mb-8 mt-2">
+                                            <div className="flex gap-8 mb-8 mt-4">
                                                 <div className="text-center"><p className="text-2xl font-black text-slate-900 leading-none">{selectedUser.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Followers</p></div>
                                                 <div className="text-center border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900 leading-none">{selectedUser.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Following</p></div>
                                             </div>
 
-                                            <div className="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-50 max-w-md mb-10"><p className="text-slate-500 font-medium text-sm leading-relaxed italic">"{selectedUser.bio}"</p></div>
+                                            {selectedUser.isLocked && !isFollowing ? (
+                                                <div className="bg-blue-50/50 p-6 rounded-[2.5rem] border border-blue-100 max-w-md w-full mb-8 text-center">
+                                                    <div className="flex justify-center mb-3"><i data-lucide="shield-check" className="w-10 h-10 text-blue-500"></i></div>
+                                                    <p className="text-blue-900 font-bold text-sm">This creator's profile is locked.</p>
+                                                    <p className="text-blue-600/70 font-medium text-xs mt-1">Follow them to unlock their insights and personal details.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-50 max-w-md w-full mb-8">
+                                                    <p className="text-slate-500 font-medium text-sm leading-relaxed italic mb-4">"{selectedUser.bio}"</p>
+                                                    <div className="flex flex-col gap-3 text-left border-t border-slate-100 pt-4">
+                                                        {(selectedUser.city || selectedUser.country) && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><i data-lucide="map-pin" className="w-4 h-4 text-blue-500"></i> {selectedUser.city}{selectedUser.city && selectedUser.country ? ', ' : ''}{selectedUser.country}</div>}
+                                                        {selectedUser.workplace && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><i data-lucide="briefcase" className="w-4 h-4 text-blue-500"></i> {selectedUser.workplace}</div>}
+                                                        {selectedUser.contactNo && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><i data-lucide="phone" className="w-4 h-4 text-blue-500"></i> {selectedUser.contactNo}</div>}
+                                                    </div>
+                                                </div>
+                                            )}
                                             
                                             <button onClick={toggleFollow} className={`w-full max-w-[240px] py-5 rounded-[2rem] font-black text-xs tracking-[0.2em] shadow-xl active:scale-95 uppercase flex items-center justify-center gap-2 transition-all ${isFollowing ? 'bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
                                                 {isFollowing ? <><i data-lucide="user-check" className="w-4 h-4"></i> Following</> : <><i data-lucide="user-plus" className="w-4 h-4"></i> Follow Creator</>}
@@ -719,18 +769,45 @@
 
                     {editProfileModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
-                            <div className="bg-white w-full max-w-md rounded-[3.5rem] p-12 shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
+                            <div className="bg-white w-full max-w-lg rounded-[3.5rem] p-10 shadow-2xl animate-in slide-in-from-bottom-10 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar">
                                 <h2 className="text-3xl font-black mb-8 text-slate-900 text-center tracking-tighter uppercase leading-none">Sync Profile Intel</h2>
-                                <form onSubmit={saveProfileUpdates} className="space-y-6">
-                                    <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Display Name</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-wide transition-all" value={editProfileModal.name} onChange={e => setEditProfileModal({...editProfileModal, name: e.target.value})} /></div>
-                                    <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Creator Bio</label><textarea className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-sm transition-all min-h-[100px]" value={editProfileModal.bio} onChange={e => setEditProfileModal({...editProfileModal, bio: e.target.value})}></textarea></div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Avatar Upload</label>
-                                        <input type="file" accept="image/*" onChange={e => setEditProfileModal({...editProfileModal, imageFile: e.target.files[0]})} className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-3 px-6 text-xs font-bold file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                                        {editProfileModal.imageFile && <div className="text-[10px] font-black text-blue-600 tracking-widest ml-2 uppercase mt-2">File Selected: {editProfileModal.imageFile.name}</div>}
+                                <form onSubmit={saveProfileUpdates} className="space-y-5">
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Avatar</label>
+                                            <input type="file" accept="image/*" onChange={e => setEditProfileModal({...editProfileModal, imageFile: e.target.files[0]})} className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-2 px-4 text-[10px] font-bold file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-blue-50 file:text-blue-700" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Cover Banner</label>
+                                            <input type="file" accept="image/*" onChange={e => setEditProfileModal({...editProfileModal, coverFile: e.target.files[0]})} className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-2 px-4 text-[10px] font-bold file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-blue-50 file:text-blue-700" />
+                                        </div>
                                     </div>
-                                    <button disabled={uploading} className="w-full btn-nexus-main text-white py-6 rounded-[2.2rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all uppercase disabled:opacity-50">{uploading ? 'SYNCING...' : 'SAVE INTEL'}</button>
-                                    <button type="button" onClick={() => setEditProfileModal({ ...editProfileModal, open: false, imageFile: null })} className="w-full mt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest text-center hover:text-slate-400">Cancel Sync</button>
+
+                                    <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Display Name</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-wide" value={editProfileModal.name} onChange={e => setEditProfileModal({...editProfileModal, name: e.target.value})} /></div>
+                                    <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Creator Bio</label><textarea className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-sm min-h-[80px]" value={editProfileModal.bio} onChange={e => setEditProfileModal({...editProfileModal, bio: e.target.value})}></textarea></div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Country</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-4 px-6 outline-none font-bold text-sm" value={editProfileModal.country} onChange={e => setEditProfileModal({...editProfileModal, country: e.target.value})} /></div>
+                                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">City</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-4 px-6 outline-none font-bold text-sm" value={editProfileModal.city} onChange={e => setEditProfileModal({...editProfileModal, city: e.target.value})} /></div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Workplace / Studio</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-4 px-6 outline-none font-bold text-sm" value={editProfileModal.workplace} onChange={e => setEditProfileModal({...editProfileModal, workplace: e.target.value})} /></div>
+                                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Contact No</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.5rem] py-4 px-6 outline-none font-bold text-sm" value={editProfileModal.contactNo} onChange={e => setEditProfileModal({...editProfileModal, contactNo: e.target.value})} /></div>
+                                    </div>
+
+                                    <div className="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-100 flex items-center justify-between mt-4">
+                                        <div>
+                                            <h4 className="font-extrabold text-sm text-slate-900">Profile Lock Mode</h4>
+                                            <p className="text-[10px] font-bold text-slate-400 mt-1">Hide details from non-followers</p>
+                                        </div>
+                                        <button type="button" onClick={() => setEditProfileModal({...editProfileModal, isLocked: !editProfileModal.isLocked})} className={`w-14 h-8 rounded-full transition-colors relative flex items-center ${editProfileModal.isLocked ? 'bg-blue-600' : 'bg-slate-300'}`}>
+                                            <div className={`w-6 h-6 bg-white rounded-full absolute shadow-sm transition-transform ${editProfileModal.isLocked ? 'translate-x-7' : 'translate-x-1'}`}></div>
+                                        </button>
+                                    </div>
+
+                                    <button disabled={uploading} className="w-full btn-nexus-main text-white py-5 rounded-[2.2rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all uppercase disabled:opacity-50 mt-6">{uploading ? 'SYNCING DATA...' : 'SAVE INTEL'}</button>
+                                    <button type="button" onClick={() => setEditProfileModal({ ...editProfileModal, open: false, imageFile: null, coverFile: null })} className="w-full mt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest text-center hover:text-slate-400">Cancel Sync</button>
                                 </form>
                             </div>
                         </div>
