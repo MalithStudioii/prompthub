@@ -43,7 +43,7 @@
             signOut, signInAnonymously, updateProfile, GoogleAuthProvider, signInWithPopup 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
-            getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc 
+            getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -63,7 +63,7 @@
 
         window.fb = { 
             auth, db, appId, collection, addDoc, query, onSnapshot, 
-            serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc,
+            serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove,
             signInWithEmailAndPassword, createUserWithEmailAndPassword, 
             signOut, onAuthStateChanged, signInAnonymously, updateProfile, 
             googleProvider, signInWithPopup
@@ -86,9 +86,10 @@
             const [editProfileModal, setEditProfileModal] = useState({ open: false, name: '', bio: '', photoURL: '' });
             const [copiedId, setCopiedId] = useState(null);
             
-            // User states for discovery
+            // Interaction States
             const [selectedUser, setSelectedUser] = useState(null);
             const [isFollowing, setIsFollowing] = useState(false);
+            const [commentModal, setCommentModal] = useState({ open: false, post: null, text: '' });
 
             useEffect(() => {
                 const handleReady = () => setIsReady(true);
@@ -110,7 +111,6 @@
                 return () => unsubscribeAuth();
             }, [isReady]);
 
-            // Fetch My Profile Data
             useEffect(() => {
                 if (!isReady || !user || user.isAnonymous) return;
                 const { db, appId, doc, onSnapshot } = window.fb;
@@ -126,19 +126,26 @@
                 return () => { unsubscribeProfile(); unsubscribeStats(); };
             }, [isReady, user]);
 
-            // Fetch Global Feed
             useEffect(() => {
                 if (!isReady || !user) return; 
                 const { db, appId, collection, onSnapshot } = window.fb;
                 const postsCol = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
                 const unsubscribePosts = onSnapshot(postsCol, (snap) => {
                     const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    setPosts(fetched.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+                    const sorted = fetched.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                    setPosts(sorted);
                 }, (err) => console.error("Feed Error:", err));
                 return () => unsubscribePosts();
             }, [isReady, user]);
 
-            // Track if following the selected user
+            // Keep comment modal up to date with new comments
+            useEffect(() => {
+                if (commentModal.open && commentModal.post) {
+                    const updatedPost = posts.find(p => p.id === commentModal.post.id);
+                    if (updatedPost) setCommentModal(prev => ({ ...prev, post: updatedPost }));
+                }
+            }, [posts]);
+
             useEffect(() => {
                 if (!selectedUser || !user || user.isAnonymous) return;
                 const { db, appId, doc, onSnapshot } = window.fb;
@@ -151,7 +158,7 @@
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }, [view, user, posts, authModal.open, postModal.open, editProfileModal.open, selectedUser, isFollowing]);
+            }, [view, user, posts, authModal.open, postModal.open, editProfileModal.open, selectedUser, isFollowing, commentModal.open]);
 
             const handleGoogleSignIn = async () => {
                 setLoading(true);
@@ -167,9 +174,8 @@
                             email: loggedInUser.email,
                             photoURL: loggedInUser.photoURL,
                             bio: 'Elite AI Creator exploring the Nexus.',
-                            followersCount: 0,
-                            followingCount: 0,
-                            createdAt: serverTimestamp()
+                            createdAt: serverTimestamp(),
+                            provider: 'google'
                         });
                     }
                     setAuthModal({ ...authModal, open: false, error: '' });
@@ -186,8 +192,6 @@
                 const { db, appId, doc, setDoc, deleteDoc, increment, serverTimestamp } = window.fb;
                 const followId = `${user.uid}_${selectedUser.id}`;
                 const followRef = doc(db, 'artifacts', appId, 'public', 'data', 'follows', followId);
-                
-                // Public stats වලට ලියන නිසා දැන් කිසිම error එකක් එන්නේ නෑ 🚀
                 const myStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid);
                 const targetStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', selectedUser.id);
 
@@ -203,9 +207,7 @@
                         await setDoc(targetStatsRef, { followersCount: increment(1) }, { merge: true });
                         setSelectedUser(prev => ({ ...prev, followersCount: (prev.followersCount || 0) + 1 }));
                     }
-                } catch (e) { 
-                    console.error("Follow error:", e); 
-                }
+                } catch (e) { console.error("Follow error:", e); }
             };
 
             const handleAuth = async (e) => {
@@ -221,8 +223,6 @@
                             email: authModal.email, 
                             photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${res.user.uid}`,
                             bio: 'Newly authorized intelligence in the Nexus.',
-                            followersCount: 0,
-                            followingCount: 0,
                             createdAt: serverTimestamp()
                         });
                     } else {
@@ -245,7 +245,6 @@
                 try {
                     const profileRef = doc(db, 'artifacts', appId, 'users', targetUserId, 'profile', 'info');
                     const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', targetUserId);
-                    
                     const profileSnap = await getDoc(profileRef);
                     const statsSnap = await getDoc(statsRef);
                     
@@ -270,7 +269,7 @@
 
             const handleCreatePost = async (e) => {
                 e.preventDefault();
-                if (!user || user.isAnonymous) return setAuthModal({ ...authModal, open: true, mode: 'login' });
+                if (!user || user.isAnonymous) return setAuthModal({ ...authModal, open: true, mode: 'login', error: 'Sign in required' });
                 setLoading(true);
                 const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
                 try {
@@ -282,12 +281,75 @@
                         imageUrl: postModal.imageUrl,
                         model: postModal.model,
                         createdAt: serverTimestamp(),
-                        likes: 0
+                        likes: [], // Started tracking likes as an array
+                        comments: []
                     });
                     setPostModal({ open: false, prompt: '', imageUrl: '', model: 'Midjourney v6.1 Pro' });
                     setView('home');
                 } catch (err) { console.error(err); }
                 setLoading(false);
+            };
+
+            // FB-Style Like Toggle
+            const toggleLike = async (post) => {
+                if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
+                const { db, appId, doc, updateDoc, arrayUnion, arrayRemove } = window.fb;
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', post.id);
+
+                const isLegacy = typeof post.likes === 'number';
+                const hasLiked = !isLegacy && post.likes?.includes?.(user.uid);
+
+                try {
+                    if (isLegacy) {
+                        await updateDoc(postRef, { likes: [user.uid] });
+                    } else if (hasLiked) {
+                        await updateDoc(postRef, { likes: arrayRemove(user.uid) });
+                    } else {
+                        await updateDoc(postRef, { likes: arrayUnion(user.uid) });
+                    }
+                } catch (e) { console.error(e); }
+            };
+
+            // FB-Style Comment Submission
+            const submitComment = async (e) => {
+                e.preventDefault();
+                if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
+                if (!commentModal.text.trim()) return;
+
+                const { db, appId, doc, updateDoc, arrayUnion } = window.fb;
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', commentModal.post.id);
+
+                const newComment = {
+                    id: Date.now().toString(),
+                    userId: user.uid,
+                    userName: profileData.name || user.displayName || 'Nexus User',
+                    userPhoto: profileData.photoURL || user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`,
+                    text: commentModal.text,
+                    timestamp: new Date().toISOString()
+                };
+
+                try {
+                    await updateDoc(postRef, { comments: arrayUnion(newComment) });
+                    setCommentModal({ ...commentModal, text: '' });
+                } catch (e) { console.error("Comment Error:", e); }
+            };
+
+            // Native Share Logic
+            const handleShare = async (post) => {
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'PromptHub Nexus',
+                            text: `Check out this AI Prompt by ${post.userName}: "${post.prompt}"`,
+                            url: window.location.href,
+                        });
+                    } catch (err) { console.log('Share dismissed'); }
+                } else {
+                    const ta = document.createElement("textarea");
+                    ta.value = `Prompt by ${post.userName}: ${post.prompt}`;
+                    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                    alert("Prompt copied to clipboard!");
+                }
             };
 
             const userPosts = posts.filter(p => p.userId === user?.uid);
@@ -335,16 +397,15 @@
                                             <div className="p-6 flex items-center justify-between">
                                                 <div className="flex items-center gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.userId)}>
                                                     <div className="p-0.5 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform">
-                                                        <img src={post.userPhoto} className="w-11 h-11 rounded-2xl bg-white p-0.5" />
+                                                        <img src={post.userPhoto} className="w-11 h-11 rounded-2xl bg-white p-0.5 object-cover" />
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="font-extrabold text-[16px] text-slate-800 tracking-tight leading-none group-hover:text-blue-600 transition-colors">{post.userName}</span>
-                                                        <span className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80 mt-1.5"><i data-lucide="cpu" className="w-3"></i> {post.model}</span>
+                                                        <span className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80 mt-1.5">
+                                                           <i data-lucide="cpu" className="w-3"></i> {post.model}
+                                                        </span>
                                                     </div>
                                                 </div>
-                                                <button onClick={() => toggleLike(post.id)} className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-400 hover:text-red-500 transition-colors font-bold text-xs group">
-                                                    <i data-lucide="heart" className="w-4 h-4 group-hover:fill-current"></i> {post.likes || 0}
-                                                </button>
                                             </div>
                                             <div className="relative group px-4">
                                                 <img src={post.imageUrl} className="w-full aspect-square object-cover rounded-[3rem] shadow-sm bg-slate-50" loading="lazy" />
@@ -355,7 +416,28 @@
                                                     {copiedId === post.id ? <i data-lucide="check-check" className="text-green-600 w-7 h-7"></i> : <i data-lucide="clipboard-list" className="w-7 h-7"></i>}
                                                 </button>
                                             </div>
-                                            <div className="p-8"><div className="bg-slate-50/70 p-7 rounded-[2.8rem] border border-slate-100 italic relative"><p className="text-[15px] font-mono text-slate-600 leading-relaxed">"{post.prompt}"</p></div></div>
+                                            
+                                            <div className="px-8 pb-6 pt-6">
+                                                <div className="bg-slate-50/70 p-7 rounded-[2.8rem] border border-slate-100 italic relative mb-4">
+                                                    <p className="text-[15px] font-mono text-slate-600 leading-relaxed">"{post.prompt}"</p>
+                                                    <div className="absolute -top-3 -left-1 bg-white p-1 rounded-lg border border-slate-100 shadow-sm"><i data-lucide="terminal" className="w-4 h-4 text-slate-300"></i></div>
+                                                </div>
+                                                
+                                                {/* FB-Style Action Bar */}
+                                                <div className="flex items-center justify-between border-t border-slate-100 pt-4 px-2">
+                                                    <button onClick={() => toggleLike(post)} className={`flex items-center gap-2 font-bold text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600' : 'text-slate-500 hover:text-blue-600'}`}>
+                                                        <i data-lucide="thumbs-up" className={`w-5 h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`}></i> 
+                                                        {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)} Like
+                                                    </button>
+                                                    <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold text-xs transition-colors">
+                                                        <i data-lucide="message-square" className="w-5 h-5"></i> 
+                                                        {post.comments?.length || 0} Comment
+                                                    </button>
+                                                    <button onClick={() => handleShare(post)} className="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold text-xs transition-colors">
+                                                        <i data-lucide="share-2" className="w-5 h-5"></i> Share
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))
                                 )}
@@ -370,7 +452,6 @@
                                             <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter uppercase leading-none">{profileData.name || user?.displayName}</h2>
                                             <p className="text-blue-600 font-black text-[11px] mb-6 tracking-[0.4em] uppercase">{user?.email}</p>
                                             
-                                            {/* Facebook Style Stats */}
                                             <div className="flex gap-8 mb-8">
                                                 <div className="text-center"><p className="text-2xl font-black text-slate-900 leading-none">{profileData.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Followers</p></div>
                                                 <div className="text-center border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900 leading-none">{profileData.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Following</p></div>
@@ -381,6 +462,10 @@
                                                 <button onClick={() => setEditProfileModal({ open: true, name: profileData.name, bio: profileData.bio, photoURL: profileData.photoURL })} className="bg-slate-900 text-white px-12 py-4.5 rounded-[2rem] font-black text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> Edit Profile</button>
                                                 <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 px-8 py-4.5 rounded-[2rem] hover:bg-red-50 transition-colors">Sign Out</button>
                                             </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-8 py-12 border-t border-slate-50 mt-14 w-full">
+                                            <div><p className="text-4xl font-black text-slate-900 tracking-tighter leading-none">{userPosts.length}</p><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Creations</p></div>
+                                            <div><p className="text-4xl font-black text-slate-900 tracking-tighter leading-none">ELITE</p><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Nexus Rank</p></div>
                                         </div>
                                     </div>
                                 </div>
@@ -395,9 +480,9 @@
                                         ))}
                                     </div>
                                 </div>
+                                <button onClick={() => setView('home')} className="w-full py-7 bg-slate-100 text-slate-400 rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[10px] mt-10">Return to Global Stream</button>
                             </div>
                         ) : (
-                            // Public Profile View
                             <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
                                 <div className="bg-white rounded-[4rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
                                     <div className="h-44 profile-banner relative"></div>
@@ -406,7 +491,6 @@
                                             <img src={selectedUser.photoURL} className="w-44 h-44 rounded-[3.5rem] border-8 border-white shadow-2xl bg-white object-cover mb-6" />
                                             <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter uppercase leading-none">{selectedUser.name}</h2>
                                             
-                                            {/* Stats View */}
                                             <div className="flex gap-8 mb-8 mt-2">
                                                 <div className="text-center"><p className="text-2xl font-black text-slate-900 leading-none">{selectedUser.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Followers</p></div>
                                                 <div className="text-center border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900 leading-none">{selectedUser.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Following</p></div>
@@ -414,11 +498,7 @@
 
                                             <div className="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-50 max-w-md mb-10"><p className="text-slate-500 font-medium text-sm leading-relaxed italic">"{selectedUser.bio}"</p></div>
                                             
-                                            {/* Action Button: Follow/Unfollow */}
-                                            <button 
-                                                onClick={toggleFollow}
-                                                className={`w-full max-w-[240px] py-5 rounded-[2rem] font-black text-xs tracking-[0.2em] shadow-xl active:scale-95 uppercase flex items-center justify-center gap-2 transition-all ${isFollowing ? 'bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                                            >
+                                            <button onClick={toggleFollow} className={`w-full max-w-[240px] py-5 rounded-[2rem] font-black text-xs tracking-[0.2em] shadow-xl active:scale-95 uppercase flex items-center justify-center gap-2 transition-all ${isFollowing ? 'bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
                                                 {isFollowing ? <><i data-lucide="user-check" className="w-4 h-4"></i> Following</> : <><i data-lucide="user-plus" className="w-4 h-4"></i> Follow Creator</>}
                                             </button>
                                         </div>
@@ -440,15 +520,13 @@
                         )}
                     </main>
 
-                    {/* Desktop Float Button */}
-                    <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else setPostModal({ ...postModal, open: true }); }} className="fixed bottom-10 right-10 bg-slate-900 text-white hidden md:flex items-center gap-3 px-10 py-5 rounded-[2rem] shadow-2xl z-40 hover:scale-105 active:scale-95 transition-all group border-4 border-white/10"><i data-lucide="plus" className="w-6 h-6 group-hover:rotate-90 transition-transform"></i><span className="font-black text-[10px] uppercase tracking-widest">Transmit Insight</span></button>
-
                     <div className="fixed bottom-0 w-full mobile-bottom-bar px-14 py-7 flex justify-around items-center md:hidden z-40">
                          <i data-lucide="home" className={`w-8 cursor-pointer transition-all ${view==='home'?'text-blue-600 scale-110':'text-slate-300'}`} onClick={()=>{ setView('home'); setSelectedUser(null); }}></i>
                          <div onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login', error: ''}); else setPostModal({ ...postModal, open: true }); }} className="w-16 h-16 btn-nexus-main rounded-[2.2rem] flex items-center justify-center text-white -mt-24 shadow-2xl active:scale-90 transition-transform cursor-pointer border-4 border-white"><i data-lucide="plus" className="w-9 h-9"></i></div>
                          <i data-lucide="user" className={`w-8 cursor-pointer transition-all ${(view==='profile' || view==='public_profile')?'text-blue-600 scale-110':'text-slate-300'}`} onClick={()=>{ setView('profile'); setSelectedUser(null); }}></i>
                     </div>
 
+                    {/* Modals: Auth, Edit Profile, Post, Comment */}
                     {authModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
                             <div className="bg-white w-full max-w-md rounded-[3.5rem] p-14 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 border border-white/20 text-center">
@@ -456,7 +534,7 @@
                                 <p className="text-slate-400 font-black text-[10px] mt-4 uppercase tracking-[0.4em] opacity-60 italic mb-10">Secure Intelligence Access</p>
                                 {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-5 rounded-2xl mb-8 border border-red-100 uppercase tracking-widest">{authModal.error}</div>}
                                 <button onClick={handleGoogleSignIn} className="w-full flex items-center justify-center gap-4 bg-white border-2 border-slate-50 py-5 rounded-[2.2rem] font-black text-sm text-slate-700 hover:bg-slate-50 transition-all mb-10 shadow-sm active:scale-95"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" className="w-6 h-6" /> CONTINUE WITH GOOGLE</button>
-                                <div className="flex items-center gap-4 mb-10"><div className="h-px bg-slate-100 flex-1"></div><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">secure link</span><div className="h-px bg-slate-100 flex-1"></div></div>
+                                <div className="flex items-center gap-4 mb-10"><div className="h-px bg-slate-100 flex-1"></div><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">secure link</span><div className="h-px bg-slate-100 flex-1"></div></div>
                                 <form onSubmit={handleAuth} className="space-y-5">
                                     {authModal.mode === 'signup' && <input type="text" placeholder="DISPLAY NAME" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] py-5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.name} onChange={e => setAuthModal({...authModal, name: e.target.value})} />}
                                     <input type="email" placeholder="EMAIL ADDRESS" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] py-5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.email} onChange={e => setAuthModal({...authModal, email: e.target.value})} />
@@ -464,12 +542,11 @@
                                     <button className="w-full btn-nexus-main text-white py-6 rounded-[2.2rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all uppercase">Establish Link</button>
                                 </form>
                                 <button onClick={() => setAuthModal({...authModal, mode: authModal.mode==='login'?'signup':'login', error: ''})} className="w-full mt-10 text-[11px] font-black text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.3em]">{authModal.mode === 'login' ? "Request Access" : "Existing Member? Sign In"}</button>
-                                <button onClick={() => setAuthModal({...authModal, open: false})} className="w-full mt-6 text-[10px] font-black text-slate-200 uppercase tracking-widest hover:text-slate-400 transition-colors">Discard Tunnel</button>
+                                <button onClick={() => setAuthModal({...authModal, open: false})} className="w-full mt-6 text-[10px] font-black text-slate-200 uppercase tracking-widest hover:text-slate-400 transition-colors">Abort Tunnel</button>
                             </div>
                         </div>
                     )}
 
-                    {/* Edit Profile Modal */}
                     {editProfileModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
                             <div className="bg-white w-full max-w-md rounded-[3.5rem] p-12 shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
@@ -490,11 +567,58 @@
                             <div className="bg-white w-full max-w-lg rounded-[4.5rem] p-14 shadow-2xl animate-in slide-in-from-bottom-8 duration-500 overflow-y-auto max-h-[90vh]">
                                 <h2 className="text-3xl font-black mb-12 text-slate-900 text-center tracking-tighter uppercase leading-none">Share Intelligence</h2>
                                 <form onSubmit={handleCreatePost} className="space-y-10">
-                                    <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Visual Output URL</label><input type="text" placeholder="https://..." className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] py-6 px-10 outline-none font-bold focus:ring-4 focus:ring-blue-500/10 shadow-sm text-sm tracking-wide" value={postModal.imageUrl} onChange={e => setPostModal({...postModal, imageUrl: e.target.value})} /></div>
+                                    <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Visualization Output URL</label><input type="text" placeholder="https://..." className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] py-6 px-10 outline-none font-bold focus:ring-4 focus:ring-blue-500/10 shadow-sm text-sm tracking-wide" value={postModal.imageUrl} onChange={e => setPostModal({...postModal, imageUrl: e.target.value})} /></div>
                                     <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Creative Formula</label><textarea placeholder="Specify the secret magic behind this..." className="w-full bg-slate-50 border border-slate-100 rounded-[2.8rem] p-10 min-h-[220px] font-mono text-[15px] leading-relaxed outline-none focus:ring-4 focus:ring-blue-500/10 shadow-sm" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea></div>
                                     <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Intelligence Model</label><select className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] py-6 px-10 font-black text-xs outline-none cursor-pointer focus:ring-4 focus:ring-blue-500/10" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}><option>Midjourney v6.1 Pro</option><option>DALL-E 3 Nexus</option><option>Stable Diffusion XL Turbo</option><option>Flux.1 Dev Master</option><option>Google Veo 3 Elite</option></select></div>
                                     <button className="w-full btn-nexus-main text-white py-7 rounded-[3rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all">TRANSMIT TO NEXUS</button>
-                                    <button type="button" onClick={() => setPostModal({ ...postModal, open: false })} className="w-full text-xs font-black text-slate-300 uppercase tracking-widest text-center mt-4">Discard</button>
+                                    <button type="button" onClick={() => setPostModal({ ...postModal, open: false })} className="w-full text-xs font-black text-slate-300 uppercase tracking-widest text-center mt-4 hover:text-slate-500">Discard Data</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* FB-Style Comments Modal */}
+                    {commentModal.open && commentModal.post && (
+                        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
+                            <div className="bg-white w-full max-w-lg rounded-[3.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 flex flex-col h-[75vh]">
+                                <div className="flex justify-between items-center mb-6 px-4">
+                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest">Comments</h3>
+                                    <button onClick={() => setCommentModal({ open: false, post: null, text: '' })} className="bg-slate-50 p-3 rounded-full text-slate-400 hover:text-slate-900 transition-colors"><i data-lucide="x" className="w-5 h-5"></i></button>
+                                </div>
+                                
+                                <div className="flex-1 overflow-y-auto mb-6 space-y-6 px-4 no-scrollbar">
+                                    {(!commentModal.post.comments || commentModal.post.comments.length === 0) ? (
+                                        <div className="text-center py-20">
+                                            <i data-lucide="message-square-dashed" className="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                                            <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Be the first to comment!</p>
+                                        </div>
+                                    ) : (
+                                        commentModal.post.comments.map((c, i) => (
+                                            <div key={i} className="flex gap-4">
+                                                <img src={c.userPhoto} className="w-10 h-10 rounded-[1rem] bg-slate-100 object-cover flex-shrink-0" />
+                                                <div className="bg-slate-50 p-5 rounded-[2rem] rounded-tl-none flex-1 border border-slate-100">
+                                                    <p className="font-extrabold text-[13px] text-slate-900 mb-1">{c.userName}</p>
+                                                    <p className="text-sm text-slate-600 font-medium leading-relaxed">{c.text}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                <form onSubmit={submitComment} className="flex gap-3 items-end px-2">
+                                    <img src={profileData.photoURL || user?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid}`} className="w-12 h-12 rounded-[1.2rem] object-cover border border-slate-100 flex-shrink-0" />
+                                    <div className="flex-1 bg-slate-50 border border-slate-200 rounded-[2rem] flex items-center pr-2 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Write your thoughts..." 
+                                            className="w-full bg-transparent py-4 px-6 outline-none text-sm font-medium"
+                                            value={commentModal.text}
+                                            onChange={(e) => setCommentModal({...commentModal, text: e.target.value})}
+                                        />
+                                        <button type="submit" disabled={!commentModal.text.trim()} className="bg-blue-600 text-white p-3 rounded-[1.5rem] disabled:opacity-50 hover:bg-blue-700 transition-colors shadow-sm">
+                                            <i data-lucide="send" className="w-4 h-4"></i>
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
