@@ -46,6 +46,7 @@
             getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase config (Storage අයින් කළා)
         const firebaseConfig = {
             apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
             authDomain: "prompthub-e69f8.firebaseapp.com",
@@ -74,6 +75,9 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // බැජී මෙතනට ඔයාගේ ImgBB API Key එක දැම්මා! 👇
+        const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368"; 
+
         const App = () => {
             const [isReady, setIsReady] = useState(false);
             const [user, setUser] = useState(null);
@@ -82,23 +86,42 @@
             const [posts, setPosts] = useState([]);
             const [loading, setLoading] = useState(true);
             const [authModal, setAuthModal] = useState({ open: false, mode: 'login', email: '', password: '', name: '', error: '' });
-            const [postModal, setPostModal] = useState({ open: false, prompt: '', imageUrl: '', model: 'Midjourney v6.1 Pro' });
-            const [editProfileModal, setEditProfileModal] = useState({ open: false, name: '', bio: '', photoURL: '' });
+            const [postModal, setPostModal] = useState({ open: false, prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' });
+            const [editProfileModal, setEditProfileModal] = useState({ open: false, name: '', bio: '', photoURL: '', imageFile: null });
             const [copiedId, setCopiedId] = useState(null);
             
-            // Interaction States
             const [selectedUser, setSelectedUser] = useState(null);
             const [isFollowing, setIsFollowing] = useState(false);
             const [commentModal, setCommentModal] = useState({ open: false, post: null, text: '' });
 
-            // --- ALUTH: Share & Notification States ---
             const [shareModal, setShareModal] = useState({ open: false, post: null });
             const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
 
-            // --- ALUTH: Search States ---
             const [searchQuery, setSearchQuery] = useState('');
+            const [uploading, setUploading] = useState(false);
 
-            // --- ALUTH: Derive active creators logically from posts ---
+            // ImgBB Upload Helper Function
+            const uploadToImgBB = async (file) => {
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                try {
+                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        return data.data.url;
+                    } else {
+                        throw new Error(data.error.message);
+                    }
+                } catch (error) {
+                    console.error("ImgBB Upload Error:", error);
+                    return null;
+                }
+            };
+
             const activeCreators = React.useMemo(() => {
                 const map = new Map();
                 posts.forEach(p => {
@@ -110,7 +133,6 @@
             }, [posts]);
 
             const filteredCreators = searchQuery.trim() === '' ? [] : activeCreators.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-            // -----------------------------
 
             useEffect(() => {
                 const handleReady = () => setIsReady(true);
@@ -159,7 +181,6 @@
                 return () => unsubscribePosts();
             }, [isReady, user]);
 
-            // Keep comment modal up to date with new comments
             useEffect(() => {
                 if (commentModal.open && commentModal.post) {
                     const updatedPost = posts.find(p => p.id === commentModal.post.id);
@@ -179,7 +200,7 @@
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }, [view, user, posts, authModal.open, postModal.open, editProfileModal.open, selectedUser, isFollowing, commentModal.open, shareModal.open, hasUnreadNotifications]);
+            }, [view, user, posts, authModal.open, postModal.open, editProfileModal.open, selectedUser, isFollowing, commentModal.open, shareModal.open, hasUnreadNotifications, uploading]);
 
             const handleGoogleSignIn = async () => {
                 setLoading(true);
@@ -280,48 +301,74 @@
             const saveProfileUpdates = async (e) => {
                 e.preventDefault();
                 const { db, appId, doc, updateDoc, auth, updateProfile } = window.fb;
+                
                 try {
+                    setUploading(true);
+                    let finalPhotoURL = editProfileModal.photoURL;
+                    
+                    // If a file was selected, upload it to ImgBB first
+                    if (editProfileModal.imageFile) {
+                        const uploadedUrl = await uploadToImgBB(editProfileModal.imageFile);
+                        if(uploadedUrl) finalPhotoURL = uploadedUrl;
+                    }
+
                     const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
-                    await updateDoc(profileRef, { name: editProfileModal.name, bio: editProfileModal.bio, photoURL: editProfileModal.photoURL });
-                    await updateProfile(auth.currentUser, { displayName: editProfileModal.name, photoURL: editProfileModal.photoURL });
-                    setEditProfileModal({ ...editProfileModal, open: false });
-                } catch (e) { console.error(e); }
+                    await updateDoc(profileRef, { name: editProfileModal.name, bio: editProfileModal.bio, photoURL: finalPhotoURL });
+                    await updateProfile(auth.currentUser, { displayName: editProfileModal.name, photoURL: finalPhotoURL });
+                    
+                    setEditProfileModal({ ...editProfileModal, open: false, imageFile: null });
+                } catch (e) { 
+                    console.error(e); 
+                    alert("Error updating profile.");
+                }
+                setUploading(false);
             };
 
             const handleCreatePost = async (e) => {
                 e.preventDefault();
                 if (!user || user.isAnonymous) return setAuthModal({ ...authModal, open: true, mode: 'login', error: 'Sign in required' });
-                setLoading(true);
+                if (!postModal.imageFile && !postModal.imageUrl) return alert("Please select an image or paste a URL.");
+                
+                setUploading(true);
                 const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
+                
                 try {
+                    let finalImageUrl = postModal.imageUrl;
+                    
+                    // Upload to ImgBB if a file was selected
+                    if (postModal.imageFile) {
+                        const uploadedUrl = await uploadToImgBB(postModal.imageFile);
+                        if (!uploadedUrl) {
+                            setUploading(false);
+                            return alert("Image upload failed. Please try again.");
+                        }
+                        finalImageUrl = uploadedUrl;
+                    }
+
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
                         userId: user.uid,
                         userName: profileData.name || user.displayName,
                         userPhoto: profileData.photoURL || user.photoURL,
                         prompt: postModal.prompt,
-                        imageUrl: postModal.imageUrl,
+                        imageUrl: finalImageUrl,
                         model: postModal.model,
                         createdAt: serverTimestamp(),
-                        likes: [], // Started tracking likes as an array
+                        likes: [],
                         comments: []
                     });
-                    setPostModal({ open: false, prompt: '', imageUrl: '', model: 'Midjourney v6.1 Pro' });
+                    setPostModal({ open: false, prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' });
                     setView('home');
                 } catch (err) { console.error(err); }
-                setLoading(false);
+                setUploading(false);
             };
 
-            // --- ALUTH: Search Dropdown UI Component ---
             const SearchResultsDropdown = () => (
                 <div className="absolute top-full mt-3 w-full bg-white border border-slate-100 rounded-3xl shadow-2xl z-50 max-h-72 overflow-y-auto p-2">
                     {filteredCreators.length > 0 ? filteredCreators.map(creator => (
                         <div 
                             key={creator.id} 
                             className="flex items-center gap-4 p-3 hover:bg-slate-50 cursor-pointer rounded-2xl transition-all"
-                            onClick={() => {
-                                openPublicProfile(creator.id);
-                                setSearchQuery(''); // Clear search after clicking
-                            }}
+                            onClick={() => { openPublicProfile(creator.id); setSearchQuery(''); }}
                         >
                             <img src={creator.photoURL} className="w-10 h-10 rounded-[1rem] object-cover bg-slate-100 shadow-sm border border-slate-200" />
                             <span className="font-extrabold text-[13px] text-slate-800">{creator.name}</span>
@@ -331,9 +378,7 @@
                     )}
                 </div>
             );
-            // ------------------------------------------
 
-            // FB-Style Like Toggle
             const toggleLike = async (post) => {
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
                 const { db, appId, doc, updateDoc, arrayUnion, arrayRemove } = window.fb;
@@ -343,17 +388,12 @@
                 const hasLiked = !isLegacy && post.likes?.includes?.(user.uid);
 
                 try {
-                    if (isLegacy) {
-                        await updateDoc(postRef, { likes: [user.uid] });
-                    } else if (hasLiked) {
-                        await updateDoc(postRef, { likes: arrayRemove(user.uid) });
-                    } else {
-                        await updateDoc(postRef, { likes: arrayUnion(user.uid) });
-                    }
+                    if (isLegacy) { await updateDoc(postRef, { likes: [user.uid] }); } 
+                    else if (hasLiked) { await updateDoc(postRef, { likes: arrayRemove(user.uid) }); } 
+                    else { await updateDoc(postRef, { likes: arrayUnion(user.uid) }); }
                 } catch (e) { console.error(e); }
             };
 
-            // FB-Style Comment Submission
             const submitComment = async (e) => {
                 e.preventDefault();
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
@@ -377,9 +417,7 @@
                 } catch (e) { console.error("Comment Error:", e); }
             };
 
-            // Native Share Logic
             const handleShare = async (post) => {
-                // Mobile එකේදී විතරක් Native Share එක දෙමු, නැත්නම් Custom Share Modal එක දෙමු
                 if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
                     try {
                         await navigator.share({
@@ -409,7 +447,6 @@
                                 <h1 className="text-2xl font-black tracking-tighter text-slate-900 uppercase">PROMPTHUB<span className="text-blue-600 ml-1">NEXUS</span></h1>
                             </div>
                             
-                            {/* --- ALUTH: Desktop Search Bar --- */}
                             <div className="hidden md:block flex-1 max-w-md mx-8 relative">
                                 <div className="relative group">
                                     <i data-lucide="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
@@ -423,10 +460,8 @@
                                 </div>
                                 {searchQuery && <SearchResultsDropdown />}
                             </div>
-                            {/* ---------------------------------- */}
 
                             <div className="flex items-center gap-6">
-                                {/* --- ALUTH: Desktop Navigation Icons --- */}
                                 <div className="hidden md:flex items-center gap-6 mr-2 border-r border-slate-200 pr-6">
                                     <button onClick={() => { setView('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
                                         <i data-lucide="home" className="w-6 h-6"></i>
@@ -436,14 +471,19 @@
                                         {hasUnreadNotifications && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
                                     </button>
                                 </div>
-                                {/* --------------------------------------- */}
 
                                 {!user || user.isAnonymous ? (
                                     <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-7 py-3 rounded-2xl font-bold text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">SIGN IN</button>
                                 ) : (
-                                    <button onClick={() => { setView('profile'); setSelectedUser(null); }} className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm active:scale-90 transition-transform bg-white p-0.5">
-                                        <img src={profileData.photoURL || user.photoURL} className="rounded-xl object-cover w-full h-full" />
-                                    </button>
+                                    <div className="flex items-center gap-4">
+                                        <div className="hidden md:block text-right">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Tier: Elite</p>
+                                            <p className="text-sm font-bold text-slate-900 leading-none">{profileData.name || user.displayName}</p>
+                                        </div>
+                                        <button onClick={() => { setView('profile'); setSelectedUser(null); }} className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm active:scale-90 transition-transform bg-white p-0.5">
+                                            <img src={profileData.photoURL || user.photoURL} className="rounded-xl object-cover w-full h-full" />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -456,7 +496,6 @@
                                     <h2 className="text-5xl font-black text-slate-900 tracking-tighter leading-none mb-4 uppercase italic">Nexus Global</h2>
                                     <p className="text-slate-400 font-medium text-[11px] tracking-[0.3em] opacity-80 uppercase leading-relaxed text-center mb-10">World-Class AI Intel Community</p>
                                     
-                                    {/* --- ALUTH: Mobile Search Bar --- */}
                                     <div className="md:hidden relative w-full text-left">
                                         <div className="relative group shadow-sm">
                                             <i data-lucide="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
@@ -471,7 +510,6 @@
                                         </div>
                                         {searchQuery && <SearchResultsDropdown />}
                                     </div>
-                                    {/* --------------------------------- */}
                                 </div>
                                 {posts.length === 0 ? (
                                     <div className="text-center py-32 bg-white rounded-[4rem] border border-dashed border-slate-200">
@@ -510,7 +548,6 @@
                                                     <div className="absolute -top-3 -left-1 bg-white p-1 rounded-lg border border-slate-100 shadow-sm"><i data-lucide="terminal" className="w-4 h-4 text-slate-300"></i></div>
                                                 </div>
                                                 
-                                                {/* FB-Style Action Bar */}
                                                 <div className="flex items-center justify-between border-t border-slate-100 pt-4 px-2">
                                                     <button onClick={() => toggleLike(post)} className={`flex items-center gap-2 font-bold text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600' : 'text-slate-500 hover:text-blue-600'}`}>
                                                         <i data-lucide="thumbs-up" className={`w-5 h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`}></i> 
@@ -546,7 +583,7 @@
 
                                             <div className="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-50 max-w-md mb-10"><p className="text-slate-500 font-medium text-sm leading-relaxed italic">"{profileData.bio}"</p></div>
                                             <div className="flex gap-4 w-full justify-center">
-                                                <button onClick={() => setEditProfileModal({ open: true, name: profileData.name, bio: profileData.bio, photoURL: profileData.photoURL })} className="bg-slate-900 text-white px-12 py-4.5 rounded-[2rem] font-black text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> Edit Profile</button>
+                                                <button onClick={() => setEditProfileModal({ open: true, name: profileData.name, bio: profileData.bio, photoURL: profileData.photoURL, imageFile: null })} className="bg-slate-900 text-white px-12 py-4.5 rounded-[2rem] font-black text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> Edit Profile</button>
                                                 <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 px-8 py-4.5 rounded-[2rem] hover:bg-red-50 transition-colors">Sign Out</button>
                                             </div>
                                         </div>
@@ -641,6 +678,9 @@
                         )}
                     </main>
 
+                    {/* Desktop Float Button */}
+                    <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else setPostModal({ ...postModal, open: true }); }} className="fixed bottom-10 right-10 bg-slate-900 text-white hidden md:flex items-center gap-3 px-10 py-5 rounded-[2rem] shadow-2xl z-40 hover:scale-105 active:scale-95 transition-all group border-4 border-white/10"><i data-lucide="plus" className="w-6 h-6 group-hover:rotate-90 transition-transform"></i><span className="font-black text-[10px] uppercase tracking-widest">Transmit Insight</span></button>
+
                     <div className="fixed bottom-0 w-full mobile-bottom-bar px-8 py-5 flex justify-between items-center md:hidden z-40">
                          <i data-lucide="home" className={`w-6 cursor-pointer transition-all ${view==='home'?'text-blue-600 scale-110':'text-slate-400'}`} onClick={()=>{ setView('home'); setSelectedUser(null); }}></i>
                          
@@ -656,7 +696,7 @@
                          <i data-lucide="user" className={`w-6 cursor-pointer transition-all ${(view==='profile' || view==='public_profile')?'text-blue-600 scale-110':'text-slate-400'}`} onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }}></i>
                     </div>
 
-                    {/* Modals: Auth, Edit Profile, Post, Comment */}
+                    {/* Modals */}
                     {authModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
                             <div className="bg-white w-full max-w-md rounded-[3.5rem] p-14 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 border border-white/20 text-center">
@@ -684,9 +724,13 @@
                                 <form onSubmit={saveProfileUpdates} className="space-y-6">
                                     <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Display Name</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-wide transition-all" value={editProfileModal.name} onChange={e => setEditProfileModal({...editProfileModal, name: e.target.value})} /></div>
                                     <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Creator Bio</label><textarea className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-sm transition-all min-h-[100px]" value={editProfileModal.bio} onChange={e => setEditProfileModal({...editProfileModal, bio: e.target.value})}></textarea></div>
-                                    <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Avatar URL</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-xs transition-all" value={editProfileModal.photoURL} onChange={e => setEditProfileModal({...editProfileModal, photoURL: e.target.value})} /></div>
-                                    <button className="w-full btn-nexus-main text-white py-6 rounded-[2.2rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all uppercase">Save Intel</button>
-                                    <button type="button" onClick={() => setEditProfileModal({ ...editProfileModal, open: false })} className="w-full mt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest text-center hover:text-slate-400">Cancel Sync</button>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Avatar Upload</label>
+                                        <input type="file" accept="image/*" onChange={e => setEditProfileModal({...editProfileModal, imageFile: e.target.files[0]})} className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-3 px-6 text-xs font-bold file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                                        {editProfileModal.imageFile && <div className="text-[10px] font-black text-blue-600 tracking-widest ml-2 uppercase mt-2">File Selected: {editProfileModal.imageFile.name}</div>}
+                                    </div>
+                                    <button disabled={uploading} className="w-full btn-nexus-main text-white py-6 rounded-[2.2rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all uppercase disabled:opacity-50">{uploading ? 'SYNCING...' : 'SAVE INTEL'}</button>
+                                    <button type="button" onClick={() => setEditProfileModal({ ...editProfileModal, open: false, imageFile: null })} className="w-full mt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest text-center hover:text-slate-400">Cancel Sync</button>
                                 </form>
                             </div>
                         </div>
@@ -697,11 +741,58 @@
                             <div className="bg-white w-full max-w-lg rounded-[4.5rem] p-14 shadow-2xl animate-in slide-in-from-bottom-8 duration-500 overflow-y-auto max-h-[90vh]">
                                 <h2 className="text-3xl font-black mb-12 text-slate-900 text-center tracking-tighter uppercase leading-none">Share Intelligence</h2>
                                 <form onSubmit={handleCreatePost} className="space-y-10">
-                                    <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Visualization Output URL</label><input type="text" placeholder="https://..." className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] py-6 px-10 outline-none font-bold focus:ring-4 focus:ring-blue-500/10 shadow-sm text-sm tracking-wide" value={postModal.imageUrl} onChange={e => setPostModal({...postModal, imageUrl: e.target.value})} /></div>
-                                    <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Creative Formula</label><textarea placeholder="Specify the secret magic behind this..." className="w-full bg-slate-50 border border-slate-100 rounded-[2.8rem] p-10 min-h-[220px] font-mono text-[15px] leading-relaxed outline-none focus:ring-4 focus:ring-blue-500/10 shadow-sm" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea></div>
+                                    <div className="space-y-3">
+                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Visual Output (Upload)</label>
+                                        <div className="relative border-2 border-dashed border-slate-200 rounded-[2.2rem] p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer group">
+                                            <input type="file" accept="image/*" onChange={e => setPostModal({...postModal, imageFile: e.target.files[0]})} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                            {postModal.imageFile ? (
+                                                <div className="text-blue-600 font-bold text-sm flex flex-col items-center gap-2"><i data-lucide="check-circle" className="w-8 h-8"></i><span className="text-[10px] uppercase tracking-widest">{postModal.imageFile.name}</span></div>
+                                            ) : (
+                                                <div className="text-slate-400 font-bold text-sm flex flex-col items-center gap-2 group-hover:text-blue-500 transition-colors"><i data-lucide="upload-cloud" className="w-8 h-8"></i><span className="text-[10px] uppercase tracking-widest">Tap to select image</span></div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Creative Formula</label><textarea placeholder="Specify the secret magic behind this..." className="w-full bg-slate-50 border border-slate-100 rounded-[2.8rem] p-10 min-h-[180px] font-mono text-[15px] leading-relaxed outline-none focus:ring-4 focus:ring-blue-500/10 shadow-sm" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea></div>
                                     <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Intelligence Model</label><select className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] py-6 px-10 font-black text-xs outline-none cursor-pointer focus:ring-4 focus:ring-blue-500/10" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}><option>Midjourney v6.1 Pro</option><option>DALL-E 3 Nexus</option><option>Stable Diffusion XL Turbo</option><option>Flux.1 Dev Master</option><option>Google Veo 3 Elite</option></select></div>
-                                    <button className="w-full btn-nexus-main text-white py-7 rounded-[3rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all">TRANSMIT TO NEXUS</button>
-                                    <button type="button" onClick={() => setPostModal({ ...postModal, open: false })} className="w-full text-xs font-black text-slate-300 uppercase tracking-widest text-center mt-4 hover:text-slate-500">Discard Data</button>
+                                    <button disabled={uploading} className="w-full btn-nexus-main text-white py-7 rounded-[3rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all disabled:opacity-50">{uploading ? 'TRANSMITTING...' : 'TRANSMIT TO NEXUS'}</button>
+                                    <button type="button" onClick={() => setPostModal({ ...postModal, open: false, imageFile: null })} className="w-full text-xs font-black text-slate-300 uppercase tracking-widest text-center mt-4 hover:text-slate-500">Discard</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* FB-Style Comments Modal */}
+                    {commentModal.open && commentModal.post && (
+                        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
+                            <div className="bg-white w-full max-w-lg rounded-[3.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 flex flex-col h-[75vh]">
+                                <div className="flex justify-between items-center mb-6 px-4">
+                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest">Comments</h3>
+                                    <button onClick={() => setCommentModal({ open: false, post: null, text: '' })} className="bg-slate-50 p-3 rounded-full text-slate-400 hover:text-slate-900 transition-colors"><i data-lucide="x" className="w-5 h-5"></i></button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto mb-6 space-y-6 px-4 no-scrollbar">
+                                    {(!commentModal.post.comments || commentModal.post.comments.length === 0) ? (
+                                        <div className="text-center py-20">
+                                            <i data-lucide="message-square-dashed" className="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                                            <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Be the first to comment!</p>
+                                        </div>
+                                    ) : (
+                                        commentModal.post.comments.map((c, i) => (
+                                            <div key={i} className="flex gap-4">
+                                                <img src={c.userPhoto} className="w-10 h-10 rounded-[1rem] bg-slate-100 object-cover flex-shrink-0" />
+                                                <div className="bg-slate-50 p-5 rounded-[2rem] rounded-tl-none flex-1 border border-slate-100">
+                                                    <p className="font-extrabold text-[13px] text-slate-900 mb-1">{c.userName}</p>
+                                                    <p className="text-sm text-slate-600 font-medium leading-relaxed">{c.text}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                                <form onSubmit={submitComment} className="flex gap-3 items-end px-2">
+                                    <img src={profileData.photoURL || user?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid}`} className="w-12 h-12 rounded-[1.2rem] object-cover border border-slate-100 flex-shrink-0" />
+                                    <div className="flex-1 bg-slate-50 border border-slate-200 rounded-[2rem] flex items-center pr-2 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
+                                        <input type="text" placeholder="Write your thoughts..." className="w-full bg-transparent py-4 px-6 outline-none text-sm font-medium" value={commentModal.text} onChange={(e) => setCommentModal({...commentModal, text: e.target.value})} />
+                                        <button type="submit" disabled={!commentModal.text.trim()} className="bg-blue-600 text-white p-3 rounded-[1.5rem] disabled:opacity-50 hover:bg-blue-700 transition-colors shadow-sm"><i data-lucide="send" className="w-4 h-4"></i></button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -733,6 +824,7 @@
                                         ta.value = `Prompt by ${shareModal.post.userName}: ${shareModal.post.prompt}`;
                                         document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
                                         setShareModal({ open: false, post: null });
+                                        alert("Prompt copied to clipboard!");
                                     }} className="flex flex-col items-center gap-3 group">
                                         <div className="w-14 h-14 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-all shadow-sm"><i data-lucide="link" className="w-6 h-6"></i></div>
                                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Copy</span>
