@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PromptHub Nexus - Future of AI</title>
-    <!-- CSS & Frameworks (මේවා load වෙන්න අනිවාර්යයෙන් internet ඕනේ බැජී) -->
+    <!-- Frameworks & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -17,40 +17,35 @@
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         
         body { 
-            background-color: #F9FBFF;
+            background-color: #F8FAFC;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
-        .glass-header {
+        .nexus-nav {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
         }
 
-        .btn-nexus {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            transition: all 0.3s ease;
+        .btn-nexus-main {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-nexus:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        .btn-nexus-main:active { transform: scale(0.95); }
+
+        .nexus-card {
+            background: #ffffff;
+            border: 1px solid rgba(241, 245, 249, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+            transition: all 0.4s ease;
         }
 
-        .card-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card-shadow:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .loader {
-            border-top-color: #2563eb;
+        .loader-spinner {
+            border-top-color: #3B82F6;
             animation: spinner 0.8s linear infinite;
         }
 
@@ -59,27 +54,48 @@
             100% { transform: rotate(360deg); }
         }
 
-        .mobile-nav {
+        .mobile-bottom-bar {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
         }
     </style>
 </head>
 <body>
     <div id="root">
         <div class="min-h-screen flex flex-col items-center justify-center bg-white text-center p-10">
-            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-100 h-12 w-12 mb-6"></div>
-            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">CONNECTING TO NEXUS...</h1>
-            <p class="text-slate-400 mt-2 text-sm">Please wait while we initialize the interface.</p>
+            <div class="loader-spinner ease-linear rounded-full border-4 border-t-4 border-slate-100 h-12 w-12 mb-6"></div>
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tighter">AUTHENTICATING NEXUS...</h1>
+            <p class="text-slate-400 mt-2 text-sm font-medium">බැජී, පොඩ්ඩක් ඉන්න... පද්ධතිය සක්‍රිය වෙනවා.</p>
         </div>
     </div>
 
-    <!-- Firebase Config -->
+    <!-- Firebase Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInAnonymously, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            signOut, 
+            signInAnonymously, 
+            updateProfile,
+            GoogleAuthProvider,
+            signInWithPopup 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            query, 
+            onSnapshot, 
+            serverTimestamp, 
+            doc, 
+            setDoc, 
+            getDoc 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
@@ -94,12 +110,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = 'prompthub-e69f8'; 
+        const googleProvider = new GoogleAuthProvider();
 
         window.fb = { 
             auth, db, appId, collection, addDoc, query, onSnapshot, 
-            serverTimestamp, doc, setDoc, signInWithEmailAndPassword, 
+            serverTimestamp, doc, setDoc, getDoc, signInWithEmailAndPassword, 
             createUserWithEmailAndPassword, signOut, onAuthStateChanged, 
-            signInAnonymously, updateProfile 
+            signInAnonymously, updateProfile, googleProvider, signInWithPopup
         };
 
         window.dispatchEvent(new Event('firebase-ready'));
@@ -131,7 +148,7 @@
 
                 const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
                     if (!u) {
-                        try { await signInAnonymously(auth); } catch (e) { console.warn("Guest mode enabled"); }
+                        try { await signInAnonymously(auth); } catch (e) { console.warn("Guest access active"); }
                     }
                     setUser(u);
                     setLoading(false);
@@ -148,7 +165,7 @@
                 const unsubscribePosts = onSnapshot(postsCol, (snap) => {
                     const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setPosts(fetched.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
-                }, (err) => console.error("Data Sync Error:", err));
+                }, (err) => console.error("Syncing Error:", err));
 
                 return () => unsubscribePosts();
             }, [isReady, user]);
@@ -156,6 +173,33 @@
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
             }, [view, user, posts, authModal.open, postModal.open]);
+
+            // --- Google Login Logic ---
+            const handleGoogleSignIn = async () => {
+                setLoading(true);
+                const { auth, db, appId, googleProvider, signInWithPopup, doc, setDoc, getDoc, serverTimestamp } = window.fb;
+                try {
+                    const result = await signInWithPopup(auth, googleProvider);
+                    const loggedInUser = result.user;
+
+                    // Check if profile exists, if not create it
+                    const profileRef = doc(db, 'artifacts', appId, 'users', loggedInUser.uid, 'profile', 'info');
+                    const profileSnap = await getDoc(profileRef);
+
+                    if (!profileSnap.exists()) {
+                        await setDoc(profileRef, {
+                            name: loggedInUser.displayName,
+                            email: loggedInUser.email,
+                            createdAt: serverTimestamp(),
+                            provider: 'google'
+                        });
+                    }
+                    setAuthModal({ ...authModal, open: false, error: '' });
+                } catch (err) {
+                    setAuthModal({ ...authModal, error: "Google sign-in අසාර්ථක විය. නැවත උත්සාහ කරන්න." });
+                }
+                setLoading(false);
+            };
 
             const handleAuth = async (e) => {
                 e.preventDefault();
@@ -171,9 +215,9 @@
                     } else {
                         await signInWithEmailAndPassword(auth, authModal.email, authModal.password);
                     }
-                    setAuthModal({ ...authModal, open: false, error: '' });
+                    setAuthModal({ ...authModal, open: false, error: '', email: '', password: '', name: '' });
                 } catch (err) {
-                    setAuthModal({ ...authModal, error: "වැරදි විස්තර හෝ දෝෂයක්. නැවත උත්සාහ කරන්න." });
+                    setAuthModal({ ...authModal, error: "විස්තර වැරදියි. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න." });
                 }
                 setLoading(false);
             };
@@ -181,7 +225,7 @@
             const handleCreatePost = async (e) => {
                 e.preventDefault();
                 if (!user || user.isAnonymous) {
-                    setAuthModal({ ...authModal, open: true, mode: 'login', error: 'ප්‍රොම්ප්ට් බෙදාගැනීමට ලොගින් වන්න!' });
+                    setAuthModal({ ...authModal, open: true, mode: 'login', error: 'ප්‍රොම්ප්ට් එක බෙදාගැනීමට ලොගින් වන්න!' });
                     return;
                 }
                 setLoading(true);
@@ -206,11 +250,10 @@
 
             return (
                 <div className="min-h-screen pb-24 md:pb-0">
-                    {/* Header */}
-                    <nav className="sticky top-0 z-50 glass-header px-6 py-4">
+                    <nav className="sticky top-0 z-50 nexus-nav px-6 py-4">
                         <div className="max-w-5xl mx-auto flex items-center justify-between">
                             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
-                                <div className="w-9 h-9 btn-nexus rounded-xl flex items-center justify-center text-white shadow-lg">
+                                <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
                                     <i data-lucide="zap" className="w-5" fill="currentColor"></i>
                                 </div>
                                 <h1 className="text-xl font-black tracking-tighter text-slate-900">
@@ -219,15 +262,15 @@
                             </div>
                             <div className="flex items-center gap-4">
                                 {!user || user.isAnonymous ? (
-                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login' })} className="bg-slate-900 text-white px-6 py-2.5 rounded-2xl font-bold text-xs shadow-xl active:scale-95 transition-transform">SIGN IN</button>
+                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login' })} className="bg-blue-600 text-white px-6 py-2.5 rounded-2xl font-bold text-xs shadow-lg active:scale-95 transition-all">SIGN IN</button>
                                 ) : (
                                     <div className="flex items-center gap-3">
                                         <div className="hidden md:block text-right">
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Creator</p>
                                             <p className="text-sm font-bold text-slate-900 leading-none">{user.displayName}</p>
                                         </div>
-                                        <button onClick={() => setView('profile')} className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm transition-transform active:scale-90 bg-white">
-                                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} alt="Profile" />
+                                        <button onClick={() => setView('profile')} className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm active:scale-90 transition-transform bg-white p-0.5">
+                                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} className="rounded-xl" alt="Profile" />
                                         </button>
                                     </div>
                                 )}
@@ -237,35 +280,35 @@
 
                     <main className="max-w-xl mx-auto px-4 py-10">
                         {view === 'home' ? (
-                            <div className="space-y-10">
+                            <div className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-700">
                                 <div className="text-center px-4">
-                                    <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-3">Nexus Global Feed</h2>
-                                    <p className="text-slate-400 font-medium text-sm italic">Connect with the world's finest AI prompt engineers.</p>
+                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none mb-3 uppercase">Nexus Global</h2>
+                                    <p className="text-slate-400 font-medium text-sm italic tracking-wide">Connecting world-class AI prompt creators.</p>
                                 </div>
 
                                 {posts.length === 0 ? (
-                                    <div className="text-center py-24 bg-white rounded-[3rem] border border-dashed border-slate-200">
-                                        <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                            <i data-lucide="image" className="text-slate-300 w-10"></i>
+                                    <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-slate-200">
+                                        <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <i data-lucide="sparkles" className="text-slate-300 w-12 h-12"></i>
                                         </div>
-                                        <p className="text-slate-400 font-bold italic text-sm">NO CREATIONS IN THE NEXUS YET.</p>
+                                        <p className="text-slate-400 font-bold italic text-sm uppercase tracking-widest">Nexus feed is empty.</p>
                                     </div>
                                 ) : (
                                     posts.map(post => (
-                                        <div key={post.id} className="bg-white rounded-[2.8rem] border border-slate-100 overflow-hidden shadow-sm transition-all mb-10 card-shadow">
+                                        <div key={post.id} className="bg-white rounded-[3rem] border border-slate-100 overflow-hidden nexus-card transition-all mb-12">
                                             <div className="p-5 flex items-center gap-3">
-                                                <div className="p-0.5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 shadow-sm">
-                                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userId}`} className="w-10 h-10 rounded-full bg-white p-0.5" />
+                                                <div className="p-0.5 rounded-2xl bg-gradient-to-tr from-blue-500 to-purple-500 shadow-sm">
+                                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userId}`} className="w-11 h-11 rounded-2xl bg-white p-0.5" />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-[14px] text-slate-800">{post.userName}</span>
-                                                    <span className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80">
+                                                    <span className="font-extrabold text-[15px] text-slate-800 tracking-tight">{post.userName}</span>
+                                                    <span className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80 mt-0.5">
                                                        <i data-lucide="cpu" className="w-3"></i> {post.model}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div className="relative group px-3">
-                                                <img src={post.imageUrl} className="w-full aspect-square object-cover rounded-[2.4rem] shadow-sm" loading="lazy" />
+                                            <div className="relative group px-4">
+                                                <img src={post.imageUrl} className="w-full aspect-square object-cover rounded-[2.8rem] shadow-sm bg-slate-50" loading="lazy" />
                                                 <button 
                                                     onClick={() => {
                                                         const textArea = document.createElement("textarea");
@@ -277,14 +320,14 @@
                                                         setCopiedId(post.id);
                                                         setTimeout(() => setCopiedId(null), 2000);
                                                     }}
-                                                    className="absolute bottom-8 right-8 bg-white text-slate-900 p-4 rounded-2xl shadow-2xl hover:scale-110 active:scale-90 transition-all border border-slate-50"
+                                                    className="absolute bottom-10 right-10 bg-white text-slate-900 p-5 rounded-3xl shadow-2xl hover:scale-110 active:scale-90 transition-all border border-slate-50"
                                                 >
                                                     {copiedId === post.id ? <i data-lucide="check" className="text-green-600 w-6 h-6"></i> : <i data-lucide="clipboard" className="w-6 h-6"></i>}
                                                 </button>
                                             </div>
-                                            <div className="p-7">
-                                                <div className="bg-slate-50/80 p-6 rounded-[2rem] border border-slate-100 italic">
-                                                    <p className="text-[13px] font-mono text-slate-600 leading-relaxed">"{post.prompt}"</p>
+                                            <div className="p-8">
+                                                <div className="bg-slate-50/70 p-6 rounded-[2.5rem] border border-slate-100 italic relative">
+                                                    <p className="text-[14px] font-mono text-slate-600 leading-relaxed">"{post.prompt}"</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -292,66 +335,72 @@
                                 )}
                             </div>
                         ) : (
-                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <div className="bg-white rounded-[3.5rem] p-12 text-center border border-slate-100 shadow-sm relative overflow-hidden mb-8">
-                                    <div className="absolute top-0 left-0 w-full h-32 btn-nexus opacity-90"></div>
-                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid}`} className="w-32 h-32 mx-auto rounded-[2.5rem] mb-6 border-8 border-white shadow-2xl relative z-10 bg-white" />
-                                    <h2 className="text-3xl font-black text-slate-900 mb-1">{user?.displayName || 'Nexus Artist'}</h2>
-                                    <p className="text-slate-400 font-bold text-xs mb-10 tracking-widest uppercase opacity-70">{user?.email}</p>
-                                    <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[11px] font-black text-red-500 uppercase tracking-[0.2em] border-2 border-red-50 px-10 py-3.5 rounded-2xl hover:bg-red-50 transition-colors">Log Out Profile</button>
+                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                                <div className="bg-white rounded-[4rem] p-12 text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
+                                    <div className="absolute top-0 left-0 w-full h-36 btn-nexus-main opacity-90"></div>
+                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid}`} className="w-36 h-36 mx-auto rounded-[3rem] mb-8 border-8 border-white shadow-2xl relative z-10 bg-white" />
+                                    <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter uppercase">{user?.displayName || 'Nexus Creator'}</h2>
+                                    <p className="text-slate-400 font-bold text-xs mb-10 tracking-[0.3em] uppercase opacity-70 italic">{user?.email}</p>
+                                    <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 px-12 py-4 rounded-[2rem] hover:bg-red-50 transition-colors">Log Out Account</button>
                                 </div>
-                                <button onClick={() => setView('home')} className="w-full py-6 bg-slate-900 text-white rounded-[2.5rem] font-bold hover:shadow-2xl transition-all shadow-slate-200 uppercase tracking-widest text-xs">Back to feed</button>
+                                <button onClick={() => setView('home')} className="w-full py-6 bg-slate-900 text-white rounded-[2.5rem] font-bold hover:shadow-2xl transition-all shadow-slate-200 uppercase tracking-widest text-xs">Return to Nexus</button>
                             </div>
                         )}
                     </main>
 
-                    {/* Desktop Floating Action Button */}
-                    <button 
-                        onClick={() => {
-                            if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'});
-                            else setPostModal({ ...postModal, open: true });
-                        }}
-                        className="fixed bottom-10 right-10 bg-slate-900 text-white flex items-center gap-3 px-8 py-5 rounded-[2rem] shadow-2xl z-40 hover:scale-105 active:scale-95 transition-all group hidden md:flex"
-                    >
-                        <i data-lucide="plus" className="w-6 h-6 group-hover:rotate-90 transition-transform"></i>
-                        <span className="font-bold tracking-tight text-xs uppercase">Share Your Work</span>
-                    </button>
-
-                    {/* Mobile Navigation */}
-                    <div className="fixed bottom-0 w-full mobile-nav border-t border-slate-100 px-12 py-6 flex justify-around items-center md:hidden z-40">
-                         <i data-lucide="home" className={`w-7 cursor-pointer transition-colors ${view==='home'?'text-blue-600':'text-slate-300'}`} onClick={()=>setView('home')}></i>
+                    {/* Navigation for Mobile */}
+                    <div className="fixed bottom-0 w-full mobile-bottom-bar px-14 py-6 flex justify-around items-center md:hidden z-40">
+                         <i data-lucide="home" className={`w-7 cursor-pointer transition-all ${view==='home'?'text-blue-600 scale-110':'text-slate-300'}`} onClick={()=>setView('home')}></i>
                          <div 
                             onClick={() => {
                                 if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'});
                                 else setPostModal({ ...postModal, open: true });
                             }}
-                            className="w-16 h-16 btn-nexus rounded-[1.8rem] flex items-center justify-center text-white -mt-16 shadow-2xl active:scale-90 transition-transform cursor-pointer border-4 border-white"
+                            className="w-16 h-16 btn-nexus-main rounded-[2rem] flex items-center justify-center text-white -mt-20 shadow-2xl active:scale-90 transition-transform cursor-pointer border-4 border-white"
                          >
                             <i data-lucide="plus" className="w-8 h-8"></i>
                          </div>
-                         <i data-lucide="user" className={`w-7 cursor-pointer transition-colors ${view==='profile'?'text-blue-600':'text-slate-300'}`} onClick={()=>setView('profile')}></i>
+                         <i data-lucide="user" className={`w-7 cursor-pointer transition-all ${view==='profile'?'text-blue-600 scale-110':'text-slate-300'}`} onClick={()=>setView('profile')}></i>
                     </div>
 
-                    {/* Auth Modal */}
+                    {/* Updated Auth Modal with Google */}
                     {authModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-                            <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300">
+                            <div className="bg-white w-full max-w-md rounded-[3.5rem] p-12 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300">
                                 <div className="text-center mb-10">
-                                    <h2 className="text-4xl font-black mb-1 text-slate-900 tracking-tight leading-none">{authModal.mode === 'login' ? 'WELCOME' : 'JOIN NEXUS'}</h2>
-                                    <p className="text-slate-400 font-medium text-[11px] mt-4 uppercase tracking-[0.2em]">Unlock Global Creative Insights</p>
+                                    <h2 className="text-4xl font-black mb-1 text-slate-900 tracking-tighter leading-none">{authModal.mode === 'login' ? 'WELCOME' : 'JOIN'}</h2>
+                                    <p className="text-slate-400 font-black text-[10px] mt-4 uppercase tracking-[0.3em] opacity-60 italic">Secure access to global insights</p>
                                 </div>
-                                {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-2xl mb-6 text-center border border-red-100 uppercase tracking-widest">{authModal.error}</div>}
+
+                                {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-2xl mb-8 text-center border border-red-100 uppercase tracking-widest">{authModal.error}</div>}
+                                
+                                {/* Social Login (Google) */}
+                                <button 
+                                    onClick={handleGoogleSignIn}
+                                    className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 py-4.5 rounded-[1.8rem] font-bold text-sm text-slate-700 hover:bg-slate-50 transition-all mb-8 shadow-sm"
+                                >
+                                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" className="w-5 h-5" alt="Google" />
+                                    Continue with Google
+                                </button>
+
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="h-px bg-slate-100 flex-1"></div>
+                                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">or email</span>
+                                    <div className="h-px bg-slate-100 flex-1"></div>
+                                </div>
+
                                 <form onSubmit={handleAuth} className="space-y-4">
-                                    {authModal.mode === 'signup' && <input type="text" placeholder="ඔබේ නම" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all" required value={authModal.name} onChange={e => setAuthModal({...authModal, name: e.target.value})} />}
-                                    <input type="email" placeholder="ඊමේල් ලිපිනය" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all" required value={authModal.email} onChange={e => setAuthModal({...authModal, email: e.target.value})} />
-                                    <input type="password" placeholder="මුරපදය" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all" required value={authModal.password} onChange={e => setAuthModal({...authModal, password: e.target.value})} />
-                                    <button className="w-full btn-nexus text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl shadow-blue-100 active:scale-95 transition-all">
+                                    {authModal.mode === 'signup' && <input type="text" placeholder="ඔබේ නම" className="w-full bg-slate-50 border border-slate-100 rounded-[1.6rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-sm transition-all" required value={authModal.name} onChange={e => setAuthModal({...authModal, name: e.target.value})} />}
+                                    <input type="email" placeholder="ඊමේල් ලිපිනය" className="w-full bg-slate-50 border border-slate-100 rounded-[1.6rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-sm transition-all" required value={authModal.email} onChange={e => setAuthModal({...authModal, email: e.target.value})} />
+                                    <input type="password" placeholder="මුරපදය" className="w-full bg-slate-50 border border-slate-100 rounded-[1.6rem] py-4.5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-sm transition-all" required value={authModal.password} onChange={e => setAuthModal({...authModal, password: e.target.value})} />
+                                    <button className="w-full btn-nexus-main text-white py-5 rounded-[1.8rem] font-black text-sm tracking-[0.2em] shadow-xl active:scale-95 transition-all">
                                         {authModal.mode === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}
                                     </button>
                                 </form>
-                                <button onClick={() => setAuthModal({...authModal, mode: authModal.mode==='login'?'signup':'login', error: ''})} className="w-full mt-8 text-xs font-black text-slate-400 hover:text-blue-600 transition-colors text-center uppercase tracking-widest">
-                                    {authModal.mode === 'login' ? "New Here? Join the Community" : "Already a member? Sign In"}
+                                <button onClick={() => setAuthModal({...authModal, mode: authModal.mode==='login'?'signup':'login', error: ''})} className="w-full mt-8 text-[11px] font-black text-slate-400 hover:text-blue-600 transition-colors text-center uppercase tracking-[0.2em]">
+                                    {authModal.mode === 'login' ? "New to the Nexus? Join" : "Already a creator? Sign In"}
                                 </button>
+                                <button onClick={() => setAuthModal({...authModal, open: false})} className="w-full mt-4 text-[10px] font-black text-slate-200 uppercase tracking-widest text-center hover:text-slate-400 transition-colors">Discard Window</button>
                             </div>
                         </div>
                     )}
@@ -359,28 +408,29 @@
                     {/* Post Modal */}
                     {postModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-                            <div className="bg-white w-full max-w-lg rounded-[3.5rem] p-10 shadow-2xl animate-in slide-in-from-bottom-8 duration-500 overflow-y-auto max-h-[90vh]">
-                                <h2 className="text-3xl font-black mb-10 text-slate-900 text-center tracking-tighter uppercase">Share Insight</h2>
+                            <div className="bg-white w-full max-w-lg rounded-[4rem] p-12 shadow-2xl animate-in slide-in-from-bottom-8 duration-500 overflow-y-auto max-h-[90vh]">
+                                <h2 className="text-3xl font-black mb-10 text-slate-900 text-center tracking-tighter uppercase">Nexus Share</h2>
                                 <form onSubmit={handleCreatePost} className="space-y-8">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Direct Image URL</label>
-                                        <input type="text" placeholder="https://..." className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none font-medium focus:ring-2 focus:ring-blue-500 shadow-sm text-sm" value={postModal.imageUrl} onChange={e => setPostModal({...postModal, imageUrl: e.target.value})} />
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2">Direct Image URL</label>
+                                        <input type="text" placeholder="https://unsplash.com/..." className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-5 px-8 outline-none font-medium focus:ring-4 focus:ring-blue-500/10 shadow-sm text-sm" value={postModal.imageUrl} onChange={e => setPostModal({...postModal, imageUrl: e.target.value})} />
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">The Magic Prompt</label>
-                                        <textarea placeholder="Imagine a world where..." className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-7 min-h-[160px] font-mono text-xs leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2">The Magic Prompt</label>
+                                        <textarea placeholder="Describe the art secret..." className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] p-8 min-h-[180px] font-mono text-sm leading-relaxed outline-none focus:ring-4 focus:ring-blue-500/10 shadow-sm" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 text-[10px]">AI Engine</label>
-                                        <select className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-6 font-bold text-xs outline-none cursor-pointer focus:ring-2 focus:ring-blue-500" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2 text-[10px]">AI Engine</label>
+                                        <select className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-5 px-8 font-bold text-xs outline-none cursor-pointer focus:ring-4 focus:ring-blue-500/10" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}>
                                             <option>Midjourney v6.1</option>
                                             <option>DALL-E 3</option>
                                             <option>Stable Diffusion XL</option>
-                                            <option>Flux.1 Dev</option>
+                                            <option>Flux.1 Pro</option>
+                                            <option>Google Veo 3</option>
                                         </select>
                                     </div>
-                                    <button className="w-full btn-nexus text-white py-6 rounded-[2.5rem] font-black text-sm tracking-widest hover:shadow-2xl transition-all active:scale-95 shadow-xl">PUBLISH TO NEXUS</button>
-                                    <button type="button" onClick={() => setPostModal({ ...postModal, open: false })} className="w-full text-xs font-black text-slate-300 uppercase tracking-widest text-center mt-2">Discard</button>
+                                    <button className="w-full btn-nexus-main text-white py-6 rounded-[2.5rem] font-black text-sm tracking-[0.3em] hover:shadow-2xl transition-all active:scale-95 shadow-xl">PUBLISH TO NEXUS</button>
+                                    <button type="button" onClick={() => setPostModal({ ...postModal, open: false })} className="w-full text-xs font-black text-slate-300 uppercase tracking-widest text-center mt-2 hover:text-slate-500">Discard Work</button>
                                 </form>
                             </div>
                         </div>
