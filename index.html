@@ -1,278 +1,396 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Clipboard, 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  Plus, 
-  Search, 
-  Image as ImageIcon, 
-  User, 
-  Code,
-  Check,
-  Zap, // Nexus vibe එකට ගැලපෙන අලුත් icon එකක්
-  Settings,
-  Grid,
-  Bookmark,
-  Camera,
-  Upload,
-  X,
-  LogOut
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PromptHub Nexus - Future of AI</title>
+    <!-- CSS & Frameworks (මේවා load වෙන්න අනිවාර්යයෙන් internet ඕනේ බැජී) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            background-color: #F9FBFF;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-const App = () => {
-  const [view, setView] = useState('home'); 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [copiedId, setCopiedId] = useState(null);
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
 
-  // අපේ අලුත් Brand එක: PromptHub Nexus
-  const brandName = "PROMPTHUB";
-  const subBrand = "NEXUS";
+        .btn-nexus {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            transition: all 0.3s ease;
+        }
 
-  const [currentUser] = useState({
-    name: "Malith (Nexus Creator)",
-    username: "@malith_nexus",
-    bio: "Exploring the boundaries of AI Art | Prompt Engineer | PromptHub Nexus Founder 🇱🇰",
-    followers: "1.2K",
-    following: "280",
-    postsCount: 2,
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Malith",
-    banner: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop"
-  });
+        .btn-nexus:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        }
 
-  const [posts] = useState([
-    {
-      id: 1,
-      user: "Baji AI",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      image: "https://images.unsplash.com/photo-1675271591211-126ad94e495d?q=80&w=1000&auto=format&fit=crop",
-      prompt: "A futuristic portrait of a Sri Lankan warrior in neon-lit armor, Colombo 2077 background, hyper-realistic, 8k.",
-      model: "Midjourney v6.1",
-      likes: 450
-    },
-    {
-      id: 2,
-      user: "Sarah Nexus",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-      image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
-      prompt: "Abstract crystalline structures floating in a digital void, iridescent lighting, 4k render.",
-      model: "DALL-E 3",
-      likes: 230
-    }
-  ]);
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 
-  const copyToClipboard = (text, id) => {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
+        .card-shadow:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
 
-  const handleUploadSim = () => {
-    setIsUploading(true);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 20;
-      setUploadProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsUploading(false);
-          setShowAddModal(false);
-          setUploadProgress(0);
-        }, 500);
-      }
-    }, 300);
-  };
+        .loader {
+            border-top-color: #2563eb;
+            animation: spinner 0.8s linear infinite;
+        }
 
-  const HomeFeed = () => (
-    <div className="space-y-8 pb-24">
-      {posts.map((post) => (
-        <div key={post.id} className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all group">
-          <div className="p-5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={post.avatar} className="w-10 h-10 rounded-2xl border-2 border-blue-50 bg-slate-50" alt="User" />
-              <div>
-                <h3 className="font-black text-sm text-slate-800">{post.user}</h3>
-                <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg uppercase tracking-widest">{post.model}</span>
-              </div>
-            </div>
-            <button className="text-slate-300 hover:text-slate-600 transition-colors"><Share2 size={20} /></button>
-          </div>
-          
-          <div className="relative px-3">
-            <img src={post.image} className="w-full aspect-square object-cover rounded-[2rem] shadow-inner" alt="Nexus Art" />
-            <button 
-              onClick={() => copyToClipboard(post.prompt, post.id)}
-              className="absolute bottom-6 right-8 bg-white/90 backdrop-blur p-4 rounded-2xl shadow-2xl hover:scale-110 active:scale-90 transition-all text-slate-900 border border-white"
-            >
-              {copiedId === post.id ? <Check size={24} className="text-green-600" /> : <Clipboard size={24} />}
-            </button>
-          </div>
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-          <div className="p-6 space-y-4">
-            <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 relative">
-               <p className="text-sm font-mono text-slate-600 leading-relaxed italic">"{post.prompt}"</p>
-            </div>
-            <div className="flex items-center gap-6 px-1">
-               <button className="flex items-center gap-2 text-slate-400 hover:text-red-500 font-bold text-sm transition-colors">
-                  <Heart size={22} /> {post.likes}
-               </button>
-               <button className="flex items-center gap-2 text-slate-400 hover:text-blue-500 font-bold text-sm transition-colors">
-                  <MessageCircle size={22} /> Discussion
-               </button>
-            </div>
-          </div>
+        .mobile-nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="min-h-screen flex flex-col items-center justify-center bg-white text-center p-10">
+            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-100 h-12 w-12 mb-6"></div>
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">CONNECTING TO NEXUS...</h1>
+            <p class="text-slate-400 mt-2 text-sm">Please wait while we initialize the interface.</p>
         </div>
-      ))}
     </div>
-  );
 
-  return (
-    <div className="min-h-screen bg-[#F8FAFF] text-slate-900 font-sans selection:bg-blue-100">
-      {/* Nexus Header */}
-      <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-2xl border-b border-slate-100 px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setView('home')}>
-            <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl group-hover:rotate-12 transition-transform">
-               <Zap size={22} fill="currentColor" />
-            </div>
-            <h1 className="text-2xl font-black tracking-tighter">
-              {brandName}<span className="text-blue-600">{subBrand}</span>
-            </h1>
-          </div>
-          
-          <div className="hidden md:flex items-center bg-slate-100/50 rounded-2xl px-5 py-2.5 w-96 border border-slate-100">
-            <Search size={18} className="text-slate-400 mr-3" />
-            <input type="text" placeholder="Search the Nexus..." className="bg-transparent border-none outline-none text-sm w-full font-medium" />
-          </div>
+    <!-- Firebase Config -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInAnonymously, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-          <div className="flex items-center gap-4">
-             <button 
-                onClick={() => setView('profile')}
-                className={`w-11 h-11 rounded-2xl overflow-hidden border-2 transition-all ${view === 'profile' ? 'border-blue-600 scale-105 shadow-lg' : 'border-white shadow-sm'}`}
-             >
-                <img src={currentUser.avatar} alt="User" />
-             </button>
-          </div>
-        </div>
-      </nav>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
+            authDomain: "prompthub-e69f8.firebaseapp.com",
+            projectId: "prompthub-e69f8",
+            storageBucket: "prompthub-e69f8.firebasestorage.app",
+            messagingSenderId: "876000777567",
+            appId: "1:876000777567:web:1927dd9d1bd037678792ea"
+        };
 
-      <main className="max-w-xl mx-auto px-4 py-10">
-        {view === 'home' ? (
-          <>
-            <div className="text-center mb-12 space-y-2 animate-in fade-in slide-in-from-top-4 duration-700">
-               <h2 className="text-4xl font-black tracking-tight text-slate-900">Welcome to the Nexus</h2>
-               <p className="text-slate-400 font-medium italic">Discover & Share the world's most powerful AI prompts.</p>
-            </div>
-            <HomeFeed />
-          </>
-        ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div className="bg-white rounded-[3rem] border border-slate-100 overflow-hidden mb-8 shadow-sm">
-                <div className="h-44 relative">
-                  <img src={currentUser.banner} className="w-full h-full object-cover opacity-90" alt="Banner" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent"></div>
-                </div>
-                <div className="px-10 pb-10">
-                   <div className="flex justify-between items-end -mt-14 mb-8">
-                      <img src={currentUser.avatar} className="w-32 h-32 rounded-[2.5rem] border-8 border-white shadow-2xl bg-white" alt="Avatar" />
-                      <div className="flex gap-3 mb-2">
-                         <button className="bg-slate-50 p-3.5 rounded-2xl text-slate-400 hover:text-slate-600 border border-slate-100 active:scale-95 transition-all"><Settings size={22} /></button>
-                         <button className="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-black text-sm hover:shadow-2xl transition-all active:scale-95">EDIT PROFILE</button>
-                      </div>
-                   </div>
-                   <h2 className="text-3xl font-black text-slate-900 mb-1">{currentUser.name}</h2>
-                   <p className="text-blue-600 font-black text-xs uppercase tracking-widest mb-6">{currentUser.username}</p>
-                   <p className="text-slate-500 leading-relaxed text-sm font-medium mb-10 max-w-md">{currentUser.bio}</p>
-                   
-                   <div className="flex gap-12 border-t border-slate-50 pt-8">
-                      <div className="text-center">
-                        <div className="text-2xl font-black text-slate-900">{currentUser.postsCount}</div>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Creations</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-black text-slate-900">{currentUser.followers}</div>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Followers</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-black text-slate-900">{currentUser.following}</div>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Following</div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-             <button onClick={() => setView('home')} className="w-full bg-slate-100 text-slate-500 py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors">Back to feed</button>
-          </div>
-        )}
-      </main>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'prompthub-e69f8'; 
 
-      {/* Floating Action Button */}
-      <button 
-        onClick={() => setShowAddModal(true)}
-        className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white flex items-center gap-3 px-10 py-5 rounded-[2rem] shadow-2xl hover:scale-105 active:scale-95 transition-all z-40 group border-4 border-white/10"
-      >
-        <Plus size={24} className="group-hover:rotate-90 transition-transform" />
-        <span className="font-black text-xs uppercase tracking-widest">Share Creation</span>
-      </button>
+        window.fb = { 
+            auth, db, appId, collection, addDoc, query, onSnapshot, 
+            serverTimestamp, doc, setDoc, signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, signOut, onAuthStateChanged, 
+            signInAnonymously, updateProfile 
+        };
 
-      {/* Upload Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-[3.5rem] p-10 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl font-black tracking-tighter">NEW CREATION</h2>
-              <button onClick={() => setShowAddModal(false)} className="bg-slate-50 p-2.5 rounded-full text-slate-300 hover:text-slate-600 transition-colors"><X size={24} /></button>
-            </div>
-            
-            <div className="space-y-8">
-               {!isUploading ? (
-                 <>
-                   <div className="bg-slate-50 border-4 border-dashed border-slate-100 rounded-[3rem] h-64 flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:border-blue-200 hover:bg-blue-50/30 transition-all group">
-                      <div className="bg-white p-5 rounded-[2rem] shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                        <Upload size={36} className="text-blue-600" />
-                      </div>
-                      <span className="font-black text-xs uppercase tracking-widest text-slate-500">Drop your AI masterpiece</span>
-                      <span className="text-[10px] font-bold mt-1">High-quality PNG or JPG</span>
-                   </div>
-                   <div className="space-y-3">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">The Magic Formula (Prompt)</label>
-                     <textarea placeholder="Describe how you created this..." className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] p-6 min-h-[140px] outline-none focus:ring-4 focus:ring-blue-500/10 font-mono text-sm leading-relaxed transition-all"></textarea>
-                   </div>
-                   <button 
-                     onClick={handleUploadSim}
-                     className="w-full bg-blue-600 text-white py-6 rounded-[2.5rem] font-black text-sm uppercase tracking-widest hover:shadow-[0_20px_40px_rgba(37,99,235,0.3)] hover:bg-blue-700 transition-all active:scale-95"
-                   >
-                     Publish to the Nexus
-                   </button>
-                 </>
-               ) : (
-                 <div className="py-24 flex flex-col items-center justify-center space-y-8">
-                    <div className="relative w-32 h-32">
-                       <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                          <circle className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" r="16" cx="18" cy="18" />
-                          <circle className="text-blue-600 transition-all duration-300" strokeWidth="3" strokeDasharray={`${uploadProgress}, 100`} strokeLinecap="round" stroke="currentColor" fill="none" r="16" cx="18" cy="18" />
-                       </svg>
-                       <div className="absolute inset-0 flex items-center justify-center font-black text-2xl text-slate-900">{uploadProgress}%</div>
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [isReady, setIsReady] = useState(false);
+            const [user, setUser] = useState(null);
+            const [view, setView] = useState('home'); 
+            const [posts, setPosts] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [authModal, setAuthModal] = useState({ open: false, mode: 'login', email: '', password: '', name: '', error: '' });
+            const [postModal, setPostModal] = useState({ open: false, prompt: '', imageUrl: '', model: 'Midjourney v6.1' });
+            const [copiedId, setCopiedId] = useState(null);
+
+            useEffect(() => {
+                const handleReady = () => setIsReady(true);
+                if (window.fb) handleReady();
+                else window.addEventListener('firebase-ready', handleReady);
+                return () => window.removeEventListener('firebase-ready', handleReady);
+            }, []);
+
+            useEffect(() => {
+                if (!isReady) return;
+                const { auth, onAuthStateChanged, signInAnonymously } = window.fb;
+
+                const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
+                    if (!u) {
+                        try { await signInAnonymously(auth); } catch (e) { console.warn("Guest mode enabled"); }
+                    }
+                    setUser(u);
+                    setLoading(false);
+                });
+
+                return () => unsubscribeAuth();
+            }, [isReady]);
+
+            useEffect(() => {
+                if (!isReady || !user) return; 
+                const { db, appId, collection, onSnapshot } = window.fb;
+                const postsCol = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+                
+                const unsubscribePosts = onSnapshot(postsCol, (snap) => {
+                    const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setPosts(fetched.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+                }, (err) => console.error("Data Sync Error:", err));
+
+                return () => unsubscribePosts();
+            }, [isReady, user]);
+
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, [view, user, posts, authModal.open, postModal.open]);
+
+            const handleAuth = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const { auth, db, appId, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, setDoc, doc, serverTimestamp } = window.fb;
+                try {
+                    if (authModal.mode === 'signup') {
+                        const res = await createUserWithEmailAndPassword(auth, authModal.email, authModal.password);
+                        await updateProfile(res.user, { displayName: authModal.name });
+                        await setDoc(doc(db, 'artifacts', appId, 'users', res.user.uid, 'profile', 'info'), {
+                            name: authModal.name, email: authModal.email, createdAt: serverTimestamp()
+                        });
+                    } else {
+                        await signInWithEmailAndPassword(auth, authModal.email, authModal.password);
+                    }
+                    setAuthModal({ ...authModal, open: false, error: '' });
+                } catch (err) {
+                    setAuthModal({ ...authModal, error: "වැරදි විස්තර හෝ දෝෂයක්. නැවත උත්සාහ කරන්න." });
+                }
+                setLoading(false);
+            };
+
+            const handleCreatePost = async (e) => {
+                e.preventDefault();
+                if (!user || user.isAnonymous) {
+                    setAuthModal({ ...authModal, open: true, mode: 'login', error: 'ප්‍රොම්ප්ට් බෙදාගැනීමට ලොගින් වන්න!' });
+                    return;
+                }
+                setLoading(true);
+                const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
+                        userId: user.uid,
+                        userName: user.displayName || 'Nexus Creator',
+                        prompt: postModal.prompt,
+                        imageUrl: postModal.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&crop=800',
+                        model: postModal.model,
+                        createdAt: serverTimestamp(),
+                        likes: 0
+                    });
+                    setPostModal({ open: false, prompt: '', imageUrl: '', model: 'Midjourney v6.1' });
+                    setView('home');
+                } catch (err) { console.error(err); }
+                setLoading(false);
+            };
+
+            if (loading && !isReady) return null;
+
+            return (
+                <div className="min-h-screen pb-24 md:pb-0">
+                    {/* Header */}
+                    <nav className="sticky top-0 z-50 glass-header px-6 py-4">
+                        <div className="max-w-5xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+                                <div className="w-9 h-9 btn-nexus rounded-xl flex items-center justify-center text-white shadow-lg">
+                                    <i data-lucide="zap" className="w-5" fill="currentColor"></i>
+                                </div>
+                                <h1 className="text-xl font-black tracking-tighter text-slate-900">
+                                    PROMPT<span className="text-blue-600">NEXUS</span>
+                                </h1>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                {!user || user.isAnonymous ? (
+                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login' })} className="bg-slate-900 text-white px-6 py-2.5 rounded-2xl font-bold text-xs shadow-xl active:scale-95 transition-transform">SIGN IN</button>
+                                ) : (
+                                    <div className="flex items-center gap-3">
+                                        <div className="hidden md:block text-right">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Creator</p>
+                                            <p className="text-sm font-bold text-slate-900 leading-none">{user.displayName}</p>
+                                        </div>
+                                        <button onClick={() => setView('profile')} className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm transition-transform active:scale-90 bg-white">
+                                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} alt="Profile" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-xl mx-auto px-4 py-10">
+                        {view === 'home' ? (
+                            <div className="space-y-10">
+                                <div className="text-center px-4">
+                                    <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-3">Nexus Global Feed</h2>
+                                    <p className="text-slate-400 font-medium text-sm italic">Connect with the world's finest AI prompt engineers.</p>
+                                </div>
+
+                                {posts.length === 0 ? (
+                                    <div className="text-center py-24 bg-white rounded-[3rem] border border-dashed border-slate-200">
+                                        <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <i data-lucide="image" className="text-slate-300 w-10"></i>
+                                        </div>
+                                        <p className="text-slate-400 font-bold italic text-sm">NO CREATIONS IN THE NEXUS YET.</p>
+                                    </div>
+                                ) : (
+                                    posts.map(post => (
+                                        <div key={post.id} className="bg-white rounded-[2.8rem] border border-slate-100 overflow-hidden shadow-sm transition-all mb-10 card-shadow">
+                                            <div className="p-5 flex items-center gap-3">
+                                                <div className="p-0.5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 shadow-sm">
+                                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userId}`} className="w-10 h-10 rounded-full bg-white p-0.5" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-[14px] text-slate-800">{post.userName}</span>
+                                                    <span className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80">
+                                                       <i data-lucide="cpu" className="w-3"></i> {post.model}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="relative group px-3">
+                                                <img src={post.imageUrl} className="w-full aspect-square object-cover rounded-[2.4rem] shadow-sm" loading="lazy" />
+                                                <button 
+                                                    onClick={() => {
+                                                        const textArea = document.createElement("textarea");
+                                                        textArea.value = post.prompt;
+                                                        document.body.appendChild(textArea);
+                                                        textArea.select();
+                                                        document.execCommand('copy');
+                                                        document.body.removeChild(textArea);
+                                                        setCopiedId(post.id);
+                                                        setTimeout(() => setCopiedId(null), 2000);
+                                                    }}
+                                                    className="absolute bottom-8 right-8 bg-white text-slate-900 p-4 rounded-2xl shadow-2xl hover:scale-110 active:scale-90 transition-all border border-slate-50"
+                                                >
+                                                    {copiedId === post.id ? <i data-lucide="check" className="text-green-600 w-6 h-6"></i> : <i data-lucide="clipboard" className="w-6 h-6"></i>}
+                                                </button>
+                                            </div>
+                                            <div className="p-7">
+                                                <div className="bg-slate-50/80 p-6 rounded-[2rem] border border-slate-100 italic">
+                                                    <p className="text-[13px] font-mono text-slate-600 leading-relaxed">"{post.prompt}"</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        ) : (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="bg-white rounded-[3.5rem] p-12 text-center border border-slate-100 shadow-sm relative overflow-hidden mb-8">
+                                    <div className="absolute top-0 left-0 w-full h-32 btn-nexus opacity-90"></div>
+                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid}`} className="w-32 h-32 mx-auto rounded-[2.5rem] mb-6 border-8 border-white shadow-2xl relative z-10 bg-white" />
+                                    <h2 className="text-3xl font-black text-slate-900 mb-1">{user?.displayName || 'Nexus Artist'}</h2>
+                                    <p className="text-slate-400 font-bold text-xs mb-10 tracking-widest uppercase opacity-70">{user?.email}</p>
+                                    <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[11px] font-black text-red-500 uppercase tracking-[0.2em] border-2 border-red-50 px-10 py-3.5 rounded-2xl hover:bg-red-50 transition-colors">Log Out Profile</button>
+                                </div>
+                                <button onClick={() => setView('home')} className="w-full py-6 bg-slate-900 text-white rounded-[2.5rem] font-bold hover:shadow-2xl transition-all shadow-slate-200 uppercase tracking-widest text-xs">Back to feed</button>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Desktop Floating Action Button */}
+                    <button 
+                        onClick={() => {
+                            if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'});
+                            else setPostModal({ ...postModal, open: true });
+                        }}
+                        className="fixed bottom-10 right-10 bg-slate-900 text-white flex items-center gap-3 px-8 py-5 rounded-[2rem] shadow-2xl z-40 hover:scale-105 active:scale-95 transition-all group hidden md:flex"
+                    >
+                        <i data-lucide="plus" className="w-6 h-6 group-hover:rotate-90 transition-transform"></i>
+                        <span className="font-bold tracking-tight text-xs uppercase">Share Your Work</span>
+                    </button>
+
+                    {/* Mobile Navigation */}
+                    <div className="fixed bottom-0 w-full mobile-nav border-t border-slate-100 px-12 py-6 flex justify-around items-center md:hidden z-40">
+                         <i data-lucide="home" className={`w-7 cursor-pointer transition-colors ${view==='home'?'text-blue-600':'text-slate-300'}`} onClick={()=>setView('home')}></i>
+                         <div 
+                            onClick={() => {
+                                if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'});
+                                else setPostModal({ ...postModal, open: true });
+                            }}
+                            className="w-16 h-16 btn-nexus rounded-[1.8rem] flex items-center justify-center text-white -mt-16 shadow-2xl active:scale-90 transition-transform cursor-pointer border-4 border-white"
+                         >
+                            <i data-lucide="plus" className="w-8 h-8"></i>
+                         </div>
+                         <i data-lucide="user" className={`w-7 cursor-pointer transition-colors ${view==='profile'?'text-blue-600':'text-slate-300'}`} onClick={()=>setView('profile')}></i>
                     </div>
-                    <div className="text-center">
-                       <h3 className="font-black text-xl tracking-tight">Syncing with Nexus...</h3>
-                       <p className="text-sm text-slate-400 font-medium mt-1">Optimizing prompt data for global delivery</p>
-                    </div>
-                 </div>
-               )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
-export default App;
+                    {/* Auth Modal */}
+                    {authModal.open && (
+                        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+                            <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300">
+                                <div className="text-center mb-10">
+                                    <h2 className="text-4xl font-black mb-1 text-slate-900 tracking-tight leading-none">{authModal.mode === 'login' ? 'WELCOME' : 'JOIN NEXUS'}</h2>
+                                    <p className="text-slate-400 font-medium text-[11px] mt-4 uppercase tracking-[0.2em]">Unlock Global Creative Insights</p>
+                                </div>
+                                {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-2xl mb-6 text-center border border-red-100 uppercase tracking-widest">{authModal.error}</div>}
+                                <form onSubmit={handleAuth} className="space-y-4">
+                                    {authModal.mode === 'signup' && <input type="text" placeholder="ඔබේ නම" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all" required value={authModal.name} onChange={e => setAuthModal({...authModal, name: e.target.value})} />}
+                                    <input type="email" placeholder="ඊමේල් ලිපිනය" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all" required value={authModal.email} onChange={e => setAuthModal({...authModal, email: e.target.value})} />
+                                    <input type="password" placeholder="මුරපදය" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all" required value={authModal.password} onChange={e => setAuthModal({...authModal, password: e.target.value})} />
+                                    <button className="w-full btn-nexus text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl shadow-blue-100 active:scale-95 transition-all">
+                                        {authModal.mode === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}
+                                    </button>
+                                </form>
+                                <button onClick={() => setAuthModal({...authModal, mode: authModal.mode==='login'?'signup':'login', error: ''})} className="w-full mt-8 text-xs font-black text-slate-400 hover:text-blue-600 transition-colors text-center uppercase tracking-widest">
+                                    {authModal.mode === 'login' ? "New Here? Join the Community" : "Already a member? Sign In"}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Post Modal */}
+                    {postModal.open && (
+                        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+                            <div className="bg-white w-full max-w-lg rounded-[3.5rem] p-10 shadow-2xl animate-in slide-in-from-bottom-8 duration-500 overflow-y-auto max-h-[90vh]">
+                                <h2 className="text-3xl font-black mb-10 text-slate-900 text-center tracking-tighter uppercase">Share Insight</h2>
+                                <form onSubmit={handleCreatePost} className="space-y-8">
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Direct Image URL</label>
+                                        <input type="text" placeholder="https://..." className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-7 outline-none font-medium focus:ring-2 focus:ring-blue-500 shadow-sm text-sm" value={postModal.imageUrl} onChange={e => setPostModal({...postModal, imageUrl: e.target.value})} />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">The Magic Prompt</label>
+                                        <textarea placeholder="Imagine a world where..." className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-7 min-h-[160px] font-mono text-xs leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 text-[10px]">AI Engine</label>
+                                        <select className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 px-6 font-bold text-xs outline-none cursor-pointer focus:ring-2 focus:ring-blue-500" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}>
+                                            <option>Midjourney v6.1</option>
+                                            <option>DALL-E 3</option>
+                                            <option>Stable Diffusion XL</option>
+                                            <option>Flux.1 Dev</option>
+                                        </select>
+                                    </div>
+                                    <button className="w-full btn-nexus text-white py-6 rounded-[2.5rem] font-black text-sm tracking-widest hover:shadow-2xl transition-all active:scale-95 shadow-xl">PUBLISH TO NEXUS</button>
+                                    <button type="button" onClick={() => setPostModal({ ...postModal, open: false })} className="w-full text-xs font-black text-slate-300 uppercase tracking-widest text-center mt-2">Discard</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
