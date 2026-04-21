@@ -76,15 +76,14 @@
 
         const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368"; 
 
-        // --- ALUTH: Real Translation Dictionary (ALL 10 LANGUAGES ADDED) ---
         const TRANSLATIONS = {
             'English': {
                 globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Transmit Insight', searchPlaceholder: 'Search Global Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexus Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Global Data Stream...', joinNexus: 'Join Nexus', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexus Rank', sharedIntel: 'Shared Intel',
-                trending: 'Trending', latest: 'Latest' // ALUTH: Algorithm labels
+                trending: 'Trending', latest: 'Latest' 
             },
             'Sinhala (සිංහල)': {
                 globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexus ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexus වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexus මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ',
-                trending: 'ජනප්‍රිය', latest: 'අලුත්ම' // ALUTH: Algorithm labels
+                trending: 'ජනප්‍රිය', latest: 'අලුත්ම' 
             },
             'Spanish (Español)': {
                 globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Transmitir Idea', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexus Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexus', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexus', sharedIntel: 'Inteligencia Compartida',
@@ -147,8 +146,7 @@
             const [pendingLanguage, setPendingLanguage] = useState(null);
             const [showLangConfirm, setShowLangConfirm] = useState(false);
 
-            // --- ALUTH: Algorithm State ---
-            const [feedAlgorithm, setFeedAlgorithm] = useState('trending'); // 'trending' | 'latest'
+            const [feedAlgorithm, setFeedAlgorithm] = useState('trending');
 
             const t = (key) => {
                 const lang = profileData.language || 'English';
@@ -243,7 +241,6 @@
                 if (window.lucide) window.lucide.createIcons();
             }); 
 
-            // --- ALUTH: Nexus Algorithm Logic ---
             const displayPosts = React.useMemo(() => {
                 let sorted = [...posts];
                 if (feedAlgorithm === 'latest') {
@@ -566,10 +563,10 @@
 
                             <div className="flex items-center gap-4 md:gap-6">
                                 <div className="hidden md:flex items-center gap-6 mr-2 border-r border-slate-200 pr-6">
-                                    <button onClick={() => { setView('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
+                                    <button key={`top-nav-home-${view}`} onClick={() => { setView('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
                                         <i data-lucide="home" className="w-6 h-6"></i>
                                     </button>
-                                    <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
+                                    <button key={`top-nav-bell-${view}`} onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
                                         <i data-lucide="bell" className="w-6 h-6"></i>
                                         {hasUnreadNotifications && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
                                     </button>
@@ -592,17 +589,17 @@
                     <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 w-full flex gap-8 justify-center">
                         
                         <aside className="hidden lg:flex flex-col w-[260px] flex-shrink-0 sticky top-28 h-fit space-y-2">
-                            <button onClick={() => { setView('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                            <button key={`side-nav-home-${view}`} onClick={() => { setView('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
                                 <i data-lucide="home" className="w-6 h-6"></i> {t('globalStream')}
                             </button>
-                            <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                            <button key={`side-nav-bell-${view}`} onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
                                 <i data-lucide="bell" className="w-6 h-6"></i> {t('alerts')}
                                 {hasUnreadNotifications && <span className="absolute top-4 left-7 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
                             </button>
-                            <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'profile' || view === 'public_profile' || view === 'edit_profile' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                            <button key={`side-nav-user-${view}`} onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'profile' || view === 'public_profile' || view === 'edit_profile' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
                                 <i data-lucide="user" className="w-6 h-6"></i> {t('elitePortfolio')}
                             </button>
-                            <button onClick={() => { setView('settings'); setSettingsSection('menu'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'settings' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                            <button key={`side-nav-settings-${view}`} onClick={() => { setView('settings'); setSettingsSection('menu'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'settings' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
                                 <i data-lucide="settings" className="w-6 h-6"></i> {t('settings')}
                             </button>
                             <div className="pt-6">
@@ -627,10 +624,10 @@
                                     </div>
 
                                     <div className="flex justify-center md:justify-start gap-4 px-2 md:px-0 mb-6">
-                                        <button onClick={() => setFeedAlgorithm('trending')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'trending' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}>
+                                        <button key={`alg-trending-${feedAlgorithm}`} onClick={() => setFeedAlgorithm('trending')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'trending' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}>
                                             <i data-lucide="flame" className="w-4 h-4"></i> {t('trending')}
                                         </button>
-                                        <button onClick={() => setFeedAlgorithm('latest')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'latest' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}>
+                                        <button key={`alg-latest-${feedAlgorithm}`} onClick={() => setFeedAlgorithm('latest')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'latest' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}>
                                             <i data-lucide="clock" className="w-4 h-4"></i> {t('latest')}
                                         </button>
                                     </div>
@@ -912,7 +909,7 @@
                                                             const isSelected = profileData.language === lang || (!profileData.language && lang === 'English');
                                                             return (
                                                                 <button
-                                                                    key={`${lang}-${isSelected}`}
+                                                                    key={`lang-${lang}-${isSelected}`}
                                                                     onClick={() => requestLanguageChange(lang)}
                                                                     className={`p-5 rounded-[1.5rem] border-2 font-bold text-sm flex items-center justify-between transition-all ${isSelected ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200 hover:bg-white'}`}
                                                                 >
@@ -1043,14 +1040,14 @@
                     <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else setPostModal({ ...postModal, open: true }); }} className="fixed bottom-10 right-10 bg-slate-900 text-white hidden md:flex items-center gap-3 px-10 py-5 rounded-[2rem] shadow-2xl z-40 hover:scale-105 active:scale-95 transition-all group border-4 border-white/10"><i data-lucide="plus" className="w-6 h-6 group-hover:rotate-90 transition-transform"></i><span className="font-black text-[10px] uppercase tracking-widest">{t('transmitInsight')}</span></button>
 
                     <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar px-6 py-4 flex justify-between items-center md:hidden z-50 pb-safe">
-                        <button onClick={()=>{ setView('home'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400'}`}><i data-lucide="home" className="w-6 h-6"></i></button>
-                        <button onClick={()=>{ setView('home'); setTimeout(()=> document.getElementById('mobile-search-input')?.focus(), 100); }} className={`p-2 transition-transform active:scale-90 ${view==='search'?'text-blue-600':'text-slate-400'}`}><i data-lucide="search" className="w-6 h-6"></i></button>
+                        <button key={`mob-nav-home-${view}`} onClick={()=>{ setView('home'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400'}`}><i data-lucide="home" className="w-6 h-6"></i></button>
+                        <button key={`mob-nav-search-${view}`} onClick={()=>{ setView('home'); setTimeout(()=> document.getElementById('mobile-search-input')?.focus(), 100); }} className={`p-2 transition-transform active:scale-90 ${view==='search'?'text-blue-600':'text-slate-400'}`}><i data-lucide="search" className="w-6 h-6"></i></button>
                         <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login', error: ''}); else setPostModal({ ...postModal, open: true }); }} className="w-14 h-14 btn-nexus-main rounded-[1.8rem] flex items-center justify-center text-white -mt-8 shadow-2xl active:scale-95 transition-transform border-4 border-white"><i data-lucide="plus" className="w-6 h-6"></i></button>
-                        <button onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); setHasUnreadNotifications(false); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400'}`}>
+                        <button key={`mob-nav-bell-${view}`} onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); setHasUnreadNotifications(false); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400'}`}>
                             <i data-lucide="bell" className="w-6 h-6"></i>
                             {hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
                         </button>
-                        <button onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400'}`}><i data-lucide="user" className="w-6 h-6"></i></button>
+                        <button key={`mob-nav-user-${view}`} onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400'}`}><i data-lucide="user" className="w-6 h-6"></i></button>
                     </div>
 
                     {showLangConfirm && (
