@@ -70,7 +70,8 @@
         import { 
             getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
             signOut, signInAnonymously, updateProfile, GoogleAuthProvider, signInWithPopup,
-            EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser
+            EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser,
+            signInWithCustomToken
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove 
@@ -88,7 +89,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = 'prompthub-e69f8'; 
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'prompthub-e69f8';
         const googleProvider = new GoogleAuthProvider();
 
         window.fb = { 
@@ -97,7 +98,8 @@
             signInWithEmailAndPassword, createUserWithEmailAndPassword, 
             signOut, onAuthStateChanged, signInAnonymously, updateProfile, 
             googleProvider, signInWithPopup,
-            EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser
+            EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser,
+            signInWithCustomToken
         };
         window.dispatchEvent(new Event('firebase-ready'));
     </script>
@@ -112,13 +114,13 @@
                 globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Share Intelligence', searchPlaceholder: 'Search Global Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexus Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Global Data Stream...', joinNexus: 'Join Nexus', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexus Rank', sharedIntel: 'Shared Intel', trending: 'Trending', latest: 'Latest', members: 'Total Members', online: 'Online Now', followedYou: 'started following you!', noNotifications: 'No new alerts.', systemIntel: 'System Intelligence',
                 deleteAccount: 'Delete Account', deleteWarning: 'This action is irreversible. All your data, prompts, and followers will be permanently removed.', enterPassword: 'Enter your password to confirm', confirmDelete: 'Yes, Delete My Account', wrongPassword: 'Incorrect password. Please try again.', accountDeleted: 'Account successfully deleted.',
                 save: 'Save', saved: 'Saved', savedIntel: 'Saved Intel', darkMode: 'Dark Mode', lightMode: 'Light Mode', filters: 'Filters', all: 'All',
-                leaderboard: 'Leaderboard', topCreators: 'Top Creators', rank: 'Rank'
+                leaderboard: 'Leaderboard', topCreators: 'Top Creators', rank: 'Rank', commandCenter: 'Command Center'
             },
             'Sinhala (සිංහල)': {
                 globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexus ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexus වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexus මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ', trending: 'ජනප්‍රිය', latest: 'අලුත්ම', members: 'මුළු සාමාජිකයින්', online: 'සක්‍රියව සිටී', followedYou: 'ඔබව අනුගමනය කිරීම ආරම්භ කළා!', noNotifications: 'අලුත් දැනුම්දීම් නැත.', systemIntel: 'පද්ධතියේ දැනුම්දීම්',
                 deleteAccount: 'ගිණුම මකන්න (Delete Account)', deleteWarning: 'මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. ඔබගේ සියලුම දත්ත සහ Followers ස්ථිරවම මැකී යනු ඇත.', enterPassword: 'තහවුරු කිරීමට මුරපදය (Password) ඇතුළත් කරන්න', confirmDelete: 'ඔව්, මගේ ගිණුම මකන්න', wrongPassword: 'මුරපදය වැරදියි. කරුණාකර නැවත උත්සාහ කරන්න.', accountDeleted: 'ගිණුම සාර්ථකව මකා දමන ලදී.',
                 save: 'සුරකින්න', saved: 'සුරැකුවා', savedIntel: 'සුරැකි නිර්මාණ', darkMode: 'අඳුරු තේමාව', lightMode: 'ආලෝක තේමාව', filters: 'පෙරහන්', all: 'සියල්ල',
-                leaderboard: 'ප්‍රමුඛ පුවරුව', topCreators: 'හොඳම නිර්මාණකරුවන්', rank: 'ස්ථානය'
+                leaderboard: 'ප්‍රමුඛ පුවරුව', topCreators: 'හොඳම නිර්මාණකරුවන්', rank: 'ස්ථානය', commandCenter: 'පාලන පැනලය'
             },
             'Spanish (Español)': {
                 globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Compartir Inteligencia', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexus Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexus', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexus', sharedIntel: 'Inteligencia Compartida', trending: 'Tendencia', latest: 'Reciente', members: 'Miembros Totales', online: 'En Línea', followedYou: 'ha empezado a seguirte!', noNotifications: 'No hay alertas nuevas.', systemIntel: 'Inteligencia del Sistema',
@@ -179,9 +181,7 @@
             const [loading, setLoading] = useState(true);
             const [authModal, setAuthModal] = useState({ open: false, mode: 'login', email: '', password: '', name: '', error: '' });
             
-            // Post creation state now handled in a separate view, but we keep the state object
             const [postModal, setPostModal] = useState({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' });
-            
             const [editProfileData, setEditProfileData] = useState({ name: '', bio: '', photoURL: '', coverURL: '', imageFile: null, coverFile: null, country: '', city: '', workplace: '', contactNo: '', isLocked: false });
             const [copiedId, setCopiedId] = useState(null);
             
@@ -211,13 +211,24 @@
             const [activeFilter, setActiveFilter] = useState('All');
             const [isDarkMode, setIsDarkMode] = useState(false);
 
+            const MASTER_ADMIN_EMAIL = 'creativeworld9204@gmail.com';
+            const isAdmin = user && user.email === MASTER_ADMIN_EMAIL;
+            
+            const [adminConfig, setAdminConfig] = useState({
+                likesWeight: 3,
+                commentsWeight: 5,
+                creatorBonusWeight: 0.1,
+                timeDecay: 1.5,
+                jitter: 5
+            });
+            const [adminTab, setAdminTab] = useState('algorithm');
+
             const t = (key) => {
                 const lang = profileData.language || 'English';
                 const dict = TRANSLATIONS[lang] || TRANSLATIONS['English'];
                 return dict[key] || TRANSLATIONS['English'][key] || key;
             };
 
-            // Initialize Dark Mode from LocalStorage
             useEffect(() => {
                 const savedTheme = localStorage.getItem('nexus_theme');
                 if (savedTheme === 'dark') setIsDarkMode(true);
@@ -253,16 +264,45 @@
 
             useEffect(() => {
                 if (!isReady) return;
+                const { auth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } = window.fb;
+                
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            try {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } catch (tokenError) {
+                                console.warn("Custom token failed, falling back to anonymous auth:", tokenError);
+                                await signInAnonymously(auth);
+                            }
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (e) {
+                        console.error("Auth init error", e);
+                    }
+                };
+                initAuth();
+
+                const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
+                    setUser(u);
+                    setLoading(false);
+                });
+                return () => unsubscribeAuth();
+            }, [isReady]);
+
+            useEffect(() => {
+                if (!isReady || !user) return;
                 const { db, appId, collection, onSnapshot, doc, setDoc } = window.fb;
                 const statsCol = collection(db, 'artifacts', appId, 'public', 'data', 'stats');
                 
                 const unsubscribeStatsGlobal = onSnapshot(statsCol, (snap) => {
                     const creators = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setAllCreators(creators.filter(c => c.name));
-                });
+                }, (error) => console.error("Stats snapshot error:", error));
 
                 let heartbeatInterval;
-                if (user && !user.isAnonymous) {
+                if (!user.isAnonymous) {
                     const updatePresence = async () => {
                         try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { lastActive: Date.now() }, { merge: true }); } catch (e) {}
                     };
@@ -270,8 +310,19 @@
                     heartbeatInterval = setInterval(updatePresence, 3 * 60 * 1000); 
                 }
 
+                let unsubSettings = () => {};
+                try {
+                    unsubSettings = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'algorithm'), (snap) => {
+                        if (snap.exists()) setAdminConfig(snap.data());
+                    }, (error) => {
+                        // Suppress error in console gracefully
+                        console.log("Using default Algorithm matrix.");
+                    });
+                } catch(e) {}
+
                 return () => {
                     unsubscribeStatsGlobal();
+                    unsubSettings();
                     if (heartbeatInterval) clearInterval(heartbeatInterval);
                 };
             }, [isReady, user]);
@@ -287,22 +338,14 @@
                 
                 if (followersOnly) return followers;
 
-                if (followers >= 50) return <i data-lucide="crown" className="w-4 h-4 text-yellow-500" title="Elite Creator"></i>;
-                if (followers >= 10) return <i data-lucide="badge-check" className="w-4 h-4 text-blue-500" title="Verified Creator"></i>;
-                if (followers >= 5) return <i data-lucide="rocket" className="w-4 h-4 text-purple-500" title="Rising Star"></i>;
-                return null;
+                const badges = [];
+                if (author?.isMonetized) badges.push(<i key="monetized" data-lucide="badge-dollar-sign" className="w-4 h-4 md:w-5 md:h-5 text-green-500" title="Monetized Creator"></i>);
+                if (author?.isVerified || followers >= 10) badges.push(<i key="verified" data-lucide="badge-check" className="w-4 h-4 md:w-5 md:h-5 text-blue-500" title="Verified Creator"></i>);
+                if (followers >= 50) badges.push(<i key="elite" data-lucide="crown" className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" title="Elite Creator"></i>);
+                else if (followers >= 5 && !author?.isVerified) badges.push(<i key="rising" data-lucide="rocket" className="w-4 h-4 md:w-5 md:h-5 text-purple-500" title="Rising Star"></i>);
+                
+                return badges.length > 0 ? <div className="flex items-center gap-1">{badges}</div> : null;
             };
-
-            useEffect(() => {
-                if (!isReady) return;
-                const { auth, onAuthStateChanged, signInAnonymously } = window.fb;
-                const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
-                    if (!u) { try { await signInAnonymously(auth); } catch (e) {} }
-                    setUser(u);
-                    setLoading(false);
-                });
-                return () => unsubscribeAuth();
-            }, [isReady]);
 
             useEffect(() => {
                 if (!isReady || !user || user.isAnonymous) return;
@@ -312,10 +355,12 @@
                 
                 const unsubscribeProfile = onSnapshot(profileRef, (snap) => {
                     if (snap.exists()) setProfileData(prev => ({ ...prev, ...snap.data() }));
-                });
+                }, (error) => console.error("Profile snapshot error:", error));
+
                 const unsubscribeStats = onSnapshot(statsRef, (snap) => {
                     if (snap.exists()) setProfileData(prev => ({ ...prev, ...snap.data() }));
-                });
+                }, (error) => console.error("Stats user snapshot error:", error));
+
                 return () => { unsubscribeProfile(); unsubscribeStats(); };
             }, [isReady, user]);
 
@@ -328,7 +373,7 @@
                     fetchedNotifs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                     setNotifications(fetchedNotifs);
                     setHasUnreadNotifications(fetchedNotifs.some(n => !n.read));
-                });
+                }, (error) => console.error("Notifications snapshot error:", error));
                 return () => unsubscribeNotifs();
             }, [isReady, user]);
 
@@ -349,7 +394,7 @@
                 const unsubscribePosts = onSnapshot(postsCol, (snap) => {
                     const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setPosts(fetched); 
-                });
+                }, (error) => console.error("Posts snapshot error:", error));
                 return () => unsubscribePosts();
             }, [isReady, user]);
 
@@ -364,13 +409,15 @@
                 if (!selectedUser || !user || user.isAnonymous) return;
                 const { db, appId, doc, onSnapshot } = window.fb;
                 const followRef = doc(db, 'artifacts', appId, 'public', 'data', 'follows', `${user.uid}_${selectedUser.id}`);
-                const unsubscribe = onSnapshot(followRef, (snap) => { setIsFollowing(snap.exists()); });
+                const unsubscribe = onSnapshot(followRef, (snap) => { 
+                    setIsFollowing(snap.exists()); 
+                }, (error) => console.error("Follows snapshot error:", error));
                 return () => unsubscribe();
             }, [selectedUser, user]);
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }, [view, posts.length, authModal.open, commentModal.open, shareModal.open, settingsSection, profileData.language, feedAlgorithm, showLangConfirm, uploading, selectedUser?.id, hasUnreadNotifications, activeFilter, isDarkMode, allCreators.length]); 
+            }, [view, posts.length, authModal.open, commentModal.open, shareModal.open, settingsSection, profileData.language, feedAlgorithm, showLangConfirm, uploading, selectedUser?.id, hasUnreadNotifications, activeFilter, isDarkMode, allCreators.length, adminTab, adminConfig]); 
 
             const availableFilters = useMemo(() => {
                 const tags = new Set();
@@ -403,19 +450,24 @@
                             const likesCount = typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0);
                             const commentsCount = post.comments?.length || 0;
                             const creatorInfo = allCreators.find(c => c.id === post.userId);
-                            const creatorBonus = (creatorInfo?.followersCount || 0) * 0.1; 
+                            
+                            const creatorBonus = (creatorInfo?.followersCount || 0) * (adminConfig.creatorBonusWeight || 0.1); 
                             const now = Date.now() / 1000;
                             const postTime = post.createdAt?.seconds || now;
                             const hoursOld = (now - postTime) / 3600;
-                            const jitter = Math.random() * 5; 
+                            const jitter = Math.random() * (adminConfig.jitter || 5); 
 
-                            return (likesCount * 3) + (commentsCount * 5) + creatorBonus - (hoursOld * 1.5) + jitter;
+                            return (likesCount * (adminConfig.likesWeight || 3)) + 
+                                   (commentsCount * (adminConfig.commentsWeight || 5)) + 
+                                   creatorBonus - 
+                                   (hoursOld * (adminConfig.timeDecay || 1.5)) + 
+                                   jitter;
                         };
                         return getScore(b) - getScore(a);
                     });
                 }
                 return sorted;
-            }, [posts, feedAlgorithm, allCreators, activeFilter]);
+            }, [posts, feedAlgorithm, allCreators, activeFilter, adminConfig]);
 
             const formatPrompt = (text) => {
                 if (!text) return text;
@@ -807,6 +859,27 @@
                 }
             };
 
+            const saveAdminConfig = async () => {
+                if (!isAdmin) return;
+                setUploading(true);
+                const { db, appId, doc, setDoc } = window.fb;
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'algorithm'), adminConfig);
+                    alert("Algorithm Updated Successfully! 🔥");
+                } catch (e) { console.error(e); alert("Failed to update algorithm."); }
+                setUploading(false);
+            };
+
+            const toggleAdminUserStatus = async (targetId, field) => {
+                if (!isAdmin) return;
+                const { db, appId, doc, setDoc } = window.fb;
+                const creator = allCreators.find(c => c.id === targetId);
+                const currentStatus = creator[field] || false;
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', targetId), { [field]: !currentStatus }, { merge: true });
+                } catch (e) { console.error(e); }
+            };
+
             const userPosts = posts.filter(p => p.userId === user?.uid);
             const targetUserPosts = selectedUser ? posts.filter(p => p.userId === selectedUser.id) : [];
 
@@ -836,6 +909,13 @@
                                     <button onClick={() => setIsDarkMode(!isDarkMode)} className="transition-colors hover:scale-110 text-slate-400 hover:text-blue-600">
                                         {isDarkMode ? <i data-lucide="sun" className="w-6 h-6"></i> : <i data-lucide="moon" className="w-6 h-6"></i>}
                                     </button>
+                                    
+                                    {isAdmin && (
+                                        <button onClick={() => setView('admin_panel')} className={`transition-colors hover:scale-110 ${view === 'admin_panel' ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}>
+                                            <i data-lucide="sliders" className="w-6 h-6"></i>
+                                        </button>
+                                    )}
+
                                     <button key={`top-nav-trophy-${view}`} onClick={() => { setView('leaderboard'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'leaderboard' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
                                         <i data-lucide="trophy" className="w-6 h-6"></i>
                                     </button>
@@ -852,8 +932,8 @@
                                     <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-5 py-2 md:px-7 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('signIn')}</button>
                                 ) : (
                                     <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
-                                        <div className="hidden md:block text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('tierElite')}</p><p className="text-sm font-bold text-slate-900 leading-none">{profileData.name || user.displayName}</p></div>
-                                        <button onClick={() => { setView('profile'); setSelectedUser(null); }} className="w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm active:scale-90 transition-transform bg-white p-0.5 flex-shrink-0">
+                                        <div className="hidden md:block text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{isAdmin ? 'MASTER ADMIN' : t('tierElite')}</p><p className="text-sm font-bold text-slate-900 leading-none">{profileData.name || user.displayName}</p></div>
+                                        <button onClick={() => { setView('profile'); setSelectedUser(null); }} className={`w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 shadow-sm active:scale-90 transition-transform bg-white p-0.5 flex-shrink-0 ${isAdmin ? 'border-red-500' : 'border-blue-500'}`}>
                                             <img src={profileData.photoURL || user.photoURL} className="rounded-lg md:rounded-xl object-cover w-full h-full" />
                                         </button>
                                     </div>
@@ -865,6 +945,12 @@
                     <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 w-full flex gap-8 justify-center">
                         
                         <aside className="hidden lg:flex flex-col w-[260px] flex-shrink-0 sticky top-28 h-fit space-y-2">
+                            {isAdmin && (
+                                <button onClick={() => setView('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 text-red-600 border border-red-100 shadow-sm' : 'text-slate-400 hover:bg-slate-50 hover:text-red-500'}`}>
+                                    <i data-lucide="sliders" className="w-6 h-6"></i> {t('commandCenter')}
+                                </button>
+                            )}
+
                             <button key={`side-nav-home-${view}`} onClick={() => { setView('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
                                 <i data-lucide="home" className="w-6 h-6"></i> {t('globalStream')}
                             </button>
@@ -889,7 +975,88 @@
                         </aside>
 
                         <section className="flex-1 max-w-2xl w-full" key={`main-view-${view}`}>
-                            {view === 'home' ? (
+                            
+                            {view === 'admin_panel' && isAdmin ? (
+                                <div className="animate-in fade-in duration-700">
+                                    <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-red-100 shadow-sm p-8 md:p-12 mb-10">
+                                        <div className="flex flex-col items-center mb-10 border-b border-slate-100 pb-8 text-center">
+                                            <div className="w-20 h-20 bg-red-50 text-red-600 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-red-100">
+                                                <i data-lucide="shield-alert" className="w-10 h-10"></i>
+                                            </div>
+                                            <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">Nexus Command Center</h2>
+                                            <p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-3 text-red-500">Master Admin Access Only</p>
+                                        </div>
+
+                                        <div className="flex justify-center gap-4 mb-10 bg-slate-50 p-2 rounded-full border border-slate-100">
+                                            <button onClick={() => setAdminTab('algorithm')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white text-red-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-900'}`}>Algorithm Tuner</button>
+                                            <button onClick={() => setAdminTab('users')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white text-red-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-900'}`}>User Management</button>
+                                        </div>
+
+                                        {adminTab === 'algorithm' ? (
+                                            <div className="space-y-8 animate-in slide-in-from-right-4">
+                                                <div className="bg-blue-50 p-5 rounded-[2rem] border border-blue-100">
+                                                    <p className="text-[11px] font-bold text-blue-800 leading-relaxed"><i data-lucide="info" className="w-4 h-4 inline mr-2 -mt-1"></i>Adjust these weights to instantly change how the <b>"Trending"</b> feed is calculated globally. Higher values mean that factor has more impact.</p>
+                                                </div>
+                                                
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Like Weight</span> <span className="text-red-500">{adminConfig.likesWeight}x</span></label>
+                                                        <input type="range" min="1" max="10" step="0.5" value={adminConfig.likesWeight} onChange={e => setAdminConfig({...adminConfig, likesWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Comment Weight</span> <span className="text-red-500">{adminConfig.commentsWeight}x</span></label>
+                                                        <input type="range" min="1" max="15" step="0.5" value={adminConfig.commentsWeight} onChange={e => setAdminConfig({...adminConfig, commentsWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Follower Bonus</span> <span className="text-red-500">{adminConfig.creatorBonusWeight}x</span></label>
+                                                        <input type="range" min="0" max="1" step="0.05" value={adminConfig.creatorBonusWeight} onChange={e => setAdminConfig({...adminConfig, creatorBonusWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Time Decay (Age Penalty)</span> <span className="text-red-500">-{adminConfig.timeDecay}x / hr</span></label>
+                                                        <input type="range" min="0" max="5" step="0.1" value={adminConfig.timeDecay} onChange={e => setAdminConfig({...adminConfig, timeDecay: parseFloat(e.target.value)})} className="w-full accent-red-600" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Random Jitter</span> <span className="text-red-500">Max +{adminConfig.jitter} pts</span></label>
+                                                        <input type="range" min="0" max="20" step="1" value={adminConfig.jitter} onChange={e => setAdminConfig({...adminConfig, jitter: parseFloat(e.target.value)})} className="w-full accent-red-600" />
+                                                    </div>
+                                                </div>
+                                                <button onClick={saveAdminConfig} disabled={uploading} className="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl hover:bg-slate-800 active:scale-95 transition-all uppercase disabled:opacity-50 mt-6">
+                                                    {uploading ? 'SYNCING MATRIX...' : 'DEPlOY NEW ALGORITHM'}
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4 animate-in slide-in-from-left-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                                {allCreators.map(creator => (
+                                                    <div key={creator.id} className="bg-slate-50 p-4 rounded-[2rem] border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-blue-100 transition-colors">
+                                                        <div className="flex items-center gap-4 cursor-pointer" onClick={() => openPublicProfile(creator.id)}>
+                                                            <img src={creator.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${creator.id}`} className="w-12 h-12 rounded-2xl object-cover border border-slate-200" />
+                                                            <div>
+                                                                <p className="font-extrabold text-sm text-slate-900 flex items-center gap-1">{creator.name} {getAuthorBadges(creator.id)}</p>
+                                                                <p className="text-[10px] font-bold text-slate-500 mt-1">{creator.followersCount || 0} Followers</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                                                            <button 
+                                                                onClick={() => toggleAdminUserStatus(creator.id, 'isVerified')}
+                                                                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-colors flex items-center justify-center gap-1 ${creator.isVerified ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'}`}
+                                                            >
+                                                                <i data-lucide="badge-check" className="w-4 h-4"></i> Verify
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => toggleAdminUserStatus(creator.id, 'isMonetized')}
+                                                                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-colors flex items-center justify-center gap-1 ${creator.isMonetized ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'}`}
+                                                            >
+                                                                <i data-lucide="badge-dollar-sign" className="w-4 h-4"></i> Monetize
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button onClick={() => setView('home')} className="w-full py-5 md:py-7 bg-slate-100 text-slate-400 rounded-full md:rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[9px] md:text-[10px] mt-8 md:mt-10 lg:hidden">Return to Nexus</button>
+                                </div>
+                            ) : view === 'home' ? (
                                 <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700">
                                     <div className="text-center md:hidden mb-8">
                                         <h2 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-3 uppercase italic">{t('nexusGlobal')}</h2>
@@ -993,7 +1160,6 @@
                                     )}
                                 </div>
                             ) : view === 'create_post' ? (
-                                /* --- ALUTH: New Full Page For Create Post --- */
                                 <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
                                     <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-sm p-8 md:p-12 mb-10">
                                         <div className="flex items-center mb-10 border-b border-slate-100 pb-6">
@@ -1102,7 +1268,6 @@
                                                     {profileData.isLocked && <i data-lucide="lock" className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0"></i>}
                                                     {getAuthorBadges(user?.uid)}
                                                 </div>
-                                                {/* --- ALUTH: Mobile fixed email truncation --- */}
                                                 <p className="text-blue-600 font-black text-[9px] md:text-[11px] mb-6 tracking-[0.2em] md:tracking-[0.4em] uppercase truncate max-w-[90%] sm:max-w-md px-2">{user?.email}</p>
                                                 
                                                 <div className="flex gap-6 md:gap-8 mb-6 md:mb-8">
