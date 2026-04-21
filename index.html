@@ -79,7 +79,7 @@
         const App = () => {
             const [isReady, setIsReady] = useState(false);
             const [user, setUser] = useState(null);
-            const [profileData, setProfileData] = useState({ bio: '', name: '', photoURL: '', coverURL: '', country: '', city: '', workplace: '', contactNo: '', isLocked: false, followersCount: 0, followingCount: 0 });
+            const [profileData, setProfileData] = useState({ bio: '', name: '', photoURL: '', coverURL: '', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', followersCount: 0, followingCount: 0 });
             const [view, setView] = useState('home'); 
             const [posts, setPosts] = useState([]);
             const [loading, setLoading] = useState(true);
@@ -187,7 +187,7 @@
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }, [view, user, posts, authModal.open, postModal.open, editProfileModal.open, selectedUser, isFollowing, commentModal.open, shareModal.open, hasUnreadNotifications, uploading, searchQuery, settingsSection]);
+            }, [view, user, posts, authModal.open, postModal.open, editProfileModal.open, selectedUser, isFollowing, commentModal.open, shareModal.open, hasUnreadNotifications, uploading, searchQuery, settingsSection, profileData.language]);
 
             const handleGoogleSignIn = async () => {
                 setLoading(true);
@@ -205,7 +205,7 @@
                             photoURL: loggedInUser.photoURL,
                             coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
                             bio: 'Elite AI Creator exploring the Nexus.',
-                            country: '', city: '', workplace: '', contactNo: '', isLocked: false,
+                            country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English',
                             createdAt: serverTimestamp(),
                             provider: 'google'
                         });
@@ -260,7 +260,7 @@
                             photoURL: defaultPhoto,
                             coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
                             bio: 'Newly authorized intelligence in the Nexus.',
-                            country: '', city: '', workplace: '', contactNo: '', isLocked: false,
+                            country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English',
                             createdAt: serverTimestamp()
                         });
                         
@@ -337,6 +337,16 @@
                     setEditProfileModal({ ...editProfileModal, open: false, imageFile: null, coverFile: null });
                 } catch (e) { alert("Error updating profile."); }
                 setUploading(false);
+            };
+
+            const updateLanguage = async (newLang) => {
+                setProfileData(prev => ({ ...prev, language: newLang }));
+                if (user && !user.isAnonymous) {
+                    const { db, appId, doc, updateDoc } = window.fb;
+                    try {
+                        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), { language: newLang });
+                    } catch (e) { console.error(e); }
+                }
             };
 
             const handleCreatePost = async (e) => {
@@ -708,6 +718,42 @@
                                                     <button onClick={() => setSettingsSection('Terms_&_Conditions')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
                                                         <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="file-text" className="w-6 h-6"></i></div><span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Terms & Conditions</span></div><i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
                                                     </button>
+                                                    
+                                                    {/* --- ALUTH: Language Option in Settings Menu --- */}
+                                                    <button onClick={() => setSettingsSection('Language')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="globe" className="w-6 h-6"></i></div>
+                                                            <span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Language / භාෂාව</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-bold text-slate-400">{profileData.language || 'English'}</span>
+                                                            <i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {/* --- ALUTH: Language Selection Page --- */}
+                                            {settingsSection === 'Language' && (
+                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 py-4">
+                                                    <p className="font-bold text-slate-900 text-lg mb-6">Select your preferred language</p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        {['English', 'Sinhala (සිංහල)', 'Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'].map(lang => (
+                                                            <button
+                                                                key={lang}
+                                                                onClick={() => updateLanguage(lang)}
+                                                                className={`p-5 rounded-[1.5rem] border-2 font-bold text-sm flex items-center justify-between transition-all ${profileData.language === lang || (!profileData.language && lang === 'English') ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200 hover:bg-white'}`}
+                                                            >
+                                                                {lang}
+                                                                {(profileData.language === lang || (!profileData.language && lang === 'English')) && <i data-lucide="check-circle-2" className="w-5 h-5 text-blue-600"></i>}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mt-8">
+                                                        <p className="text-[10px] text-blue-600 text-center uppercase tracking-widest font-black flex items-center justify-center gap-2">
+                                                            <i data-lucide="info" className="w-4 h-4"></i> Note: Full localization is rolling out to all regions soon.
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             )}
 
