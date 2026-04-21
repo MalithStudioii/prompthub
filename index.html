@@ -72,50 +72,40 @@
     </script>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368"; 
 
         const TRANSLATIONS = {
             'English': {
-                globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Transmit Insight', searchPlaceholder: 'Search Global Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexus Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Global Data Stream...', joinNexus: 'Join Nexus', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexus Rank', sharedIntel: 'Shared Intel',
-                trending: 'Trending', latest: 'Latest' 
+                globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Transmit Insight', searchPlaceholder: 'Search Global Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexus Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Global Data Stream...', joinNexus: 'Join Nexus', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexus Rank', sharedIntel: 'Shared Intel', trending: 'Trending', latest: 'Latest', members: 'Total Members', online: 'Online Now', followedYou: 'started following you!', noNotifications: 'No new alerts.', systemIntel: 'System Intelligence'
             },
             'Sinhala (සිංහල)': {
-                globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexus ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexus වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexus මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ',
-                trending: 'ජනප්‍රිය', latest: 'අලුත්ම' 
+                globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexus ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexus වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexus මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ', trending: 'ජනප්‍රිය', latest: 'අලුත්ම', members: 'මුළු සාමාජිකයින්', online: 'සක්‍රියව සිටී', followedYou: 'ඔබව අනුගමනය කිරීම ආරම්භ කළා!', noNotifications: 'අලුත් දැනුම්දීම් නැත.', systemIntel: 'පද්ධතියේ දැනුම්දීම්'
             },
             'Spanish (Español)': {
-                globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Transmitir Idea', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexus Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexus', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexus', sharedIntel: 'Inteligencia Compartida',
-                trending: 'Tendencia', latest: 'Reciente'
+                globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Transmitir Idea', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexus Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexus', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexus', sharedIntel: 'Inteligencia Compartida', trending: 'Tendencia', latest: 'Reciente', members: 'Miembros Totales', online: 'En Línea', followedYou: 'ha empezado a seguirte!', noNotifications: 'No hay alertas nuevas.', systemIntel: 'Inteligencia del Sistema'
             },
             'French (Français)': {
-                globalStream: 'Flux Global', alerts: 'Alertes', elitePortfolio: 'Portfolio Élite', settings: 'Paramètres', transmitInsight: 'Transmettre Idée', searchPlaceholder: 'Rechercher des Créateurs...', signIn: 'SE CONNECTER', nexusGlobal: 'Nexus Global', worldClass: 'Communauté IA de Classe Mondiale', syncing: 'Synchronisation...', joinNexus: 'Rejoindre Nexus', connectElite: 'Connectez-vous avec l\'élite.', trendingTech: 'Tendances Tech', tierElite: 'Niveau: Élite', selectLanguage: 'Sélectionnez votre langue', noteLocalization: 'Note: La localisation complète arrive bientôt.', cancel: 'Annuler', confirm: 'Confirmer', changeLangTitle: 'Changer de langue ?', changeLangDesc: 'Voulez-vous changer la langue en', backToFeed: 'Retour au flux', editProfile: 'Éditer le profil', signOut: 'Déconnexion', followers: 'Abonnés', following: 'Abonnements', creations: 'Créations', nexusRank: 'Rang Nexus', sharedIntel: 'Intelligence Partagée',
-                trending: 'Tendance', latest: 'Récents'
+                globalStream: 'Flux Global', alerts: 'Alertes', elitePortfolio: 'Portfolio Élite', settings: 'Paramètres', transmitInsight: 'Transmettre Idée', searchPlaceholder: 'Rechercher des Créateurs...', signIn: 'SE CONNECTER', nexusGlobal: 'Nexus Global', worldClass: 'Communauté IA de Classe Mondiale', syncing: 'Synchronisation...', joinNexus: 'Rejoindre Nexus', connectElite: 'Connectez-vous avec l\'élite.', trendingTech: 'Tendances Tech', tierElite: 'Niveau: Élite', selectLanguage: 'Sélectionnez votre langue', noteLocalization: 'Note: La localisation complète arrive bientôt.', cancel: 'Annuler', confirm: 'Confirmer', changeLangTitle: 'Changer de langue ?', changeLangDesc: 'Voulez-vous changer la langue en', backToFeed: 'Retour au flux', editProfile: 'Éditer le profil', signOut: 'Déconnexion', followers: 'Abonnés', following: 'Abonnements', creations: 'Créations', nexusRank: 'Rang Nexus', sharedIntel: 'Intelligence Partagée', trending: 'Tendance', latest: 'Récents', members: 'Membres Totaux', online: 'En Ligne', followedYou: 'a commencé à vous suivre!', noNotifications: 'Pas de nouvelles alertes.', systemIntel: 'Intelligence du Système'
             },
             'German (Deutsch)': {
-                globalStream: 'Globaler Stream', alerts: 'Benachrichtigungen', elitePortfolio: 'Elite-Portfolio', settings: 'Einstellungen', transmitInsight: 'Idee Übertragen', searchPlaceholder: 'Schöpfer suchen...', signIn: 'ANMELDEN', nexusGlobal: 'Nexus Global', worldClass: 'Weltklasse-KI-Community', syncing: 'Synchronisiere...', joinNexus: 'Nexus Beitreten', connectElite: 'Verbinde dich mit der Elite.', trendingTech: 'Tech-Trends', tierElite: 'Stufe: Elite', selectLanguage: 'Wähle deine Sprache', noteLocalization: 'Hinweis: Vollständige Lokalisierung folgt.', cancel: 'Abbrechen', confirm: 'Bestätigen', changeLangTitle: 'Sprache ändern?', changeLangDesc: 'Möchten Sie die Sprache ändern in', backToFeed: 'Zurück zum Stream', editProfile: 'Profil bearbeiten', signOut: 'Abmelden', followers: 'Follower', following: 'Folge ich', creations: 'Kreationen', nexusRank: 'Nexus-Rang', sharedIntel: 'Geteilte Intelligenz',
-                trending: 'Im Trend', latest: 'Neueste'
+                globalStream: 'Globaler Stream', alerts: 'Benachrichtigungen', elitePortfolio: 'Elite-Portfolio', settings: 'Einstellungen', transmitInsight: 'Idee Übertragen', searchPlaceholder: 'Schöpfer suchen...', signIn: 'ANMELDEN', nexusGlobal: 'Nexus Global', worldClass: 'Weltklasse-KI-Community', syncing: 'Synchronisiere...', joinNexus: 'Nexus Beitreten', connectElite: 'Verbinde dich mit der Elite.', trendingTech: 'Tech-Trends', tierElite: 'Stufe: Elite', selectLanguage: 'Wähle deine Sprache', noteLocalization: 'Hinweis: Vollständige Lokalisierung folgt.', cancel: 'Abbrechen', confirm: 'Bestätigen', changeLangTitle: 'Sprache ändern?', changeLangDesc: 'Möchten Sie die Sprache ändern in', backToFeed: 'Zurück zum Stream', editProfile: 'Profil bearbeiten', signOut: 'Abmelden', followers: 'Follower', following: 'Folge ich', creations: 'Kreationen', nexusRank: 'Nexus-Rang', sharedIntel: 'Geteilte Intelligenz', trending: 'Im Trend', latest: 'Neueste', members: 'Mitglieder', online: 'Jetzt Online', followedYou: 'folgt dir jetzt!', noNotifications: 'Keine neuen Benachrichtigungen.', systemIntel: 'Systemintelligenz'
             },
             'Chinese (中文)': {
-                globalStream: '全球动态', alerts: '提醒', elitePortfolio: '精英作品集', settings: '设置', transmitInsight: '发布见解', searchPlaceholder: '搜索全球创作者...', signIn: '登录', nexusGlobal: 'Nexus 全球', worldClass: '世界级 AI 社区', syncing: '正在同步数据...', joinNexus: '加入 Nexus', connectElite: '与全球精英建立联系。', trendingTech: '热门技术', tierElite: '等级：精英', selectLanguage: '选择您的语言', noteLocalization: '注意：完整本地化即将推出。', cancel: '取消', confirm: '确认', changeLangTitle: '更改语言？', changeLangDesc: '您确定要将语言更改为', backToFeed: '返回全球动态', editProfile: '编辑个人资料', signOut: '退出登录', followers: '粉丝', following: '关注', creations: '创作', nexusRank: 'Nexus 排名', sharedIntel: '分享的见解',
-                trending: '热门', latest: '最新'
+                globalStream: '全球动态', alerts: '提醒', elitePortfolio: '精英作品集', settings: '设置', transmitInsight: '发布见解', searchPlaceholder: '搜索全球创作者...', signIn: '登录', nexusGlobal: 'Nexus 全球', worldClass: '世界级 AI 社区', syncing: '正在同步数据...', joinNexus: '加入 Nexus', connectElite: '与全球精英建立联系。', trendingTech: '热门技术', tierElite: '等级：精英', selectLanguage: '选择您的语言', noteLocalization: '注意：完整本地化即将推出。', cancel: '取消', confirm: '确认', changeLangTitle: '更改语言？', changeLangDesc: '您确定要将语言更改为', backToFeed: '返回全球动态', editProfile: '编辑个人资料', signOut: '退出登录', followers: '粉丝', following: '关注', creations: '创作', nexusRank: 'Nexus 排名', sharedIntel: '分享的见解', trending: '热门', latest: '最新', members: '总成员', online: '在线', followedYou: '开始关注你了！', noNotifications: '没有新提醒。', systemIntel: '系统智能'
             },
             'Japanese (日本語)': {
-                globalStream: 'グローバルストリーム', alerts: '通知', elitePortfolio: 'エリートポートフォリオ', settings: '設定', transmitInsight: 'インサイトを送信', searchPlaceholder: 'クリエイターを検索...', signIn: 'ログイン', nexusGlobal: 'Nexus グローバル', worldClass: '世界クラスのAIコミュニティ', syncing: '同期中...', joinNexus: 'Nexusに参加', connectElite: 'エリートクリエイターと繋がる。', trendingTech: 'トレンド技術', tierElite: 'ティア：エリート', selectLanguage: '言語を選択', noteLocalization: '注：完全なローカリゼーションはまもなく展開されます。', cancel: 'キャンセル', confirm: '確認', changeLangTitle: '言語を変更しますか？', changeLangDesc: 'プラットフォームの言語を次に変更しますか：', backToFeed: 'ストリームに戻る', editProfile: 'プロフィール編集', signOut: 'ログアウト', followers: 'フォロワー', following: 'フォロー中', creations: '制作物', nexusRank: 'Nexus ランク', sharedIntel: '共有インサイト',
-                trending: 'トレンド', latest: '最新'
+                globalStream: 'グローバルストリーム', alerts: '通知', elitePortfolio: 'エリートポートフォリオ', settings: '設定', transmitInsight: 'インサイトを送信', searchPlaceholder: 'クリエイターを検索...', signIn: 'ログイン', nexusGlobal: 'Nexus グローバル', worldClass: '世界クラスのAIコミュニティ', syncing: '同期中...', joinNexus: 'Nexusに参加', connectElite: 'エリートクリエイターと繋がる。', trendingTech: 'トレンド技術', tierElite: 'ティア：エリート', selectLanguage: '言語を選択', noteLocalization: '注：完全なローカリゼーションはまもなく展開されます。', cancel: 'キャンセル', confirm: '確認', changeLangTitle: '言語を変更しますか？', changeLangDesc: 'プラットフォームの言語を次に変更しますか：', backToFeed: 'ストリームに戻る', editProfile: 'プロフィール編集', signOut: 'ログアウト', followers: 'フォロワー', following: 'フォロー中', creations: '制作物', nexusRank: 'Nexus ランク', sharedIntel: '共有インサイト', trending: 'トレンド', latest: '最新', members: 'メンバー総数', online: 'オンライン', followedYou: 'があなたをフォローしました！', noNotifications: '新しい通知はありません。', systemIntel: 'システムインテリジェンス'
             },
             'Arabic (العربية)': {
-                globalStream: 'البث العالمي', alerts: 'التنبيهات', elitePortfolio: 'محفظة النخبة', settings: 'الإعدادات', transmitInsight: 'نقل الفكرة', searchPlaceholder: 'البحث عن المبدعين...', signIn: 'تسجيل الدخول', nexusGlobal: 'نكسس العالمي', worldClass: 'مجتمع الذكاء الاصطناعي العالمي', syncing: 'جاري المزامنة...', joinNexus: 'انضم إلى نكسس', connectElite: 'تواصل مع المبدعين.', trendingTech: 'التقنيات الرائجة', tierElite: 'المستوى: النخبة', selectLanguage: 'اختر لغتك', noteLocalization: 'ملاحظة: التعريب الكامل قادم قريباً.', cancel: 'إلغاء', confirm: 'تأكيد', changeLangTitle: 'تغيير اللغة؟', changeLangDesc: 'هل أنت متأكد من تغيير اللغة إلى', backToFeed: 'العودة للبث', editProfile: 'تعديل الملف', signOut: 'تسجيل الخروج', followers: 'المتابعون', following: 'يتابع', creations: 'الإبداعات', nexusRank: 'تصنيف نكسس', sharedIntel: 'الأفكار المشتركة',
-                trending: 'شائع', latest: 'الأحدث'
+                globalStream: 'البث العالمي', alerts: 'التنبيهات', elitePortfolio: 'محفظة النخبة', settings: 'الإعدادات', transmitInsight: 'نقل الفكرة', searchPlaceholder: 'البحث عن المبدعين...', signIn: 'تسجيل الدخول', nexusGlobal: 'نكسس العالمي', worldClass: 'مجتمع الذكاء الاصطناعي العالمي', syncing: 'جاري المزامنة...', joinNexus: 'انضم إلى نكسس', connectElite: 'تواصل مع المبدعين.', trendingTech: 'التقنيات الرائجة', tierElite: 'المستوى: النخبة', selectLanguage: 'اختر لغتك', noteLocalization: 'ملاحظة: التعريب الكامل قادم قريباً.', cancel: 'إلغاء', confirm: 'تأكيد', changeLangTitle: 'تغيير اللغة؟', changeLangDesc: 'هل أنت متأكد من تغيير اللغة إلى', backToFeed: 'العودة للبث', editProfile: 'تعديل الملف', signOut: 'تسجيل الخروج', followers: 'المتابعون', following: 'يتابع', creations: 'الإبداعات', nexusRank: 'تصنيف نكسس', sharedIntel: 'الأفكار المشتركة', trending: 'شائع', latest: 'الأحدث', members: 'إجمالي الأعضاء', online: 'متصل الآن', followedYou: 'بدأ بمتابعتك!', noNotifications: 'لا توجد تنبيهات جديدة.', systemIntel: 'ذكاء النظام'
             },
             'Hindi (हिन्दी)': {
-                globalStream: 'ग्लोबल स्ट्रीम', alerts: 'अलर्ट', elitePortfolio: 'एलीट पोर्टफोलियो', settings: 'सेटिंग्स', transmitInsight: 'विचार साझा करें', searchPlaceholder: 'क्रिएटर्स खोजें...', signIn: 'साइन इन', nexusGlobal: 'नेक्सस ग्लोबल', worldClass: 'विश्व स्तरीय AI समुदाय', syncing: 'सिंक हो रहा है...', joinNexus: 'नेक्सस से जुड़ें', connectElite: 'एलीट क्रिएटर्स से जुड़ें।', trendingTech: 'ट्रेंडिंग तकनीक', tierElite: 'टियर: एलीट', selectLanguage: 'अपनी भाषा चुनें', noteLocalization: 'नोट: पूर्ण स्थानीयकरण जल्द ही आ रहा है।', cancel: 'रद्द करें', confirm: 'पुष्टि करें', changeLangTitle: 'भाषा बदलें?', changeLangDesc: 'क्या आप भाषा को बदलना चाहते हैं', backToFeed: 'स्ट्रीम पर वापस जाएं', editProfile: 'प्रोफ़ाइल संपादित करें', signOut: 'साइन आउट', followers: 'फॉलोअर्स', following: 'फॉलोइंग', creations: 'रचनाएँ', nexusRank: 'नेक्सस रैंक', sharedIntel: 'साझा विचार',
-                trending: 'ट्रेंडिंग', latest: 'नवीनतम'
+                globalStream: 'ग्लोबल स्ट्रीम', alerts: 'अलर्ट', elitePortfolio: 'एलीट पोर्टफोलियो', settings: 'सेटिंग्स', transmitInsight: 'विचार साझा करें', searchPlaceholder: 'क्रिएटर्स खोजें...', signIn: 'साइन इन', nexusGlobal: 'नेक्सस ग्लोबल', worldClass: 'विश्व स्तरीय AI समुदाय', syncing: 'सिंक हो रहा है...', joinNexus: 'नेक्सस से जुड़ें', connectElite: 'एलीट क्रिएटर्स से जुड़ें।', trendingTech: 'ट्रेंडिंग तकनीक', tierElite: 'टियर: एलीट', selectLanguage: 'अपनी भाषा चुनें', noteLocalization: 'नोट: पूर्ण स्थानीयकरण जल्द ही आ रहा है।', cancel: 'रद्द करें', confirm: 'पुष्टि करें', changeLangTitle: 'भाषा बदलें?', changeLangDesc: 'क्या आप भाषा को बदलना चाहते हैं', backToFeed: 'स्ट्रीम पर वापस जाएं', editProfile: 'प्रोफ़ाइल संपादित करें', signOut: 'साइन आउट', followers: 'फॉलोअर्स', following: 'फॉलोइंग', creations: 'रचनाएँ', nexusRank: 'नेक्सस रैंक', sharedIntel: 'साझा विचार', trending: 'ट्रेंडिंग', latest: 'नवीनतम', members: 'कुल सदस्य', online: 'अभी ऑनलाइन', followedYou: 'ने आपको फॉलो करना शुरू किया!', noNotifications: 'कोई नया अलर्ट नहीं।', systemIntel: 'सिस्टम इंटेलिजेंस'
             },
             'Russian (Русский)': {
-                globalStream: 'Глобальный Поток', alerts: 'Уведомления', elitePortfolio: 'Элитное Портфолио', settings: 'Настройки', transmitInsight: 'Передать Идею', searchPlaceholder: 'Поиск Авторов...', signIn: 'ВОЙТИ', nexusGlobal: 'Nexus Global', worldClass: 'Мировое ИИ Сообщество', syncing: 'Синхронизация...', joinNexus: 'Присоединиться', connectElite: 'Связь с элитой.', trendingTech: 'Тренды', tierElite: 'Уровень: Элита', selectLanguage: 'Выберите язык', noteLocalization: 'Примечание: Полная локализация скоро.', cancel: 'Отмена', confirm: 'Подтвердить', changeLangTitle: 'Изменить язык?', changeLangDesc: 'Вы уверены, что хотите изменить язык на', backToFeed: 'Вернуться к потоку', editProfile: 'Редакт. профиль', signOut: 'Выйти', followers: 'Подписчики', following: 'Подписки', creations: 'Творения', nexusRank: 'Ранг Nexus', sharedIntel: 'Общий интеллект',
-                trending: 'В тренде', latest: 'Новые'
+                globalStream: 'Глобальный Поток', alerts: 'Уведомления', elitePortfolio: 'Элитное Портфолио', settings: 'Настройки', transmitInsight: 'Передать Идею', searchPlaceholder: 'Поиск Авторов...', signIn: 'ВОЙТИ', nexusGlobal: 'Nexus Global', worldClass: 'Мировое ИИ Сообщество', syncing: 'Синхронизация...', joinNexus: 'Присоединиться', connectElite: 'Связь с элитой.', trendingTech: 'Тренды', tierElite: 'Уровень: Элита', selectLanguage: 'Выберите язык', noteLocalization: 'Примечание: Полная локализация скоро.', cancel: 'Отмена', confirm: 'Подтвердить', changeLangTitle: 'Изменить язык?', changeLangDesc: 'Вы уверены, что хотите изменить язык на', backToFeed: 'Вернуться к потоку', editProfile: 'Редакт. профиль', signOut: 'Выйти', followers: 'Подписчики', following: 'Подписки', creations: 'Творения', nexusRank: 'Ранг Nexus', sharedIntel: 'Общий интеллект', trending: 'В тренде', latest: 'Новые', members: 'Всего участников', online: 'В сети', followedYou: 'начал(а) читать вас!', noNotifications: 'Нет новых уведомлений.', systemIntel: 'Системный интеллект'
             }
         };
 
@@ -134,13 +124,14 @@
             const [selectedUser, setSelectedUser] = useState(null);
             const [isFollowing, setIsFollowing] = useState(false);
             const [commentModal, setCommentModal] = useState({ open: false, post: null, text: '' });
-
             const [shareModal, setShareModal] = useState({ open: false, post: null });
-            const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
 
+            const [notifications, setNotifications] = useState([]);
+            const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+            const [allCreators, setAllCreators] = useState([]);
+            
             const [searchQuery, setSearchQuery] = useState('');
             const [uploading, setUploading] = useState(false);
-            const [allCreators, setAllCreators] = useState([]);
 
             const [settingsSection, setSettingsSection] = useState('menu');
             const [pendingLanguage, setPendingLanguage] = useState(null);
@@ -166,24 +157,45 @@
             };
 
             useEffect(() => {
-                if (!isReady) return;
-                const { db, appId, collection, onSnapshot } = window.fb;
-                const statsCol = collection(db, 'artifacts', appId, 'public', 'data', 'stats');
-                const unsubscribeStatsGlobal = onSnapshot(statsCol, (snap) => {
-                    const creators = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    setAllCreators(creators.filter(c => c.name));
-                });
-                return () => unsubscribeStatsGlobal();
-            }, [isReady]);
-
-            const filteredCreators = searchQuery.trim() === '' ? [] : allCreators.filter(c => c.name?.toLowerCase().includes(searchQuery.toLowerCase()));
-
-            useEffect(() => {
                 const handleReady = () => setIsReady(true);
                 if (window.fb) handleReady();
                 else window.addEventListener('firebase-ready', handleReady);
                 return () => window.removeEventListener('firebase-ready', handleReady);
             }, []);
+
+            // Global Creators & Online Heartbeat Sync
+            useEffect(() => {
+                if (!isReady) return;
+                const { db, appId, collection, onSnapshot, doc, setDoc } = window.fb;
+                const statsCol = collection(db, 'artifacts', appId, 'public', 'data', 'stats');
+                
+                const unsubscribeStatsGlobal = onSnapshot(statsCol, (snap) => {
+                    const creators = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setAllCreators(creators.filter(c => c.name));
+                });
+
+                // Heartbeat to show "Online" status
+                let heartbeatInterval;
+                if (user && !user.isAnonymous) {
+                    const updatePresence = async () => {
+                        try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { lastActive: Date.now() }, { merge: true }); } catch (e) {}
+                    };
+                    updatePresence();
+                    heartbeatInterval = setInterval(updatePresence, 3 * 60 * 1000); // Every 3 mins
+                }
+
+                return () => {
+                    unsubscribeStatsGlobal();
+                    if (heartbeatInterval) clearInterval(heartbeatInterval);
+                };
+            }, [isReady, user]);
+
+            const filteredCreators = searchQuery.trim() === '' ? [] : allCreators.filter(c => c.name?.toLowerCase().includes(searchQuery.toLowerCase()));
+            
+            // Calculate Total and Online Members
+            const totalMembers = allCreators.length;
+            // Online if active in last 5 mins (300000 ms)
+            const onlineMembers = Math.max(1, allCreators.filter(c => c.lastActive && (Date.now() - c.lastActive < 300000)).length);
 
             useEffect(() => {
                 if (!isReady) return;
@@ -210,6 +222,31 @@
                 });
                 return () => { unsubscribeProfile(); unsubscribeStats(); };
             }, [isReady, user]);
+
+            // Fetch Real-time Notifications
+            useEffect(() => {
+                if (!isReady || !user || user.isAnonymous) return;
+                const { db, appId, collection, onSnapshot } = window.fb;
+                const notifCol = collection(db, 'artifacts', appId, 'users', user.uid, 'notifications');
+                const unsubscribeNotifs = onSnapshot(notifCol, (snap) => {
+                    const fetchedNotifs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    fetchedNotifs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    setNotifications(fetchedNotifs);
+                    setHasUnreadNotifications(fetchedNotifs.some(n => !n.read));
+                });
+                return () => unsubscribeNotifs();
+            }, [isReady, user]);
+
+            // Mark notifications as read when opening the view
+            useEffect(() => {
+                if (view === 'notifications' && hasUnreadNotifications && user && !user.isAnonymous) {
+                    const { db, appId, doc, updateDoc } = window.fb;
+                    notifications.filter(n => !n.read).forEach(n => {
+                        updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'notifications', n.id), { read: true }).catch(()=>{});
+                    });
+                    setHasUnreadNotifications(false);
+                }
+            }, [view, hasUnreadNotifications, notifications, user]);
 
             useEffect(() => {
                 if (!isReady || !user) return; 
@@ -241,7 +278,8 @@
                 if (window.lucide) window.lucide.createIcons();
             }); 
 
-            const displayPosts = React.useMemo(() => {
+            // Advanced Nexus Algorithm (Trending Logic)
+            const displayPosts = useMemo(() => {
                 let sorted = [...posts];
                 if (feedAlgorithm === 'latest') {
                     sorted.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
@@ -250,16 +288,26 @@
                         const getScore = (post) => {
                             const likesCount = typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0);
                             const commentsCount = post.comments?.length || 0;
+                            
+                            // Get creator bonus based on followers
+                            const creatorInfo = allCreators.find(c => c.id === post.userId);
+                            const creatorBonus = (creatorInfo?.followersCount || 0) * 0.1; // 10 followers = 1 point bonus
+
+                            // Time Decay
                             const now = Date.now() / 1000;
                             const postTime = post.createdAt?.seconds || now;
                             const hoursOld = (now - postTime) / 3600;
-                            return (likesCount * 2) + (commentsCount * 3) - (hoursOld * 0.5);
+                            
+                            // Random Jitter to keep feed fresh
+                            const jitter = Math.random() * 5; 
+
+                            return (likesCount * 3) + (commentsCount * 5) + creatorBonus - (hoursOld * 1.5) + jitter;
                         };
                         return getScore(b) - getScore(a);
                     });
                 }
                 return sorted;
-            }, [posts, feedAlgorithm]);
+            }, [posts, feedAlgorithm, allCreators]);
 
             const handleGoogleSignIn = async () => {
                 setLoading(true);
@@ -285,7 +333,8 @@
                             name: loggedInUser.displayName,
                             photoURL: loggedInUser.photoURL,
                             followersCount: 0,
-                            followingCount: 0
+                            followingCount: 0,
+                            lastActive: Date.now()
                         }, { merge: true });
                     }
                     setAuthModal({ ...authModal, open: false, error: '' });
@@ -296,7 +345,7 @@
             const toggleFollow = async () => {
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
                 if (!selectedUser) return;
-                const { db, appId, doc, setDoc, deleteDoc, increment, serverTimestamp } = window.fb;
+                const { db, appId, doc, setDoc, addDoc, collection, deleteDoc, increment, serverTimestamp } = window.fb;
                 const followId = `${user.uid}_${selectedUser.id}`;
                 const followRef = doc(db, 'artifacts', appId, 'public', 'data', 'follows', followId);
                 const myStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid);
@@ -312,6 +361,15 @@
                         await setDoc(myStatsRef, { followingCount: increment(1) }, { merge: true });
                         await setDoc(targetStatsRef, { followersCount: increment(1) }, { merge: true });
                         setSelectedUser(prev => ({ ...prev, followersCount: (prev.followersCount || 0) + 1 }));
+
+                        await addDoc(collection(db, 'artifacts', appId, 'users', selectedUser.id, 'notifications'), {
+                            type: 'follow',
+                            fromUserId: user.uid,
+                            fromUserName: profileData.name || user.displayName,
+                            fromUserPhoto: profileData.photoURL || user.photoURL,
+                            timestamp: serverTimestamp(),
+                            read: false
+                        });
                     }
                 } catch (e) {}
             };
@@ -340,7 +398,8 @@
                             name: authModal.name,
                             photoURL: defaultPhoto,
                             followersCount: 0,
-                            followingCount: 0
+                            followingCount: 0,
+                            lastActive: Date.now()
                         }, { merge: true });
                         
                     } else {
@@ -428,7 +487,6 @@
                 setUploading(false);
             };
 
-            // --- ALUTH: Quick Profile / Cover Update Logic ---
             const handleQuickImageUpdate = async (file, type) => {
                 if (!file || !user || user.isAnonymous) return;
                 setUploading(true);
@@ -641,8 +699,13 @@
                                 <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700">
                                     <div className="text-center md:hidden mb-8">
                                         <h2 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-3 uppercase italic">{t('nexusGlobal')}</h2>
-                                        <p className="text-slate-400 font-medium text-[10px] tracking-[0.2em] opacity-80 uppercase leading-relaxed mb-6">{t('worldClass')}</p>
+                                        <p className="text-slate-400 font-medium text-[10px] tracking-[0.2em] opacity-80 uppercase leading-relaxed mb-4">{t('worldClass')}</p>
                                         
+                                        <div className="flex justify-center gap-4 mb-6">
+                                            <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full"><i data-lucide="users" className="w-3 h-3 inline mr-1"></i>{totalMembers}</span>
+                                            <span className="text-[10px] font-bold bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100"><span className="w-2 h-2 rounded-full bg-green-500 inline-block mr-1.5 animate-pulse"></span>{onlineMembers}</span>
+                                        </div>
+
                                         <div className="relative w-full text-left shadow-sm mt-2">
                                             <i data-lucide="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
                                             <input id="mobile-search-input" type="text" placeholder={t('searchPlaceholder')} className="w-full bg-white border border-slate-200 rounded-[2rem] py-4 pl-14 pr-6 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 font-bold text-sm tracking-wide transition-all shadow-md" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -826,17 +889,35 @@
                                 <div className="animate-in fade-in slide-in-from-bottom-10 duration-700 max-w-xl mx-auto">
                                     <div className="flex items-center gap-4 mb-8 md:mb-10 px-4">
                                         <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-50 rounded-2xl md:rounded-3xl flex items-center justify-center text-blue-600 shadow-inner"><i data-lucide="bell" className="w-6 h-6 md:w-7 md:h-7"></i></div>
-                                        <div className="text-left"><h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">{t('alerts')}</h2><p className="text-slate-400 font-bold text-[9px] md:text-[10px] tracking-[0.3em] uppercase mt-1">System Intelligence</p></div>
+                                        <div className="text-left"><h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">{t('alerts')}</h2><p className="text-slate-400 font-bold text-[9px] md:text-[10px] tracking-[0.3em] uppercase mt-1">{t('systemIntel')}</p></div>
                                     </div>
+                                    
                                     <div className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-sm p-3 md:p-4 space-y-2">
-                                        <div className="flex items-start gap-3 md:gap-4 p-4 md:p-5 hover:bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] transition-colors cursor-pointer group">
-                                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-[1.2rem] bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-md group-hover:scale-105 transition-transform"><i data-lucide="zap" className="w-5 h-5 md:w-6 md:h-6"></i></div>
-                                            <div className="flex-1 text-left pt-1"><p className="text-[13px] md:text-[15px] font-extrabold text-slate-900 leading-snug">Welcome to Nexus Network!</p><p className="text-xs md:text-sm font-medium text-slate-500 mt-1">Your creator profile is successfully established.</p><p className="text-[9px] md:text-[10px] font-black text-blue-500 uppercase tracking-widest mt-2">Just now</p></div>
-                                        </div>
-                                        <div className="flex items-start gap-3 md:gap-4 p-4 md:p-5 hover:bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] transition-colors cursor-pointer group">
-                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=System" className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-[1.2rem] bg-slate-100 flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform border border-slate-200 object-cover" />
-                                            <div className="flex-1 text-left pt-1"><p className="text-[13px] md:text-[15px] font-extrabold text-slate-900 leading-snug">Nexus System Protocol</p><p className="text-xs md:text-sm font-medium text-slate-500 mt-1">Start transmitting your AI prompts to gain influence.</p><p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">2 hours ago</p></div>
-                                        </div>
+                                        {notifications.length === 0 ? (
+                                            <div className="text-center py-16">
+                                                <i data-lucide="bell-off" className="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                                                <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">{t('noNotifications')}</p>
+                                            </div>
+                                        ) : (
+                                            notifications.map(notif => (
+                                                <div 
+                                                    key={notif.id} 
+                                                    onClick={() => { if(notif.type === 'follow') openPublicProfile(notif.fromUserId); }}
+                                                    className={`flex items-start gap-3 md:gap-4 p-4 md:p-5 hover:bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] transition-colors cursor-pointer group ${!notif.read ? 'bg-blue-50/50' : ''}`}
+                                                >
+                                                    <img src={notif.fromUserPhoto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${notif.fromUserId}`} className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-[1.2rem] bg-slate-100 flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform border border-slate-200 object-cover" />
+                                                    <div className="flex-1 text-left pt-1">
+                                                        <p className="text-[13px] md:text-[15px] font-extrabold text-slate-900 leading-snug">
+                                                            {notif.fromUserName} <span className="font-medium text-slate-500">{t('followedYou')}</span>
+                                                        </p>
+                                                        <p className="text-[9px] md:text-[10px] font-black text-blue-500 uppercase tracking-widest mt-2">
+                                                            {!notif.read && <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>}
+                                                            Alert
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
                                     <button onClick={() => setView('home')} className="w-full py-5 bg-slate-100 text-slate-400 rounded-full font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[9px] mt-8 lg:hidden">{t('backToFeed')}</button>
                                 </div>
@@ -1032,6 +1113,22 @@
                         </section>
 
                         <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 sticky top-28 h-fit space-y-6">
+                            
+                            {/* --- ALUTH: Network Status Card for Desktop --- */}
+                            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                                <h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Nexus Network</h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between bg-slate-50 p-3 rounded-2xl">
+                                        <div className="flex items-center gap-3"><i data-lucide="users" className="w-4 h-4 text-slate-400"></i><span className="text-xs font-bold text-slate-600">{t('members')}</span></div>
+                                        <span className="font-black text-sm text-slate-900">{totalMembers}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between bg-green-50 p-3 rounded-2xl border border-green-100">
+                                        <div className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse ml-1"></span><span className="text-xs font-bold text-green-700">{t('online')}</span></div>
+                                        <span className="font-black text-sm text-green-700">{onlineMembers}</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             {!user || user.isAnonymous ? (
                                 <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center">
                                     <h3 className="font-black text-lg text-slate-900 mb-2">{t('joinNexus')}</h3>
