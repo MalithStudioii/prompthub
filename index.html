@@ -40,7 +40,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-            signOut, signInAnonymously, updateProfile, GoogleAuthProvider, signInWithPopup 
+            signOut, signInAnonymously, updateProfile, GoogleAuthProvider, signInWithPopup,
+            EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove 
@@ -66,7 +67,8 @@
             serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove,
             signInWithEmailAndPassword, createUserWithEmailAndPassword, 
             signOut, onAuthStateChanged, signInAnonymously, updateProfile, 
-            googleProvider, signInWithPopup
+            googleProvider, signInWithPopup,
+            EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser
         };
         window.dispatchEvent(new Event('firebase-ready'));
     </script>
@@ -78,7 +80,12 @@
 
         const TRANSLATIONS = {
             'English': {
-                globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Transmit Insight', searchPlaceholder: 'Search Global Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexus Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Global Data Stream...', joinNexus: 'Join Nexus', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexus Rank', sharedIntel: 'Shared Intel', trending: 'Trending', latest: 'Latest', members: 'Total Members', online: 'Online Now', followedYou: 'started following you!', noNotifications: 'No new alerts.', systemIntel: 'System Intelligence'
+                globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Transmit Insight', searchPlaceholder: 'Search Global Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexus Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Global Data Stream...', joinNexus: 'Join Nexus', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexus Rank', sharedIntel: 'Shared Intel', trending: 'Trending', latest: 'Latest', members: 'Total Members', online: 'Online Now', followedYou: 'started following you!', noNotifications: 'No new alerts.', systemIntel: 'System Intelligence',
+                deleteAccount: 'Delete Account', deleteWarning: 'This action is irreversible. All your data, prompts, and followers will be permanently removed.', enterPassword: 'Enter your password to confirm', confirmDelete: 'Yes, Delete My Account', wrongPassword: 'Incorrect password. Please try again.', accountDeleted: 'Account successfully deleted.'
+            },
+            'Sinhala (සිංහල)': {
+                globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexus ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexus වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexus මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ', trending: 'ජනප්‍රිය', latest: 'අලුත්ම', members: 'මුළු සාමාජිකයින්', online: 'සක්‍රියව සිටී', followedYou: 'ඔබව අනුගමනය කිරීම ආරම්භ කළා!', noNotifications: 'අලුත් දැනුම්දීම් නැත.', systemIntel: 'පද්ධතියේ දැනුම්දීම්',
+                deleteAccount: 'ගිණුම මකන්න (Delete Account)', deleteWarning: 'මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. ඔබගේ සියලුම දත්ත සහ Followers ස්ථිරවම මැකී යනු ඇත.', enterPassword: 'තහවුරු කිරීමට මුරපදය (Password) ඇතුළත් කරන්න', confirmDelete: 'ඔව්, මගේ ගිණුම මකන්න', wrongPassword: 'මුරපදය වැරදියි. කරුණාකර නැවත උත්සාහ කරන්න.', accountDeleted: 'ගිණුම සාර්ථකව මකා දමන ලදී.'
             },
             'Sinhala (සිංහල)': {
                 globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexus ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexus වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexus මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ', trending: 'ජනප්‍රිය', latest: 'අලුත්ම', members: 'මුළු සාමාජිකයින්', online: 'සක්‍රියව සිටී', followedYou: 'ඔබව අනුගමනය කිරීම ආරම්භ කළා!', noNotifications: 'අලුත් දැනුම්දීම් නැත.', systemIntel: 'පද්ධතියේ දැනුම්දීම්'
@@ -136,6 +143,11 @@
             const [settingsSection, setSettingsSection] = useState('menu');
             const [pendingLanguage, setPendingLanguage] = useState(null);
             const [showLangConfirm, setShowLangConfirm] = useState(false);
+
+            // --- ALUTH: Account Deletion States ---
+            const [deletePassword, setDeletePassword] = useState('');
+            const [deleteError, setDeleteError] = useState('');
+            const [isDeleting, setIsDeleting] = useState(false);
 
             const [feedAlgorithm, setFeedAlgorithm] = useState('trending');
 
@@ -517,6 +529,53 @@
                 }
                 setShowLangConfirm(false);
                 setPendingLanguage(null);
+            };
+
+            // --- ALUTH: Account Deletion Logic ---
+            const handleDeleteAccount = async (e) => {
+                if (e) e.preventDefault();
+                if (!user || user.isAnonymous) return;
+                setIsDeleting(true);
+                setDeleteError('');
+                
+                const { EmailAuthProvider, GoogleAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser, db, appId, doc, deleteDoc } = window.fb;
+                const isGoogleUser = user.providerData?.[0]?.providerId === 'google.com';
+                
+                try {
+                    // 1. Re-authenticate
+                    if (isGoogleUser) {
+                        const provider = new GoogleAuthProvider();
+                        await reauthenticateWithPopup(user, provider);
+                    } else {
+                        if (!deletePassword) {
+                            setDeleteError(t('enterPassword'));
+                            setIsDeleting(false);
+                            return;
+                        }
+                        const credential = EmailAuthProvider.credential(user.email, deletePassword);
+                        await reauthenticateWithCredential(user, credential);
+                    }
+
+                    // 2. Clean up major DB records
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'));
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid));
+                    
+                    // 3. Delete Firebase Auth User
+                    await deleteUser(user);
+                    
+                    alert(t('accountDeleted'));
+                    setView('home');
+                    setSettingsSection('menu');
+                    setDeletePassword('');
+                } catch (err) {
+                    console.error(err);
+                    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                        setDeleteError(t('wrongPassword'));
+                    } else {
+                        setDeleteError("Error: " + err.message);
+                    }
+                }
+                setIsDeleting(false);
             };
 
             const handleCreatePost = async (e) => {
@@ -1006,6 +1065,17 @@
                                                             <i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
                                                         </div>
                                                     </button>
+
+                                                    {/* --- ALUTH: Delete Account Button in Menu --- */}
+                                                    <div className="pt-6 mt-6 border-t border-slate-100">
+                                                        <button onClick={() => setSettingsSection('Delete_Account')} className="w-full flex items-center justify-between p-5 bg-red-50 hover:bg-red-100 rounded-[2rem] transition-colors group border border-transparent hover:border-red-200">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-red-600 text-red-400"><i data-lucide="trash-2" className="w-6 h-6"></i></div>
+                                                                <span className="font-extrabold text-[15px] text-red-600">{t('deleteAccount')}</span>
+                                                            </div>
+                                                            <i data-lucide="chevron-right" className="w-5 h-5 text-red-300"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -1090,6 +1160,48 @@
                                                     </ul>
                                                     <div className="bg-red-50 p-5 rounded-[2rem] border border-red-100 mt-6">
                                                         <p className="text-sm font-bold text-red-600 flex items-center gap-3"><i data-lucide="alert-triangle" className="w-5 h-5"></i> Violation of these terms may result in immediate terminal disconnection and ban.</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* --- ALUTH: Delete Account Form --- */}
+                                            {settingsSection === 'Delete_Account' && (
+                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 py-4">
+                                                    <div className="text-center mb-8">
+                                                        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-[2rem] mx-auto flex items-center justify-center mb-6">
+                                                            <i data-lucide="alert-triangle" className="w-10 h-10"></i>
+                                                        </div>
+                                                        <h3 className="font-black text-2xl text-slate-900 mb-2">{t('deleteAccount')}</h3>
+                                                        <p className="font-medium text-red-500">{t('deleteWarning')}</p>
+                                                    </div>
+
+                                                    <div className="space-y-6 bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
+                                                        {deleteError && (
+                                                            <div className="bg-red-100 text-red-700 p-4 rounded-2xl text-sm font-bold text-center">
+                                                                {deleteError}
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {user?.providerData?.[0]?.providerId !== 'google.com' && (
+                                                            <div className="space-y-3">
+                                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">{t('enterPassword')}</label>
+                                                                <input 
+                                                                    type="password" 
+                                                                    placeholder="••••••••" 
+                                                                    className="w-full bg-white border border-slate-200 rounded-[1.5rem] py-4 px-6 outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-400 font-bold text-sm tracking-wide transition-all" 
+                                                                    value={deletePassword} 
+                                                                    onChange={(e) => setDeletePassword(e.target.value)} 
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        
+                                                        <button 
+                                                            onClick={handleDeleteAccount}
+                                                            disabled={isDeleting || (user?.providerData?.[0]?.providerId !== 'google.com' && !deletePassword)} 
+                                                            className="w-full bg-red-600 text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl shadow-red-600/20 hover:bg-red-700 active:scale-95 transition-all uppercase disabled:opacity-50 flex items-center justify-center gap-2"
+                                                        >
+                                                            {isDeleting ? <div className="loader-spinner w-5 h-5 border-2 border-t-2 border-white/30 border-t-white"></div> : (user?.providerData?.[0]?.providerId === 'google.com' ? 'VERIFY WITH GOOGLE & DELETE' : <><i data-lucide="trash-2" className="w-5 h-5"></i> {t('confirmDelete')}</>)}
+                                                        </button>
                                                     </div>
                                                 </div>
                                             )}
