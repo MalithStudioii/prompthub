@@ -163,7 +163,6 @@
                 return () => window.removeEventListener('firebase-ready', handleReady);
             }, []);
 
-            // Global Creators & Online Heartbeat Sync
             useEffect(() => {
                 if (!isReady) return;
                 const { db, appId, collection, onSnapshot, doc, setDoc } = window.fb;
@@ -174,14 +173,13 @@
                     setAllCreators(creators.filter(c => c.name));
                 });
 
-                // Heartbeat to show "Online" status
                 let heartbeatInterval;
                 if (user && !user.isAnonymous) {
                     const updatePresence = async () => {
                         try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { lastActive: Date.now() }, { merge: true }); } catch (e) {}
                     };
                     updatePresence();
-                    heartbeatInterval = setInterval(updatePresence, 3 * 60 * 1000); // Every 3 mins
+                    heartbeatInterval = setInterval(updatePresence, 3 * 60 * 1000); 
                 }
 
                 return () => {
@@ -192,9 +190,7 @@
 
             const filteredCreators = searchQuery.trim() === '' ? [] : allCreators.filter(c => c.name?.toLowerCase().includes(searchQuery.toLowerCase()));
             
-            // Calculate Total and Online Members
             const totalMembers = allCreators.length;
-            // Online if active in last 5 mins (300000 ms)
             const onlineMembers = Math.max(1, allCreators.filter(c => c.lastActive && (Date.now() - c.lastActive < 300000)).length);
 
             useEffect(() => {
@@ -223,7 +219,6 @@
                 return () => { unsubscribeProfile(); unsubscribeStats(); };
             }, [isReady, user]);
 
-            // Fetch Real-time Notifications
             useEffect(() => {
                 if (!isReady || !user || user.isAnonymous) return;
                 const { db, appId, collection, onSnapshot } = window.fb;
@@ -237,7 +232,6 @@
                 return () => unsubscribeNotifs();
             }, [isReady, user]);
 
-            // Mark notifications as read when opening the view
             useEffect(() => {
                 if (view === 'notifications' && hasUnreadNotifications && user && !user.isAnonymous) {
                     const { db, appId, doc, updateDoc } = window.fb;
@@ -274,11 +268,11 @@
                 return () => unsubscribe();
             }, [selectedUser, user]);
 
+            // --- ALUTH: Safety Hack for React & Lucide Icons (Dependency Array Fix) ---
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }); 
+            }, [view, posts.length, authModal.open, postModal.open, commentModal.open, shareModal.open, settingsSection, profileData.language, feedAlgorithm, showLangConfirm, uploading, selectedUser?.id, hasUnreadNotifications]); 
 
-            // Advanced Nexus Algorithm (Trending Logic)
             const displayPosts = useMemo(() => {
                 let sorted = [...posts];
                 if (feedAlgorithm === 'latest') {
@@ -288,17 +282,11 @@
                         const getScore = (post) => {
                             const likesCount = typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0);
                             const commentsCount = post.comments?.length || 0;
-                            
-                            // Get creator bonus based on followers
                             const creatorInfo = allCreators.find(c => c.id === post.userId);
-                            const creatorBonus = (creatorInfo?.followersCount || 0) * 0.1; // 10 followers = 1 point bonus
-
-                            // Time Decay
+                            const creatorBonus = (creatorInfo?.followersCount || 0) * 0.1; 
                             const now = Date.now() / 1000;
                             const postTime = post.createdAt?.seconds || now;
                             const hoursOld = (now - postTime) / 3600;
-                            
-                            // Random Jitter to keep feed fresh
                             const jitter = Math.random() * 5; 
 
                             return (likesCount * 3) + (commentsCount * 5) + creatorBonus - (hoursOld * 1.5) + jitter;
@@ -694,7 +682,7 @@
                             </div>
                         </aside>
 
-                        <section className="flex-1 max-w-2xl w-full">
+                        <section className="flex-1 max-w-2xl w-full" key={`main-view-${view}`}>
                             {view === 'home' ? (
                                 <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700">
                                     <div className="text-center md:hidden mb-8">
@@ -814,9 +802,9 @@
                                                 </div>
 
                                                 <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full justify-center px-4">
-                                                    <button onClick={handleEditProfileOpen} className="bg-slate-900 text-white w-full sm:w-auto px-8 md:px-10 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> {t('editProfile')}</button>
-                                                    <button onClick={() => { setView('settings'); setSettingsSection('menu'); }} className="bg-slate-100 text-slate-600 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:bg-slate-200 transition-colors active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="settings" className="w-4 h-4"></i> {t('settings')}</button>
-                                                    <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[10px] md:text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="log-out" className="w-4 h-4"></i> {t('signOut')}</button>
+                                                    <button key="btn-edit" onClick={handleEditProfileOpen} className="bg-slate-900 text-white w-full sm:w-auto px-8 md:px-10 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> {t('editProfile')}</button>
+                                                    <button key="btn-settings" onClick={() => { setView('settings'); setSettingsSection('menu'); }} className="bg-slate-100 text-slate-600 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:bg-slate-200 transition-colors active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="settings" className="w-4 h-4"></i> {t('settings')}</button>
+                                                    <button key="btn-logout" onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[10px] md:text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="log-out" className="w-4 h-4"></i> {t('signOut')}</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -838,7 +826,7 @@
                                 <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
                                     <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-sm p-8 md:p-12 mb-10">
                                         <div className="flex items-center mb-8 border-b border-slate-100 pb-6">
-                                            <button onClick={() => setView('profile')} className="mr-4 bg-slate-50 p-2.5 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><i data-lucide="arrow-left" className="w-5 h-5"></i></button>
+                                            <button key="btn-back-edit" onClick={() => setView('profile')} className="mr-4 bg-slate-50 p-2.5 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><i data-lucide="arrow-left" className="w-5 h-5"></i></button>
                                             <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">{t('editProfile')}</h2>
                                         </div>
 
@@ -981,7 +969,7 @@
                                     <button onClick={() => { setView('home'); setSelectedUser(null); }} className="w-full py-5 md:py-7 bg-slate-900 text-white rounded-full md:rounded-[3rem] font-bold hover:shadow-2xl transition-all shadow-slate-200 uppercase tracking-[0.2em] text-[10px] md:text-xs mt-8 md:mt-10 lg:hidden">{t('backToFeed')}</button>
                                 </div>
                             ) : view === 'settings' ? (
-                                <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
+                                <div className="animate-in fade-in slide-in-from-bottom-10 duration-700" key={`settings-view-${settingsSection}`}>
                                     <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-sm p-8 md:p-12 mb-10 min-h-[60vh]">
                                         <div className="flex items-center mb-8 border-b border-slate-100 pb-6">
                                             {settingsSection !== 'menu' && (
@@ -1011,7 +999,7 @@
                                                     <button onClick={() => setSettingsSection('Language')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="globe" className="w-6 h-6"></i></div>
-                                                            <span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Language</span>
+                                                            <span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Language / භාෂාව</span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-xs font-bold text-slate-400">{profileData.language || 'English'}</span>
@@ -1114,7 +1102,6 @@
 
                         <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 sticky top-28 h-fit space-y-6">
                             
-                            {/* --- ALUTH: Network Status Card for Desktop --- */}
                             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
                                 <h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Nexus Network</h3>
                                 <div className="space-y-3">
