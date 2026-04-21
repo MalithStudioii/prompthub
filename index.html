@@ -76,6 +76,70 @@
 
         const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368"; 
 
+        // --- ALUTH: Real Translation Dictionary ---
+        const TRANSLATIONS = {
+            'English': {
+                globalStream: 'Global Stream',
+                alerts: 'Alerts',
+                elitePortfolio: 'Elite Portfolio',
+                settings: 'Settings',
+                transmitInsight: 'Transmit Insight',
+                searchPlaceholder: 'Search Global Creators...',
+                signIn: 'SIGN IN',
+                nexusGlobal: 'Nexus Global',
+                worldClass: 'World-Class AI Intel Community',
+                syncing: 'Syncing Global Data Stream...',
+                joinNexus: 'Join Nexus',
+                connectElite: 'Connect with elite AI creators globally.',
+                trendingTech: 'Trending Tech',
+                tierElite: 'Tier: Elite',
+                selectLanguage: 'Select your preferred language',
+                noteLocalization: 'Note: Full localization is rolling out to all regions soon.',
+                cancel: 'Cancel',
+                confirm: 'Confirm',
+                changeLangTitle: 'Change Language?',
+                changeLangDesc: 'Are you sure you want to change the platform language to',
+                backToFeed: 'Return to Global Stream',
+                editProfile: 'Edit Profile',
+                signOut: 'Sign Out',
+                followers: 'Followers',
+                following: 'Following',
+                creations: 'Creations',
+                nexusRank: 'Nexus Rank',
+                sharedIntel: 'Shared Intel'
+            },
+            'Sinhala (සිංහල)': {
+                globalStream: 'ප්‍රධාන පිටුව',
+                alerts: 'දැනුම්දීම්',
+                elitePortfolio: 'මගේ ගිණුම',
+                settings: 'සැකසුම්',
+                transmitInsight: 'අලුත් පෝස්ට් එකක්',
+                searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...',
+                signIn: 'ලොග් වෙන්න',
+                nexusGlobal: 'Nexus ප්‍රධාන පිටුව',
+                worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්',
+                syncing: 'දත්ත ලබාගනිමින් පවතී...',
+                joinNexus: 'Nexus වෙත එකතු වෙන්න',
+                connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.',
+                trendingTech: 'නවීන තාක්ෂණයන්',
+                tierElite: 'මට්ටම: Elite',
+                selectLanguage: 'ඔබේ භාෂාව තෝරන්න',
+                noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.',
+                cancel: 'අවලංගු කරන්න',
+                confirm: 'ඔව්, මාරු කරන්න',
+                changeLangTitle: 'භාෂාව වෙනස් කරන්නද?',
+                changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:',
+                backToFeed: 'ප්‍රධාන පිටුවට යන්න',
+                editProfile: 'ගිණුම වෙනස් කරන්න',
+                signOut: 'ඉවත් වෙන්න (Sign Out)',
+                followers: 'අනුගාමිකයින්',
+                following: 'අනුගමනය කරන',
+                creations: 'නිර්මාණ',
+                nexusRank: 'Nexus මට්ටම',
+                sharedIntel: 'ඔබේ නිර්මාණ'
+            }
+        };
+
         const App = () => {
             const [isReady, setIsReady] = useState(false);
             const [user, setUser] = useState(null);
@@ -100,6 +164,17 @@
             const [allCreators, setAllCreators] = useState([]);
 
             const [settingsSection, setSettingsSection] = useState('menu');
+            
+            // --- ALUTH: Language Confirmation State ---
+            const [pendingLanguage, setPendingLanguage] = useState(null);
+            const [showLangConfirm, setShowLangConfirm] = useState(false);
+
+            // Translator Function
+            const t = (key) => {
+                const lang = profileData.language || 'English';
+                const dict = TRANSLATIONS[lang] || TRANSLATIONS['English'];
+                return dict[key] || TRANSLATIONS['English'][key] || key;
+            };
 
             const uploadToImgBB = async (file) => {
                 const formData = new FormData();
@@ -187,7 +262,7 @@
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }); // Removed dependency array so icons re-bind on EVERY render safely.
+            }); 
 
             const handleGoogleSignIn = async () => {
                 setLoading(true);
@@ -339,14 +414,23 @@
                 setUploading(false);
             };
 
-            const updateLanguage = async (newLang) => {
-                setProfileData(prev => ({ ...prev, language: newLang }));
+            // --- ALUTH: Request Language Change Logic ---
+            const requestLanguageChange = (newLang) => {
+                if (newLang === (profileData.language || 'English')) return;
+                setPendingLanguage(newLang);
+                setShowLangConfirm(true); // Popup එක පෙන්වන්න
+            };
+
+            const confirmLanguageChange = async () => {
+                setProfileData(prev => ({ ...prev, language: pendingLanguage }));
                 if (user && !user.isAnonymous) {
                     const { db, appId, doc, updateDoc } = window.fb;
                     try {
-                        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), { language: newLang });
+                        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), { language: pendingLanguage });
                     } catch (e) { console.error(e); }
                 }
+                setShowLangConfirm(false);
+                setPendingLanguage(null);
             };
 
             const handleCreatePost = async (e) => {
@@ -459,7 +543,7 @@
                             <div className="hidden md:block flex-1 max-w-md mx-8 relative">
                                 <div className="relative group">
                                     <i data-lucide="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
-                                    <input type="text" placeholder="Search Global Creators..." className="w-full bg-slate-50/80 border border-slate-200 rounded-[2rem] py-3 pl-12 pr-6 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white font-bold text-xs tracking-wide transition-all shadow-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                                    <input type="text" placeholder={t('searchPlaceholder')} className="w-full bg-slate-50/80 border border-slate-200 rounded-[2rem] py-3 pl-12 pr-6 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white font-bold text-xs tracking-wide transition-all shadow-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                                 </div>
                                 {searchQuery && <SearchResultsDropdown />}
                             </div>
@@ -476,10 +560,10 @@
                                 </div>
 
                                 {!user || user.isAnonymous ? (
-                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-5 py-2 md:px-7 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">SIGN IN</button>
+                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-5 py-2 md:px-7 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('signIn')}</button>
                                 ) : (
                                     <div className="flex items-center gap-3 md:gap-4">
-                                        <div className="hidden md:block text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Tier: Elite</p><p className="text-sm font-bold text-slate-900 leading-none">{profileData.name || user.displayName}</p></div>
+                                        <div className="hidden md:block text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('tierElite')}</p><p className="text-sm font-bold text-slate-900 leading-none">{profileData.name || user.displayName}</p></div>
                                         <button onClick={() => { setView('profile'); setSelectedUser(null); }} className="w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm active:scale-90 transition-transform bg-white p-0.5">
                                             <img src={profileData.photoURL || user.photoURL} className="rounded-lg md:rounded-xl object-cover w-full h-full" />
                                         </button>
@@ -493,21 +577,21 @@
                         
                         <aside className="hidden lg:flex flex-col w-[260px] flex-shrink-0 sticky top-28 h-fit space-y-2">
                             <button onClick={() => { setView('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
-                                <i data-lucide="home" className="w-6 h-6"></i> Global Stream
+                                <i data-lucide="home" className="w-6 h-6"></i> {t('globalStream')}
                             </button>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
-                                <i data-lucide="bell" className="w-6 h-6"></i> Alerts
+                                <i data-lucide="bell" className="w-6 h-6"></i> {t('alerts')}
                                 {hasUnreadNotifications && <span className="absolute top-4 left-7 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
                             </button>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'profile' || view === 'public_profile' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
-                                <i data-lucide="user" className="w-6 h-6"></i> Elite Portfolio
+                                <i data-lucide="user" className="w-6 h-6"></i> {t('elitePortfolio')}
                             </button>
                             <button onClick={() => { setView('settings'); setSettingsSection('menu'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'settings' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
-                                <i data-lucide="settings" className="w-6 h-6"></i> Settings
+                                <i data-lucide="settings" className="w-6 h-6"></i> {t('settings')}
                             </button>
                             <div className="pt-6">
                                 <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else setPostModal({ ...postModal, open: true }); }} className="w-full btn-nexus-main text-white py-4 rounded-[1.5rem] font-black text-xs tracking-widest shadow-xl active:scale-95 transition-all uppercase flex items-center justify-center gap-2">
-                                    <i data-lucide="plus" className="w-5 h-5"></i> Transmit Insight
+                                    <i data-lucide="plus" className="w-5 h-5"></i> {t('transmitInsight')}
                                 </button>
                             </div>
                         </aside>
@@ -516,18 +600,18 @@
                             {view === 'home' ? (
                                 <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700">
                                     <div className="text-center md:hidden mb-8">
-                                        <h2 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-3 uppercase italic">Nexus Global</h2>
-                                        <p className="text-slate-400 font-medium text-[10px] tracking-[0.2em] opacity-80 uppercase leading-relaxed mb-6">World-Class AI Intel Community</p>
+                                        <h2 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-3 uppercase italic">{t('nexusGlobal')}</h2>
+                                        <p className="text-slate-400 font-medium text-[10px] tracking-[0.2em] opacity-80 uppercase leading-relaxed mb-6">{t('worldClass')}</p>
                                         
                                         <div className="relative w-full text-left shadow-sm mt-2">
                                             <i data-lucide="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                                            <input id="mobile-search-input" type="text" placeholder="Search Creators..." className="w-full bg-white border border-slate-200 rounded-[2rem] py-4 pl-14 pr-6 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 font-bold text-sm tracking-wide transition-all shadow-md" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                                            <input id="mobile-search-input" type="text" placeholder={t('searchPlaceholder')} className="w-full bg-white border border-slate-200 rounded-[2rem] py-4 pl-14 pr-6 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 font-bold text-sm tracking-wide transition-all shadow-md" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                                             {searchQuery && <SearchResultsDropdown />}
                                         </div>
                                     </div>
 
                                     {posts.length === 0 ? (
-                                        <div className="text-center py-32 bg-white rounded-[3rem] md:rounded-[4rem] border border-dashed border-slate-200"><i data-lucide="globe" className="text-slate-200 w-16 h-16 mx-auto mb-6 animate-pulse"></i><p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.4em]">Syncing Global Data Stream...</p></div>
+                                        <div className="text-center py-32 bg-white rounded-[3rem] md:rounded-[4rem] border border-dashed border-slate-200"><i data-lucide="globe" className="text-slate-200 w-16 h-16 mx-auto mb-6 animate-pulse"></i><p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.4em]">{t('syncing')}</p></div>
                                     ) : (
                                         posts.map(post => (
                                             <div key={post.id} className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 overflow-hidden nexus-card transition-all mb-8 md:mb-14 p-2 shadow-sm">
@@ -592,8 +676,8 @@
                                                 <p className="text-blue-600 font-black text-[9px] md:text-[11px] mb-6 tracking-[0.4em] uppercase break-all px-4">{user?.email}</p>
                                                 
                                                 <div className="flex gap-6 md:gap-8 mb-6 md:mb-8">
-                                                    <div className="text-center"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{profileData.followersCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Followers</p></div>
-                                                    <div className="text-center border-l border-slate-100 pl-6 md:pl-8"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{profileData.followingCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Following</p></div>
+                                                    <div className="text-center"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{profileData.followersCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('followers')}</p></div>
+                                                    <div className="text-center border-l border-slate-100 pl-6 md:pl-8"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{profileData.followingCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('following')}</p></div>
                                                 </div>
 
                                                 <div className="bg-slate-50/50 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] border border-slate-50 max-w-md w-full mb-6 md:mb-8">
@@ -606,15 +690,15 @@
                                                 </div>
 
                                                 <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full justify-center px-4">
-                                                    <button onClick={() => setEditProfileModal({ open: true, name: profileData.name, bio: profileData.bio, photoURL: profileData.photoURL, coverURL: profileData.coverURL || '', country: profileData.country || '', city: profileData.city || '', workplace: profileData.workplace || '', contactNo: profileData.contactNo || '', isLocked: profileData.isLocked || false, imageFile: null, coverFile: null })} className="bg-slate-900 text-white w-full sm:w-auto px-8 md:px-10 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> Edit Profile</button>
-                                                    <button onClick={() => { setView('settings'); setSettingsSection('menu'); }} className="bg-slate-100 text-slate-600 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:bg-slate-200 transition-colors active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="settings" className="w-4 h-4"></i> Settings</button>
-                                                    <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[10px] md:text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="log-out" className="w-4 h-4"></i> Sign Out</button>
+                                                    <button onClick={() => setEditProfileModal({ open: true, name: profileData.name, bio: profileData.bio, photoURL: profileData.photoURL, coverURL: profileData.coverURL || '', country: profileData.country || '', city: profileData.city || '', workplace: profileData.workplace || '', contactNo: profileData.contactNo || '', isLocked: profileData.isLocked || false, imageFile: null, coverFile: null })} className="bg-slate-900 text-white w-full sm:w-auto px-8 md:px-10 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:shadow-2xl active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="edit-3" className="w-4 h-4"></i> {t('editProfile')}</button>
+                                                    <button onClick={() => { setView('settings'); setSettingsSection('menu'); }} className="bg-slate-100 text-slate-600 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] font-black text-[10px] md:text-xs tracking-[0.2em] hover:bg-slate-200 transition-colors active:scale-95 uppercase flex items-center justify-center gap-2"><i data-lucide="settings" className="w-4 h-4"></i> {t('settings')}</button>
+                                                    <button onClick={() => window.fb.signOut(window.fb.auth).then(() => setView('home'))} className="text-[10px] md:text-[11px] font-black text-red-500 uppercase tracking-[0.3em] border-2 border-red-50 w-full sm:w-auto px-8 py-4 md:py-4.5 rounded-[2rem] hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="log-out" className="w-4 h-4"></i> {t('signOut')}</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="space-y-4 md:space-y-6">
-                                        <h3 className="text-lg md:text-xl font-black text-slate-900 uppercase tracking-widest px-4">Portfolio</h3>
+                                        <h3 className="text-lg md:text-xl font-black text-slate-900 uppercase tracking-widest px-4">{t('sharedIntel')}</h3>
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 px-2 md:px-4">
                                             {userPosts.map(p => (
                                                 <div key={p.id} className="aspect-square bg-slate-100 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-sm group relative">
@@ -624,13 +708,13 @@
                                             ))}
                                         </div>
                                     </div>
-                                    <button onClick={() => setView('home')} className="w-full py-5 md:py-7 bg-slate-100 text-slate-400 rounded-full md:rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[9px] md:text-[10px] mt-8 md:mt-10 lg:hidden">Return to Global Stream</button>
+                                    <button onClick={() => setView('home')} className="w-full py-5 md:py-7 bg-slate-100 text-slate-400 rounded-full md:rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[9px] md:text-[10px] mt-8 md:mt-10 lg:hidden">{t('backToFeed')}</button>
                                 </div>
                             ) : view === 'notifications' ? (
                                 <div className="animate-in fade-in slide-in-from-bottom-10 duration-700 max-w-xl mx-auto">
                                     <div className="flex items-center gap-4 mb-8 md:mb-10 px-4">
                                         <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-50 rounded-2xl md:rounded-3xl flex items-center justify-center text-blue-600 shadow-inner"><i data-lucide="bell" className="w-6 h-6 md:w-7 md:h-7"></i></div>
-                                        <div className="text-left"><h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Alerts</h2><p className="text-slate-400 font-bold text-[9px] md:text-[10px] tracking-[0.3em] uppercase mt-1">System Intelligence</p></div>
+                                        <div className="text-left"><h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">{t('alerts')}</h2><p className="text-slate-400 font-bold text-[9px] md:text-[10px] tracking-[0.3em] uppercase mt-1">System Intelligence</p></div>
                                     </div>
                                     <div className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-sm p-3 md:p-4 space-y-2">
                                         <div className="flex items-start gap-3 md:gap-4 p-4 md:p-5 hover:bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] transition-colors cursor-pointer group">
@@ -642,12 +726,12 @@
                                             <div className="flex-1 text-left pt-1"><p className="text-[13px] md:text-[15px] font-extrabold text-slate-900 leading-snug">Nexus System Protocol</p><p className="text-xs md:text-sm font-medium text-slate-500 mt-1">Start transmitting your AI prompts to gain influence.</p><p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">2 hours ago</p></div>
                                         </div>
                                     </div>
-                                    <button onClick={() => setView('home')} className="w-full py-5 bg-slate-100 text-slate-400 rounded-full font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[9px] mt-8 lg:hidden">Return to Global Stream</button>
+                                    <button onClick={() => setView('home')} className="w-full py-5 bg-slate-100 text-slate-400 rounded-full font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[9px] mt-8 lg:hidden">{t('backToFeed')}</button>
                                 </div>
                             ) : view === 'public_profile' && selectedUser ? (
                                 <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
                                     <div className="bg-white rounded-[3rem] md:rounded-[4rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
-                                        <div className="h-32 md:h-44 profile-banner relative bg-slate-800">
+                                        <div className="h-32 md:h-4 profile-banner relative bg-slate-800">
                                             {selectedUser.coverURL && <img src={selectedUser.coverURL} className="w-full h-full object-cover opacity-80" />}
                                         </div>
                                         <div className="px-6 md:px-12 pb-10 md:pb-14 relative flex flex-col items-center">
@@ -659,8 +743,8 @@
                                                 </div>
                                                 
                                                 <div className="flex gap-6 md:gap-8 mb-6 md:mb-8 mt-2">
-                                                    <div className="text-center"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{selectedUser.followersCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Followers</p></div>
-                                                    <div className="text-center border-l border-slate-100 pl-6 md:pl-8"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{selectedUser.followingCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Following</p></div>
+                                                    <div className="text-center"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{selectedUser.followersCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('followers')}</p></div>
+                                                    <div className="text-center border-l border-slate-100 pl-6 md:pl-8"><p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{selectedUser.followingCount || 0}</p><p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('following')}</p></div>
                                                 </div>
 
                                                 {selectedUser.isLocked && !isFollowing ? (
@@ -691,7 +775,7 @@
                                         </div>
                                     </div>
                                     <div className="space-y-4 md:space-y-6">
-                                        <h3 className="text-lg md:text-xl font-black text-slate-900 uppercase tracking-widest px-4">Shared Intel</h3>
+                                        <h3 className="text-lg md:text-xl font-black text-slate-900 uppercase tracking-widest px-4">{t('sharedIntel')}</h3>
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 px-2 md:px-4">
                                             {targetUserPosts.map(p => (
                                                 <div key={p.id} className="aspect-square bg-slate-100 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-sm group relative">
@@ -701,7 +785,7 @@
                                             ))}
                                         </div>
                                     </div>
-                                    <button onClick={() => { setView('home'); setSelectedUser(null); }} className="w-full py-5 md:py-7 bg-slate-900 text-white rounded-full md:rounded-[3rem] font-bold hover:shadow-2xl transition-all shadow-slate-200 uppercase tracking-[0.2em] text-[10px] md:text-xs mt-8 md:mt-10 lg:hidden">Back to Global Feed</button>
+                                    <button onClick={() => { setView('home'); setSelectedUser(null); }} className="w-full py-5 md:py-7 bg-slate-900 text-white rounded-full md:rounded-[3rem] font-bold hover:shadow-2xl transition-all shadow-slate-200 uppercase tracking-[0.2em] text-[10px] md:text-xs mt-8 md:mt-10 lg:hidden">{t('backToFeed')}</button>
                                 </div>
                             ) : view === 'settings' ? (
                                 <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
@@ -746,14 +830,14 @@
 
                                             {settingsSection === 'Language' && (
                                                 <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 py-4">
-                                                    <p className="font-bold text-slate-900 text-lg mb-6">Select your preferred language</p>
+                                                    <p className="font-bold text-slate-900 text-lg mb-6">{t('selectLanguage')}</p>
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                         {['English', 'Sinhala (සිංහල)', 'Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'].map(lang => {
                                                             const isSelected = profileData.language === lang || (!profileData.language && lang === 'English');
                                                             return (
                                                                 <button
                                                                     key={`${lang}-${isSelected}`}
-                                                                    onClick={() => updateLanguage(lang)}
+                                                                    onClick={() => requestLanguageChange(lang)}
                                                                     className={`p-5 rounded-[1.5rem] border-2 font-bold text-sm flex items-center justify-between transition-all ${isSelected ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200 hover:bg-white'}`}
                                                                 >
                                                                     {lang}
@@ -764,7 +848,7 @@
                                                     </div>
                                                     <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mt-8">
                                                         <p className="text-[10px] text-blue-600 text-center uppercase tracking-widest font-black flex items-center justify-center gap-2">
-                                                            <i data-lucide="info" className="w-4 h-4"></i> Note: Full localization is rolling out to all regions soon.
+                                                            <i data-lucide="info" className="w-4 h-4"></i> {t('noteLocalization')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -830,7 +914,7 @@
                                             )}
                                         </div>
                                     </div>
-                                    <button onClick={() => { setView('home'); setSettingsSection('menu'); }} className="w-full py-5 md:py-7 bg-slate-100 text-slate-400 rounded-full md:rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[10px] md:text-xs mt-4 lg:hidden">Return to Global Stream</button>
+                                    <button onClick={() => { setView('home'); setSettingsSection('menu'); }} className="w-full py-5 md:py-7 bg-slate-100 text-slate-400 rounded-full md:rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[10px] md:text-xs mt-4 lg:hidden">{t('backToFeed')}</button>
                                 </div>
                             ) : null}
                         </section>
@@ -838,9 +922,9 @@
                         <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 sticky top-28 h-fit space-y-6">
                             {!user || user.isAnonymous ? (
                                 <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center">
-                                    <h3 className="font-black text-lg text-slate-900 mb-2">Join Nexus</h3>
-                                    <p className="text-xs text-slate-500 font-medium mb-4">Connect with elite AI creators globally.</p>
-                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-xs shadow-md hover:bg-blue-700 transition-colors uppercase tracking-widest">Sign In</button>
+                                    <h3 className="font-black text-lg text-slate-900 mb-2">{t('joinNexus')}</h3>
+                                    <p className="text-xs text-slate-500 font-medium mb-4">{t('connectElite')}</p>
+                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-xs shadow-md hover:bg-blue-700 transition-colors uppercase tracking-widest">{t('signIn')}</button>
                                 </div>
                             ) : (
                                 <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => { setView('profile'); setSelectedUser(null); }}>
@@ -853,7 +937,7 @@
                             )}
                             
                             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                                <h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Trending Tech</h3>
+                                <h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">{t('trendingTech')}</h3>
                                 <div className="space-y-4">
                                     <div className="flex flex-col cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-colors">
                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">#1 IN AI ART</span>
@@ -880,7 +964,7 @@
                         </aside>
                     </main>
 
-                    <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else setPostModal({ ...postModal, open: true }); }} className="fixed bottom-10 right-10 bg-slate-900 text-white hidden md:flex items-center gap-3 px-10 py-5 rounded-[2rem] shadow-2xl z-40 hover:scale-105 active:scale-95 transition-all group border-4 border-white/10"><i data-lucide="plus" className="w-6 h-6 group-hover:rotate-90 transition-transform"></i><span className="font-black text-[10px] uppercase tracking-widest">Transmit Insight</span></button>
+                    <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else setPostModal({ ...postModal, open: true }); }} className="fixed bottom-10 right-10 bg-slate-900 text-white hidden md:flex items-center gap-3 px-10 py-5 rounded-[2rem] shadow-2xl z-40 hover:scale-105 active:scale-95 transition-all group border-4 border-white/10"><i data-lucide="plus" className="w-6 h-6 group-hover:rotate-90 transition-transform"></i><span className="font-black text-[10px] uppercase tracking-widest">{t('transmitInsight')}</span></button>
 
                     <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar px-6 py-4 flex justify-between items-center md:hidden z-50 pb-safe">
                         <button onClick={()=>{ setView('home'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400'}`}><i data-lucide="home" className="w-6 h-6"></i></button>
@@ -892,6 +976,23 @@
                         </button>
                         <button onClick={()=>{ if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setView('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings')?'text-blue-600':'text-slate-400'}`}><i data-lucide="user" className="w-6 h-6"></i></button>
                     </div>
+
+                    {/* --- ALUTH: Language Change Confirmation Modal --- */}
+                    {showLangConfirm && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
+                            <div className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 text-center">
+                                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <i data-lucide="globe" className="w-8 h-8"></i>
+                                </div>
+                                <h3 className="text-xl font-black text-slate-900 mb-2">{t('changeLangTitle')}</h3>
+                                <p className="text-slate-500 font-medium text-sm mb-8">{t('changeLangDesc')} <b>{pendingLanguage}</b>?</p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setShowLangConfirm(false)} className="flex-1 bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-colors">{t('cancel')}</button>
+                                    <button onClick={confirmLanguageChange} className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">{t('confirm')}</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {authModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
