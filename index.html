@@ -428,6 +428,33 @@
                 setUploading(false);
             };
 
+            // --- ALUTH: Quick Profile / Cover Update Logic ---
+            const handleQuickImageUpdate = async (file, type) => {
+                if (!file || !user || user.isAnonymous) return;
+                setUploading(true);
+                try {
+                    const url = await uploadToImgBB(file);
+                    if (url) {
+                        const { db, appId, doc, updateDoc, setDoc, auth, updateProfile } = window.fb;
+                        const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
+                        
+                        if (type === 'avatar') {
+                            await updateDoc(profileRef, { photoURL: url });
+                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { photoURL: url }, { merge: true });
+                            await updateProfile(auth.currentUser, { photoURL: url });
+                            setProfileData(prev => ({ ...prev, photoURL: url }));
+                        } else if (type === 'cover') {
+                            await updateDoc(profileRef, { coverURL: url });
+                            setProfileData(prev => ({ ...prev, coverURL: url }));
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert(`Failed to update ${type}.`);
+                }
+                setUploading(false);
+            };
+
             const requestLanguageChange = (newLang) => {
                 if (newLang === (profileData.language || 'English')) return;
                 setPendingLanguage(newLang);
@@ -546,11 +573,11 @@
                 <div className="min-h-screen pb-28 md:pb-0">
                     <nav className="sticky top-0 z-50 nexus-nav px-4 md:px-6 py-3 md:py-4">
                         <div className="max-w-7xl mx-auto flex items-center justify-between">
-                            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setView('home'); setSelectedUser(null); }}>
-                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-[0.8rem] md:rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform">
+                            <div className="flex items-center gap-2 cursor-pointer group min-w-0" onClick={() => { setView('home'); setSelectedUser(null); }}>
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-[0.8rem] md:rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform flex-shrink-0">
                                     <i data-lucide="zap" className="w-5 md:w-6" fill="currentColor"></i>
                                 </div>
-                                <h1 className="text-xl md:text-2xl font-black tracking-tighter text-slate-900 uppercase">PROMPTHUB<span className="text-blue-600 ml-1">NEXUS</span></h1>
+                                <h1 className="text-[17px] xs:text-xl md:text-2xl font-black tracking-tighter text-slate-900 uppercase whitespace-nowrap overflow-hidden text-ellipsis">PROMPTHUB<span className="text-blue-600 ml-1">NEXUS</span></h1>
                             </div>
                             
                             <div className="hidden md:block flex-1 max-w-md mx-8 relative">
@@ -575,9 +602,9 @@
                                 {!user || user.isAnonymous ? (
                                     <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-5 py-2 md:px-7 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('signIn')}</button>
                                 ) : (
-                                    <div className="flex items-center gap-3 md:gap-4">
+                                    <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
                                         <div className="hidden md:block text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('tierElite')}</p><p className="text-sm font-bold text-slate-900 leading-none">{profileData.name || user.displayName}</p></div>
-                                        <button onClick={() => { setView('profile'); setSelectedUser(null); }} className="w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm active:scale-90 transition-transform bg-white p-0.5">
+                                        <button onClick={() => { setView('profile'); setSelectedUser(null); }} className="w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm active:scale-90 transition-transform bg-white p-0.5 flex-shrink-0">
                                             <img src={profileData.photoURL || user.photoURL} className="rounded-lg md:rounded-xl object-cover w-full h-full" />
                                         </button>
                                     </div>
@@ -687,10 +714,22 @@
                                         <div className="h-32 md:h-44 profile-banner relative bg-slate-800">
                                             {profileData.coverURL && <img src={profileData.coverURL} className="w-full h-full object-cover opacity-80" />}
                                             <div className="absolute inset-0 bg-black/10"></div>
+                                            {uploading && <div className="absolute inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-10"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
+                                            <label htmlFor="cover-upload" className="absolute bottom-3 right-3 md:bottom-5 md:right-5 w-9 h-9 md:w-11 md:h-11 bg-black/50 backdrop-blur-md text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-black/70 transition-colors border border-white/20 z-20">
+                                                <i data-lucide="camera" className="w-4 h-4 md:w-5 md:h-5"></i>
+                                            </label>
+                                            <input type="file" id="cover-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'cover')} disabled={uploading} />
                                         </div>
                                         <div className="px-6 md:px-12 pb-10 md:pb-14 relative flex flex-col items-center">
                                             <div className="flex flex-col items-center -mt-16 md:-mt-20">
-                                                <img src={profileData.photoURL || user?.photoURL} className="w-32 h-32 md:w-44 md:h-44 rounded-[2.5rem] md:rounded-[3.5rem] border-8 border-white shadow-2xl bg-white object-cover mb-4 md:mb-6 relative z-10" />
+                                                <div className="relative mb-4 md:mb-6 z-10">
+                                                    <img src={profileData.photoURL || user?.photoURL} className="w-32 h-32 md:w-44 md:h-44 rounded-[2.5rem] md:rounded-[3.5rem] border-8 border-white shadow-2xl bg-white object-cover" />
+                                                    {uploading && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
+                                                    <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 md:bottom-1 md:right-1 w-10 h-10 md:w-12 md:h-12 bg-slate-900 text-white rounded-full flex items-center justify-center cursor-pointer shadow-xl hover:bg-blue-600 transition-colors border-4 border-white">
+                                                        <i data-lucide="camera" className="w-4 h-4 md:w-5 md:h-5"></i>
+                                                    </label>
+                                                    <input type="file" id="avatar-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'avatar')} disabled={uploading} />
+                                                </div>
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">{profileData.name || user?.displayName}</h2>
                                                     {profileData.isLocked && <i data-lucide="lock" className="w-4 h-4 md:w-5 md:h-5 text-blue-600"></i>}
