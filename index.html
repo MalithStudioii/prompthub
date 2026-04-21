@@ -71,7 +71,7 @@
             getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
             signOut, signInAnonymously, updateProfile, GoogleAuthProvider, signInWithPopup,
             EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser,
-            signInWithCustomToken
+            signInWithCustomToken, GithubAuthProvider, TwitterAuthProvider, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove 
@@ -91,15 +91,17 @@
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'prompthub-e69f8';
         const googleProvider = new GoogleAuthProvider();
+        const githubProvider = new GithubAuthProvider();
+        const twitterProvider = new TwitterAuthProvider();
 
         window.fb = { 
             auth, db, appId, collection, addDoc, query, onSnapshot, 
             serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove,
             signInWithEmailAndPassword, createUserWithEmailAndPassword, 
             signOut, onAuthStateChanged, signInAnonymously, updateProfile, 
-            googleProvider, signInWithPopup,
+            googleProvider, githubProvider, twitterProvider, signInWithPopup,
             EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, deleteUser,
-            signInWithCustomToken
+            signInWithCustomToken, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink
         };
         window.dispatchEvent(new Event('firebase-ready'));
     </script>
@@ -121,54 +123,6 @@
                 deleteAccount: 'ගිණුම මකන්න (Delete Account)', deleteWarning: 'මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. ඔබගේ සියලුම දත්ත සහ Followers ස්ථිරවම මැකී යනු ඇත.', enterPassword: 'තහවුරු කිරීමට මුරපදය (Password) ඇතුළත් කරන්න', confirmDelete: 'ඔව්, මගේ ගිණුම මකන්න', wrongPassword: 'මුරපදය වැරදියි. කරුණාකර නැවත උත්සාහ කරන්න.', accountDeleted: 'ගිණුම සාර්ථකව මකා දමන ලදී.',
                 save: 'සුරකින්න', saved: 'සුරැකුවා', savedIntel: 'සුරැකි නිර්මාණ', darkMode: 'අඳුරු තේමාව', lightMode: 'ආලෝක තේමාව', filters: 'පෙරහන්', all: 'සියල්ල',
                 leaderboard: 'ප්‍රමුඛ පුවරුව', topCreators: 'හොඳම නිර්මාණකරුවන්', rank: 'ස්ථානය', commandCenter: 'පාලන පැනලය'
-            },
-            'Spanish (Español)': {
-                globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Compartir Inteligencia', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexus Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexus', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexus', sharedIntel: 'Inteligencia Compartida', trending: 'Tendencia', latest: 'Reciente', members: 'Miembros Totales', online: 'En Línea', followedYou: 'ha empezado a seguirte!', noNotifications: 'No hay alertas nuevas.', systemIntel: 'Inteligencia del Sistema',
-                deleteAccount: 'Eliminar Cuenta', deleteWarning: 'Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.', enterPassword: 'Introduce tu contraseña', confirmDelete: 'Sí, Eliminar Mi Cuenta', wrongPassword: 'Contraseña incorrecta. Inténtalo de nuevo.', accountDeleted: 'Cuenta eliminada con éxito.',
-                save: 'Guardar', saved: 'Guardado', savedIntel: 'Guardados', darkMode: 'Modo Oscuro', lightMode: 'Modo Claro', filters: 'Filtros', all: 'Todo',
-                leaderboard: 'Clasificación', topCreators: 'Mejores Creadores', rank: 'Rango'
-            },
-            'French (Français)': {
-                globalStream: 'Flux Global', alerts: 'Alertas', elitePortfolio: 'Portfolio Élite', settings: 'Paramètres', transmitInsight: 'Partager l\'Intelligence', searchPlaceholder: 'Rechercher des Créateurs...', signIn: 'SE CONNECTER', nexusGlobal: 'Nexus Global', worldClass: 'Communauté IA de Classe Mondiale', syncing: 'Synchronisation...', joinNexus: 'Rejoindre Nexus', connectElite: 'Connectez-vous avec l\'élite.', trendingTech: 'Tendances Tech', tierElite: 'Niveau: Élite', selectLanguage: 'Sélectionnez votre langue', noteLocalization: 'Note: La localisation complète arrive bientôt.', cancel: 'Annuler', confirm: 'Confirmer', changeLangTitle: 'Changer de langue ?', changeLangDesc: 'Voulez-vous changer la langue en', backToFeed: 'Retour au flux', editProfile: 'Éditer le profil', signOut: 'Déconnexion', followers: 'Abonnés', following: 'Abonnements', creations: 'Créations', nexusRank: 'Rang Nexus', sharedIntel: 'Intelligence Partagée', trending: 'Tendance', latest: 'Récents', members: 'Membres Totaux', online: 'En Ligne', followedYou: 'a commencé à vous suivre!', noNotifications: 'Pas de nouvelles alertes.', systemIntel: 'Intelligence du Système',
-                deleteAccount: 'Supprimer le compte', deleteWarning: 'Cette action est irréversible. Toutes vos données seront définitivement supprimées.', enterPassword: 'Entrez votre mot de passe', confirmDelete: 'Oui, Supprimer Mon Compte', wrongPassword: 'Mot de passe incorrect. Veuillez réessayer.', accountDeleted: 'Compte supprimé avec succès.',
-                save: 'Enregistrer', saved: 'Enregistré', savedIntel: 'Enregistrés', darkMode: 'Mode Sombre', lightMode: 'Mode Clair', filters: 'Filtres', all: 'Tout',
-                leaderboard: 'Classement', topCreators: 'Meilleurs Créateurs', rank: 'Rang'
-            },
-            'German (Deutsch)': {
-                globalStream: 'Globaler Stream', alerts: 'Benachrichtigungen', elitePortfolio: 'Elite-Portfolio', settings: 'Einstellungen', transmitInsight: 'Intelligenz Teilen', searchPlaceholder: 'Schöpfer suchen...', signIn: 'ANMELDEN', nexusGlobal: 'Nexus Global', worldClass: 'Weltklasse-KI-Community', syncing: 'Synchronisiere...', joinNexus: 'Nexus Beitreten', connectElite: 'Verbinde dich mit der Elite.', trendingTech: 'Tech-Trends', tierElite: 'Stufe: Elite', selectLanguage: 'Wähle deine Sprache', noteLocalization: 'Hinweis: Vollständige Lokalisierung folgt.', cancel: 'Abbrechen', confirm: 'Bestätigen', changeLangTitle: 'Sprache ändern?', changeLangDesc: 'Möchten Sie die Sprache ändern in', backToFeed: 'Zurück zum Stream', editProfile: 'Profil bearbeiten', signOut: 'Abmelden', followers: 'Follower', following: 'Folge ich', creations: 'Kreationen', nexusRank: 'Nexus-Rang', sharedIntel: 'Geteilte Intelligenz', trending: 'Im Trend', latest: 'Neueste', members: 'Mitglieder', online: 'Jetzt Online', followedYou: 'folgt dir jetzt!', noNotifications: 'Keine neuen Benachrichtigungen.', systemIntel: 'Systemintelligenz',
-                deleteAccount: 'Konto löschen', deleteWarning: 'Diese Aktion ist unumkehrbar. Alle Ihre Daten werden dauerhaft entfernt.', enterPassword: 'Geben Sie Ihr Passwort ein', confirmDelete: 'Ja, Mein Konto Löschen', wrongPassword: 'Falsches Passwort. Bitte versuchen Sie es erneut.', accountDeleted: 'Konto erfolgreich gelöscht.',
-                save: 'Speichern', saved: 'Gespeichert', savedIntel: 'Gespeichert', darkMode: 'Dunkelmodus', lightMode: 'Heller Modus', filters: 'Filter', all: 'Alle',
-                leaderboard: 'Bestenliste', topCreators: 'Top-Ersteller', rank: 'Rang'
-            },
-            'Chinese (中文)': {
-                globalStream: '全球动态', alerts: '提醒', elitePortfolio: '精英作品集', settings: '设置', transmitInsight: '分享见解', searchPlaceholder: '搜索全球创作者...', signIn: '登录', nexusGlobal: 'Nexus 全球', worldClass: '世界级 AI 社区', syncing: '正在同步数据...', joinNexus: '加入 Nexus', connectElite: '与全球精英建立联系。', trendingTech: '热门技术', tierElite: '等级：精英', selectLanguage: '选择您的语言', noteLocalization: '注意：完整本地化即将推出。', cancel: '取消', confirm: '确认', changeLangTitle: '更改语言？', changeLangDesc: '您确定要将语言更改为', backToFeed: '返回全球动态', editProfile: '编辑个人资料', signOut: '退出登录', followers: '粉丝', following: '关注', creations: '创作', nexusRank: 'Nexus 排名', sharedIntel: '分享的见解', trending: '热门', latest: '最新', members: '总成员', online: '在线', followedYou: '开始关注你了！', noNotifications: '没有新提醒。', systemIntel: '系统智能',
-                deleteAccount: '删除账户', deleteWarning: '此操作不可逆。您的所有数据将被永久删除。', enterPassword: '输入您的密码', confirmDelete: '是的，删除我的账户', wrongPassword: '密码错误。请重试。', accountDeleted: '账户已成功删除。',
-                save: '保存', saved: '已保存', savedIntel: '收藏', darkMode: '夜间模式', lightMode: '白天模式', filters: '过滤', all: '全部',
-                leaderboard: '排行榜', topCreators: '顶级创作者', rank: '排名'
-            },
-            'Japanese (日本語)': {
-                globalStream: 'グローバルストリーム', alerts: '通知', elitePortfolio: 'エリートポートフォリオ', settings: '設定', transmitInsight: 'インサイトを共有', searchPlaceholder: 'クリエイターを検索...', signIn: 'ログイン', nexusGlobal: 'Nexus グローバル', worldClass: '世界クラスのAIコミュニティ', syncing: '同期中...', joinNexus: 'Nexusに参加', connectElite: 'エリートクリエイターと繋がる。', trendingTech: 'トレンド技術', tierElite: 'ティア：エリート', selectLanguage: '言語を選択', noteLocalization: '注：完全なローカリゼーションはまもなく展開されます。', cancel: 'キャンセル', confirm: '確認', changeLangTitle: '言語を変更しますか？', changeLangDesc: 'プラットフォームの言語を次に変更しますか：', backToFeed: 'ストリームに戻る', editProfile: 'プロフィール編集', signOut: 'ログアウト', followers: 'フォロワー', following: 'フォロー中', creations: '制作物', nexusRank: 'Nexus ランク', sharedIntel: '共有インサイト', trending: 'トレンド', latest: '最新', members: 'メンバー総数', online: 'オンライン', followedYou: 'があなたをフォローしました！', noNotifications: '新しい通知はありません。', systemIntel: 'システムインテリジェンス',
-                deleteAccount: 'アカウントを削除', deleteWarning: 'この操作は取り消せません。すべてのデータが完全に削除されます。', enterPassword: 'パスワードを入力', confirmDelete: 'はい、アカウントを削除します', wrongPassword: 'パスワードが間違っています。もう一度お試しください。', accountDeleted: 'アカウントが正常に削除されました。',
-                save: '保存', saved: '保存済み', savedIntel: 'ブックマーク', darkMode: 'ダークモード', lightMode: 'ライトモード', filters: 'フィルター', all: 'すべて',
-                leaderboard: 'リーダーボード', topCreators: 'トップクリエイター', rank: 'ランク'
-            },
-            'Arabic (العربية)': {
-                globalStream: 'البث العالمي', alerts: 'التنبيهات', elitePortfolio: 'محفظة النخبة', settings: 'الإعدادات', transmitInsight: 'مشاركة الأفكار', searchPlaceholder: 'البحث عن المبدعين...', signIn: 'تسجيل الدخول', nexusGlobal: 'نكسس العالمي', worldClass: 'مجتمع الذكاء الاصطناعي العالمي', syncing: 'جاري المزامنة...', joinNexus: 'انضم إلى نكسس', connectElite: 'تواصل مع المبدعين.', trendingTech: 'التقنيات الرائجة', tierElite: 'المستوى: النخبة', selectLanguage: 'اختر لغتك', noteLocalization: 'ملاحظة: التعريب الكامل قادم قريباً.', cancel: 'إلغاء', confirm: 'تأكيد', changeLangTitle: 'تغيير اللغة؟', changeLangDesc: 'هل أنت متأكد من تغيير اللغة إلى', backToFeed: 'العودة للبث', editProfile: 'تعديل الملف', signOut: 'تسجيل الخروج', followers: 'المتابعون', following: 'يتابع', creations: 'الإبداعات', nexusRank: 'تصنيف نكسس', sharedIntel: 'الأفكار المشتركة', trending: 'شائع', latest: 'الأحدث', members: 'إجمالي الأعضاء', online: 'متصل الآن', followedYou: 'بدأ بمتابعتك!', noNotifications: 'لا توجد تنبيهات جديدة.', systemIntel: 'ذكاء النظام',
-                deleteAccount: 'حذف الحساب', deleteWarning: 'هذا الإجراء لا رجعة فيه. ستتم إزالة جميع بياناتك نهائيًا.', enterPassword: 'أدخل كلمة المرور', confirmDelete: 'نعم، احذف حسابي', wrongPassword: 'كلمة المرور خاطئة. يرجى المحاولة مرة أخرى.', accountDeleted: 'تم حذف الحساب بنجاح.',
-                save: 'حفظ', saved: 'تم الحفظ', savedIntel: 'المحفوظات', darkMode: 'الوضع الداكن', lightMode: 'وضع الإضاءة', filters: 'المرشحات', all: 'الجميع',
-                leaderboard: 'لوحة الصدارة', topCreators: 'أفضل المبدعين', rank: 'مرتبة'
-            },
-            'Hindi (हिन्दी)': {
-                globalStream: 'ग्लोबल स्ट्रीम', alerts: 'अलर्ट', elitePortfolio: 'एलीट पोर्टफोलियो', settings: 'सेटिंग्स', transmitInsight: 'बुद्धिमत्ता साझा करें', searchPlaceholder: 'क्रिएटर्स खोजें...', signIn: 'साइन इन', nexusGlobal: 'नेक्सस ग्लोबल', worldClass: 'विश्व स्तरीय AI समुदाय', syncing: 'सिंक हो रहा है...', joinNexus: 'नेक्सस से जुड़ें', connectElite: 'एलीट क्रिएटर्स से जुड़ें।', trendingTech: 'ट्रेंडिंग तकनीक', tierElite: 'टियर: एलीट', selectLanguage: 'अपनी भाषा चुनें', noteLocalization: 'नोट: पूर्ण स्थानीयकरण जल्द ही आ रहा है।', cancel: 'रद्द करें', confirm: 'पुष्टि करें', changeLangTitle: 'भाषा बदलें?', changeLangDesc: 'क्या आप भाषा को बदलना चाहते हैं', backToFeed: 'स्ट्रीम पर वापस जाएं', editProfile: 'प्रोफ़ाइल संपादित करें', signOut: 'साइन आउट', followers: 'फॉलोअर्स', following: 'फॉलोइंग', creations: 'रचनाएँ', nexusRank: 'नेक्सस रैंक', sharedIntel: 'साझा विचार', trending: 'ट्रेंडिंग', latest: 'नवीनतम', members: 'कुल सदस्य', online: 'अभी ऑनलाइन', followedYou: 'ने आपको फॉलो करना शुरू किया!', noNotifications: 'कोई नया अलर्ट नहीं।', systemIntel: 'सिस्टम इंटेलिजेंस',
-                deleteAccount: 'खाता हटाएं', deleteWarning: 'यह क्रिया अपरिवर्तनीय है। आपका सारा डेटा स्थायी रूप से हटा दिया जाएगा।', enterPassword: 'अपना पासवर्ड दर्ज करें', confirmDelete: 'हाँ, मेरा खाता हटाएँ', wrongPassword: 'गलत पासवर्ड। कृपया पुनः प्रयास करें।', accountDeleted: 'खाता सफलतापूर्वक हटा दिया गया।',
-                save: 'सहेजें', saved: 'सहेजा गया', savedIntel: 'सहेजे गए', darkMode: 'डार्क मोड', lightMode: 'लाइट मोड', filters: 'फ़िल्टर', all: 'सभी',
-                leaderboard: 'लीडरबोर्ड', topCreators: 'शीर्ष निर्माता', rank: 'रैंक'
-            },
-            'Russian (Русский)': {
-                globalStream: 'Глобальный Поток', alerts: 'Уведомления', elitePortfolio: 'Элитное Портфолио', settings: 'Настройки', transmitInsight: 'Поделиться идеей', searchPlaceholder: 'Поиск Авторов...', signIn: 'ВОЙТИ', nexusGlobal: 'Nexus Global', worldClass: 'Мировое ИИ Сообщество', syncing: 'Синхронизация...', joinNexus: 'Присоединиться', connectElite: 'Связь с элитой.', trendingTech: 'Тренды', tierElite: 'Уровень: Элита', selectLanguage: 'Выберите язык', noteLocalization: 'Примечание: Полная локализация скоро.', cancel: 'Отмена', confirm: 'Подтвердить', changeLangTitle: 'Изменить язык?', changeLangDesc: 'Вы уверены, что хотите изменить язык на', backToFeed: 'Вернуться к потоку', editProfile: 'Редакт. профиль', signOut: 'Выйти', followers: 'Подписчики', following: 'Подписки', creations: 'Творения', nexusRank: 'Ранг Nexus', sharedIntel: 'Общий интеллект', trending: 'В тренде', latest: 'Новые', members: 'Всего участников', online: 'В сети', followedYou: 'начал(а) читать вас!', noNotifications: 'Нет новых уведомлений.', systemIntel: 'Системный интеллект',
-                deleteAccount: 'Удалить аккаунт', deleteWarning: 'Это действие необратимо. Все ваши данные будут удалены.', enterPassword: 'Ввести пароль', confirmDelete: 'Да, Удалить', wrongPassword: 'Неверный пароль. Попробуйте еще раз.', accountDeleted: 'Аккаунт успешно удален.',
-                save: 'Сохранить', saved: 'Сохранено', savedIntel: 'Сохраненные', darkMode: 'Темный режим', lightMode: 'Светлый режим', filters: 'Фильтры', all: 'Все',
-                leaderboard: 'Таблица лидеров', topCreators: 'Лучшие авторы', rank: 'Ранг'
             }
         };
 
@@ -262,17 +216,58 @@
                 return () => window.removeEventListener('firebase-ready', handleReady);
             }, []);
 
+            // --- ALUTH: Check for Magic Link Returns on App Load ---
             useEffect(() => {
                 if (!isReady) return;
-                const { auth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } = window.fb;
+                const { auth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, isSignInWithEmailLink, signInWithEmailLink, db, appId, doc, setDoc, serverTimestamp, getDoc } = window.fb;
                 
                 const initAuth = async () => {
                     try {
+                        // Check if returned from Magic Link
+                        if (isSignInWithEmailLink(auth, window.location.href)) {
+                            let email = window.localStorage.getItem('emailForSignIn');
+                            if (!email) email = window.prompt('Please confirm your email address to complete sign-in:');
+                            if (email) {
+                                try {
+                                    const result = await signInWithEmailLink(auth, email, window.location.href);
+                                    window.localStorage.removeItem('emailForSignIn');
+                                    
+                                    // Profile creation if new user
+                                    const loggedInUser = result.user;
+                                    const profileRef = doc(db, 'artifacts', appId, 'users', loggedInUser.uid, 'profile', 'info');
+                                    const profileSnap = await getDoc(profileRef);
+                                    
+                                    if (!profileSnap.exists()) {
+                                        await setDoc(profileRef, {
+                                            name: loggedInUser.email.split('@')[0], // Default name
+                                            email: loggedInUser.email,
+                                            photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`,
+                                            coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
+                                            bio: 'Elite AI Creator exploring the Nexus.',
+                                            country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English',
+                                            createdAt: serverTimestamp(),
+                                            provider: 'magic_link'
+                                        });
+                                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', loggedInUser.uid), {
+                                            name: loggedInUser.email.split('@')[0],
+                                            photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`,
+                                            followersCount: 0, followingCount: 0, lastActive: Date.now()
+                                        }, { merge: true });
+                                    }
+                                    setAuthModal({ ...authModal, open: false, error: '' });
+                                    return; // Successfully logged in via magic link
+                                } catch (err) {
+                                    console.error("Magic link error", err);
+                                    alert("Magic link expired or invalid.");
+                                }
+                            }
+                        }
+
+                        // Normal Auth Flow
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                             try {
                                 await signInWithCustomToken(auth, __initial_auth_token);
                             } catch (tokenError) {
-                                console.warn("Custom token failed, falling back to anonymous auth:", tokenError);
                                 await signInAnonymously(auth);
                             }
                         } else {
@@ -314,9 +309,7 @@
                 try {
                     unsubSettings = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'algorithm'), (snap) => {
                         if (snap.exists()) setAdminConfig(snap.data());
-                    }, (error) => {
-                        console.log("Using default Algorithm matrix.");
-                    });
+                    }, (error) => {});
                 } catch(e) {}
 
                 return () => {
@@ -480,36 +473,65 @@
                 );
             };
 
-            const handleGoogleSignIn = async () => {
+            // --- ALUTH: Dynamic Social Provider Sign-In ---
+            const handleSocialSignIn = async (providerType) => {
                 setLoading(true);
-                const { auth, db, appId, googleProvider, signInWithPopup, doc, setDoc, getDoc, serverTimestamp } = window.fb;
+                const { auth, db, appId, googleProvider, githubProvider, twitterProvider, signInWithPopup, doc, setDoc, getDoc, serverTimestamp } = window.fb;
+                
+                let provider;
+                if (providerType === 'google') provider = googleProvider;
+                else if (providerType === 'github') provider = githubProvider;
+                else if (providerType === 'twitter') provider = twitterProvider;
+
                 try {
-                    const result = await signInWithPopup(auth, googleProvider);
+                    const result = await signInWithPopup(auth, provider);
                     const loggedInUser = result.user;
                     const profileRef = doc(db, 'artifacts', appId, 'users', loggedInUser.uid, 'profile', 'info');
                     const profileSnap = await getDoc(profileRef);
                     
                     if (!profileSnap.exists()) {
                         await setDoc(profileRef, {
-                            name: loggedInUser.displayName,
-                            email: loggedInUser.email,
-                            photoURL: loggedInUser.photoURL,
+                            name: loggedInUser.displayName || loggedInUser.email?.split('@')[0] || 'Nexus Creator',
+                            email: loggedInUser.email || '',
+                            photoURL: loggedInUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`,
                             coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
                             bio: 'Elite AI Creator exploring the Nexus.',
                             country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English',
                             createdAt: serverTimestamp(),
-                            provider: 'google'
+                            provider: providerType
                         });
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', loggedInUser.uid), {
-                            name: loggedInUser.displayName,
-                            photoURL: loggedInUser.photoURL,
+                            name: loggedInUser.displayName || loggedInUser.email?.split('@')[0] || 'Nexus Creator',
+                            photoURL: loggedInUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`,
                             followersCount: 0,
                             followingCount: 0,
                             lastActive: Date.now()
                         }, { merge: true });
                     }
                     setAuthModal({ ...authModal, open: false, error: '' });
-                } catch (err) { setAuthModal(prev => ({ ...prev, error: "Authentication failed." })); }
+                } catch (err) { 
+                    setAuthModal(prev => ({ ...prev, error: err.message.replace('Firebase:', '').trim() })); 
+                }
+                setLoading(false);
+            };
+
+            // --- ALUTH: Magic Link Logic ---
+            const handleMagicLinkSend = async (e) => {
+                e.preventDefault();
+                if (!authModal.email) return setAuthModal(prev => ({...prev, error: "Please enter your email."}));
+                setLoading(true);
+                const { auth, sendSignInLinkToEmail } = window.fb;
+                const actionCodeSettings = {
+                    url: window.location.href, // Returns to the same URL
+                    handleCodeInApp: true,
+                };
+                try {
+                    await sendSignInLinkToEmail(auth, authModal.email, actionCodeSettings);
+                    window.localStorage.setItem('emailForSignIn', authModal.email);
+                    setAuthModal(prev => ({...prev, mode: 'magic_sent', error: ''}));
+                } catch (err) {
+                    setAuthModal(prev => ({...prev, error: err.message.replace('Firebase:', '').trim()}));
+                }
                 setLoading(false);
             };
 
@@ -577,7 +599,7 @@
                         await signInWithEmailAndPassword(auth, authModal.email, authModal.password);
                     }
                     setAuthModal({ ...authModal, open: false, error: '' });
-                } catch (err) { setAuthModal({ ...authModal, error: "Access denied." }); }
+                } catch (err) { setAuthModal({ ...authModal, error: err.message.replace('Firebase:', '').trim() }); }
                 setLoading(false);
             };
 
@@ -1201,7 +1223,7 @@
                                                     <option>Google Veo 3 Elite</option>
                                                 </select>
                                             </div>
-                                            <button disabled={uploading} className="w-full btn-nexus-main text-white py-6 md:py-7 rounded-[3rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all disabled:opacity-50 mt-4">{uploading ? 'TRANSMITTING...' : 'TRANSMIT TO NEXUS'}</button>
+                                            <button disabled={uploading} className="w-full btn-nexus-main text-white py-5 md:py-7 rounded-[3rem] font-black text-xs md:text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all disabled:opacity-50 mt-4">{uploading ? 'TRANSMITTING...' : 'TRANSMIT TO NEXUS'}</button>
                                         </form>
                                     </div>
                                     <button onClick={() => setView('home')} className="w-full py-5 md:py-7 bg-slate-100 text-slate-400 rounded-full md:rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[9px] md:text-[10px] mt-2 lg:hidden">{t('backToFeed')}</button>
@@ -1384,199 +1406,6 @@
                                 </div>
                             )}
 
-                            {view === 'settings' && (
-                                <div className="animate-in fade-in slide-in-from-bottom-10 duration-700" key={`settings-view-${settingsSection}`}>
-                                    <div className="bg-white rounded-[2rem] md:rounded-[4rem] border-0 md:border md:border-slate-100 shadow-none md:shadow-sm p-6 md:p-12 mb-10 min-h-[60vh]">
-                                        <div className="flex items-center mb-8 border-b border-slate-100 pb-6">
-                                            {settingsSection !== 'menu' && (
-                                                <button onClick={() => setSettingsSection('menu')} className="mr-4 bg-slate-50 p-2.5 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><i data-lucide="arrow-left" className="w-5 h-5"></i></button>
-                                            )}
-                                            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                                                {settingsSection === 'menu' ? 'Platform Settings' : settingsSection.replace(/_/g, ' ')}
-                                            </h2>
-                                        </div>
-
-                                        <div className="flex-1">
-                                            {settingsSection === 'menu' && (
-                                                <div className="space-y-3">
-                                                    <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400">
-                                                                {isDarkMode ? <i data-lucide="moon" className="w-6 h-6"></i> : <i data-lucide="sun" className="w-6 h-6"></i>}
-                                                            </div>
-                                                            <span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">{isDarkMode ? t('lightMode') : t('darkMode')}</span>
-                                                        </div>
-                                                        <div className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${isDarkMode ? 'bg-blue-600' : 'bg-slate-300'}`}>
-                                                            <div className={`w-4 h-4 bg-white rounded-full absolute shadow-sm transition-transform ${isDarkMode ? 'translate-x-7' : 'translate-x-1'}`}></div>
-                                                        </div>
-                                                    </button>
-                                                    <button onClick={() => setSettingsSection('About_Nexus')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
-                                                        <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="info" className="w-6 h-6"></i></div><span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">About Nexus</span></div><i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
-                                                    </button>
-                                                    <button onClick={() => setSettingsSection('Contact_Us')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
-                                                        <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="mail" className="w-6 h-6"></i></div><span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Contact & Support</span></div><i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
-                                                    </button>
-                                                    <button onClick={() => setSettingsSection('Privacy_Policy')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
-                                                        <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="shield" className="w-6 h-6"></i></div><span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Privacy Policy</span></div><i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
-                                                    </button>
-                                                    <button onClick={() => setSettingsSection('Terms_&_Conditions')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
-                                                        <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="file-text" className="w-6 h-6"></i></div><span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Terms & Conditions</span></div><i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
-                                                    </button>
-                                                    
-                                                    <button onClick={() => setSettingsSection('Language')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-[2rem] transition-colors group border border-transparent hover:border-blue-100">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-blue-600 text-slate-400"><i data-lucide="globe" className="w-6 h-6"></i></div>
-                                                            <span className="font-extrabold text-[15px] text-slate-700 group-hover:text-blue-700">Language / භාෂාව</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-bold text-slate-400">{profileData.language || 'English'}</span>
-                                                            <i data-lucide="chevron-right" className="w-5 h-5 text-slate-300"></i>
-                                                        </div>
-                                                    </button>
-
-                                                    <div className="pt-6 mt-6 border-t border-slate-100">
-                                                        <button onClick={() => setSettingsSection('Delete_Account')} className="w-full flex items-center justify-between p-5 bg-red-50 hover:bg-red-100 rounded-[2rem] transition-colors group border border-transparent hover:border-red-200">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:text-red-600 text-red-400"><i data-lucide="trash-2" className="w-6 h-6"></i></div>
-                                                                <span className="font-extrabold text-[15px] text-red-600">{t('deleteAccount')}</span>
-                                                            </div>
-                                                            <i data-lucide="chevron-right" className="w-5 h-5 text-red-300"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {settingsSection === 'Language' && (
-                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 py-4">
-                                                    <p className="font-bold text-slate-900 text-lg mb-6">{t('selectLanguage')}</p>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                        {['English', 'Sinhala (සිංහල)', 'Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'].map(lang => {
-                                                            const isSelected = profileData.language === lang || (!profileData.language && lang === 'English');
-                                                            return (
-                                                                <button
-                                                                    key={`lang-${lang}-${isSelected}`}
-                                                                    onClick={() => requestLanguageChange(lang)}
-                                                                    className={`p-5 rounded-[1.5rem] border-2 font-bold text-sm flex items-center justify-between transition-all ${isSelected ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200 hover:bg-white'}`}
-                                                                >
-                                                                    {lang}
-                                                                    {isSelected && <i data-lucide="check-circle-2" className="w-5 h-5 text-blue-600"></i>}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                    <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mt-8">
-                                                        <p className="text-[10px] text-blue-600 text-center uppercase tracking-widest font-black flex items-center justify-center gap-2">
-                                                            <i data-lucide="info" className="w-4 h-4"></i> {t('noteLocalization')}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {settingsSection === 'About_Nexus' && (
-                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 text-center py-6">
-                                                    <div className="w-24 h-24 bg-slate-900 rounded-[2rem] mx-auto flex items-center justify-center text-white shadow-xl mb-8"><i data-lucide="zap" className="w-12 h-12" fill="currentColor"></i></div>
-                                                    <h4 className="font-black text-3xl text-slate-900">PROMPTHUB <span className="text-blue-600">NEXUS</span></h4>
-                                                    <p className="font-medium text-lg px-4">The World-Class AI Creator Network designed for Prompt Engineers, Digital Artists, and AI Enthusiasts.</p>
-                                                    <p className="px-4">Our mission is to bridge the gap between imagination and generation by providing a global platform to share, discover, and learn the magic formulas behind stunning AI outputs.</p>
-                                                    <div className="pt-8 border-t border-slate-100 mt-8">
-                                                        <p className="font-black text-[11px] uppercase tracking-widest text-slate-400">Version 1.0.0 (Elite Build)</p>
-                                                        <p className="font-black text-[11px] uppercase tracking-widest text-blue-500 mt-2">© 2026 PromptHub Nexus.</p>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {settingsSection === 'Contact_Us' && (
-                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-8 py-4">
-                                                    <p className="font-medium text-center mb-8 text-lg">Need help, have a suggestion, or want to collaborate? Reach out to our intelligence team!</p>
-                                                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
-                                                        <div className="flex items-center gap-5"><div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-500"><i data-lucide="mail" className="w-6 h-6"></i></div> <a href="mailto:support@prompthubnexus.com" className="font-bold text-slate-800 text-sm md:text-base break-all hover:text-blue-600 transition-colors">support@prompthubnexus.com</a></div>
-                                                        <div className="flex items-center gap-5"><div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-500"><i data-lucide="globe" className="w-6 h-6"></i></div> <span className="font-bold text-slate-800 text-sm md:text-base">www.prompthub-nexus.vercel.app</span></div>
-                                                        <div className="flex items-center gap-5"><div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-500"><i data-lucide="map-pin" className="w-6 h-6"></i></div> <span className="font-bold text-slate-800 text-sm md:text-base">Colombo, Sri Lanka</span></div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {settingsSection === 'Privacy_Policy' && (
-                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 py-4">
-                                                    <p className="font-bold text-slate-900 text-lg">Your privacy is our priority at Nexus.</p>
-                                                    <div className="space-y-5">
-                                                        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 hover:border-blue-100 transition-colors">
-                                                            <h5 className="font-extrabold text-slate-800 mb-3 flex items-center gap-3"><i data-lucide="database" className="w-5 h-5 text-blue-500"></i> Data Collection</h5>
-                                                            <p className="text-sm">We collect basic profile info (Name, Email, Bio) and shared prompts to personalize your global experience.</p>
-                                                        </div>
-                                                        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 hover:border-blue-100 transition-colors">
-                                                            <h5 className="font-extrabold text-slate-800 mb-3 flex items-center gap-3"><i data-lucide="shield-check" className="w-5 h-5 text-blue-500"></i> Data Security</h5>
-                                                            <p className="text-sm">We use enterprise-grade security protocols to keep your intelligence safe from unauthorized access.</p>
-                                                        </div>
-                                                        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 hover:border-blue-100 transition-colors">
-                                                            <h5 className="font-extrabold text-slate-800 mb-3 flex items-center gap-3"><i data-lucide="lock" className="w-5 h-5 text-blue-500"></i> Profile Lock Mode</h5>
-                                                            <p className="text-sm">You have full control over who sees your personal details. Enable Lock Mode in Edit Profile to hide data from non-followers.</p>
-                                                        </div>
-                                                    </div>
-                                                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest text-center mt-8">Last updated: April 2026</p>
-                                                </div>
-                                            )}
-
-                                            {settingsSection === 'Terms_&_Conditions' && (
-                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 py-4">
-                                                    <p className="font-bold text-slate-900 text-lg">By accessing the Nexus, you agree to these terms:</p>
-                                                    <ul className="space-y-4">
-                                                        <li className="flex items-start gap-4 bg-slate-50 p-5 rounded-[2rem] border border-slate-100"><i data-lucide="check-circle-2" className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5"></i> <span className="text-sm"><strong>Respect the Community:</strong> Maintain a professional, creative, and toxic-free environment.</span></li>
-                                                        <li className="flex items-start gap-4 bg-slate-50 p-5 rounded-[2rem] border border-slate-100"><i data-lucide="check-circle-2" className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5"></i> <span className="text-sm"><strong>Originality:</strong> Only share AI prompts you have the rights to, or provide proper credits.</span></li>
-                                                        <li className="flex items-start gap-4 bg-slate-50 p-5 rounded-[2rem] border border-slate-100"><i data-lucide="check-circle-2" className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5"></i> <span className="text-sm"><strong>Fair Usage:</strong> Do not attempt to spam, bypass security protocols, or scrape data.</span></li>
-                                                    </ul>
-                                                    <div className="bg-red-50 p-5 rounded-[2rem] border border-red-100 mt-6">
-                                                        <p className="text-sm font-bold text-red-600 flex items-center gap-3"><i data-lucide="alert-triangle" className="w-5 h-5"></i> Violation of these terms may result in immediate terminal disconnection and ban.</p>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {settingsSection === 'Delete_Account' && (
-                                                <div className="text-slate-600 text-[15px] leading-relaxed space-y-6 py-4">
-                                                    <div className="text-center mb-8">
-                                                        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-[2rem] mx-auto flex items-center justify-center mb-6">
-                                                            <i data-lucide="alert-triangle" className="w-10 h-10"></i>
-                                                        </div>
-                                                        <h3 className="font-black text-2xl text-slate-900 mb-2">{t('deleteAccount')}</h3>
-                                                        <p className="font-medium text-red-500">{t('deleteWarning')}</p>
-                                                    </div>
-
-                                                    <div className="space-y-6 bg-slate-50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100">
-                                                        {deleteError && (
-                                                            <div className="bg-red-100 text-red-700 p-4 rounded-2xl text-sm font-bold text-center break-words">
-                                                                {deleteError}
-                                                            </div>
-                                                        )}
-                                                        
-                                                        {user?.providerData?.[0]?.providerId !== 'google.com' && (
-                                                            <div className="space-y-3">
-                                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">{t('enterPassword')}</label>
-                                                                <input 
-                                                                    type="password" 
-                                                                    placeholder="••••••••" 
-                                                                    className="w-full bg-white border border-slate-200 rounded-[1.5rem] py-4 px-6 outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-400 font-bold text-sm tracking-wide transition-all" 
-                                                                    value={deletePassword} 
-                                                                    onChange={(e) => setDeletePassword(e.target.value)} 
-                                                                />
-                                                            </div>
-                                                        )}
-                                                        
-                                                        <button 
-                                                            onClick={handleDeleteAccount}
-                                                            disabled={isDeleting || (user?.providerData?.[0]?.providerId !== 'google.com' && !deletePassword)} 
-                                                            className="w-full bg-red-600 text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl shadow-red-600/20 hover:bg-red-700 active:scale-95 transition-all uppercase disabled:opacity-50 flex items-center justify-center gap-2"
-                                                        >
-                                                            {isDeleting ? <div className="loader-spinner w-5 h-5 border-2 border-t-2 border-white/30 border-t-white"></div> : (user?.providerData?.[0]?.providerId === 'google.com' ? 'VERIFY WITH GOOGLE & DELETE' : <><i data-lucide="trash-2" className="w-5 h-5"></i> {t('confirmDelete')}</>)}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <button onClick={() => { setView('home'); setSettingsSection('menu'); }} className="w-full py-5 md:py-7 bg-slate-100 text-slate-400 rounded-full md:rounded-[3rem] font-black hover:bg-slate-200 transition-all uppercase tracking-[0.2em] text-[10px] md:text-xs mt-4 lg:hidden">{t('backToFeed')}</button>
-                                </div>
-                            )}
-
                         </section>
 
                         <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 sticky top-28 h-fit space-y-6">
@@ -1670,19 +1499,62 @@
 
                     {authModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
-                            <div className="bg-white w-full max-w-md rounded-[3.5rem] p-14 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 border border-white/20 text-center">
-                                <h2 className="text-4xl font-black mb-2 text-slate-900 tracking-tighter leading-none uppercase">{authModal.mode === 'login' ? 'IDENTITY PORTAL' : 'NEXUS ORIGIN'}</h2>
-                                <p className="text-slate-400 font-black text-[10px] mt-4 uppercase tracking-[0.4em] opacity-60 italic mb-10">Secure Intelligence Access</p>
-                                {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-5 rounded-2xl mb-8 border border-red-100 uppercase tracking-widest">{authModal.error}</div>}
-                                <button onClick={handleGoogleSignIn} className="w-full flex items-center justify-center gap-4 bg-white border-2 border-slate-50 py-5 rounded-[2.2rem] font-black text-sm text-slate-700 hover:bg-slate-50 transition-all mb-10 shadow-sm active:scale-95"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" className="w-6 h-6" /> CONTINUE WITH GOOGLE</button>
-                                <div className="flex items-center gap-4 mb-10"><div className="h-px bg-slate-100 flex-1"></div><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">secure link</span><div className="h-px bg-slate-100 flex-1"></div></div>
-                                <form onSubmit={handleAuth} className="space-y-5">
-                                    {authModal.mode === 'signup' && <input type="text" placeholder="DISPLAY NAME" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] py-5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.name} onChange={e => setAuthModal({...authModal, name: e.target.value})} />}
-                                    <input type="email" placeholder="EMAIL ADDRESS" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] py-5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.email} onChange={e => setAuthModal({...authModal, email: e.target.value})} />
-                                    <input type="password" placeholder="SECURITY KEY" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] py-5 px-8 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.password} onChange={e => setAuthModal({...authModal, password: e.target.value})} />
-                                    <button className="w-full btn-nexus-main text-white py-6 rounded-[2.2rem] font-black text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all uppercase">Establish Link</button>
+                            <div className="bg-white w-full max-w-md rounded-[3.5rem] p-10 md:p-14 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 border border-white/20 text-center">
+                                <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900 tracking-tighter leading-none uppercase">{authModal.mode === 'login' ? 'IDENTITY PORTAL' : 'NEXUS ORIGIN'}</h2>
+                                <p className="text-slate-400 font-black text-[10px] mt-2 md:mt-4 uppercase tracking-[0.4em] opacity-60 italic mb-8 md:mb-10">Secure Intelligence Access</p>
+                                
+                                {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-2xl mb-6 border border-red-100 uppercase tracking-widest">{authModal.error}</div>}
+                                {authModal.mode === 'magic_sent' && <div className="bg-green-50 text-green-600 text-[10px] font-black p-4 rounded-2xl mb-6 border border-green-100 uppercase tracking-widest">Magic Link Sent! Check your email.</div>}
+                                
+                                {/* --- ALUTH: Multi-Provider Login UI --- */}
+                                <div className="flex gap-3 mb-8">
+                                    <button onClick={() => handleSocialSignIn('google')} className="flex-1 flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-50 py-4 rounded-[1.8rem] font-black text-[10px] text-slate-700 hover:bg-slate-50 transition-all shadow-sm active:scale-95">
+                                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" className="w-6 h-6" /> Google
+                                    </button>
+                                    <button onClick={() => handleSocialSignIn('github')} className="flex-1 flex flex-col items-center justify-center gap-2 bg-slate-900 border-2 border-slate-900 py-4 rounded-[1.8rem] font-black text-[10px] text-white hover:bg-slate-800 transition-all shadow-sm active:scale-95">
+                                        <i data-lucide="github" className="w-6 h-6"></i> GitHub
+                                    </button>
+                                    <button onClick={() => handleSocialSignIn('twitter')} className="flex-1 flex flex-col items-center justify-center gap-2 bg-blue-400 border-2 border-blue-400 py-4 rounded-[1.8rem] font-black text-[10px] text-white hover:bg-blue-500 transition-all shadow-sm active:scale-95">
+                                        <i data-lucide="twitter" className="w-6 h-6"></i> X (Twitter)
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="h-px bg-slate-100 flex-1"></div>
+                                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">OR USE EMAIL</span>
+                                    <div className="h-px bg-slate-100 flex-1"></div>
+                                </div>
+                                
+                                <form onSubmit={authModal.mode === 'magic' ? handleMagicLinkSend : handleAuth} className="space-y-4">
+                                    {authModal.mode === 'signup' && <input type="text" placeholder="DISPLAY NAME" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.name} onChange={e => setAuthModal({...authModal, name: e.target.value})} />}
+                                    
+                                    <input type="email" placeholder="EMAIL ADDRESS" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.email} onChange={e => setAuthModal({...authModal, email: e.target.value})} />
+                                    
+                                    {authModal.mode !== 'magic' && authModal.mode !== 'magic_sent' && (
+                                        <input type="password" placeholder="SECURITY KEY (PASSWORD)" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest transition-all" required value={authModal.password} onChange={e => setAuthModal({...authModal, password: e.target.value})} />
+                                    )}
+
+                                    <button disabled={loading} className="w-full btn-nexus-main text-white py-5 rounded-[2rem] font-black text-xs md:text-sm tracking-[0.3em] shadow-xl active:scale-95 transition-all uppercase disabled:opacity-50 mt-2">
+                                        {loading ? 'CONNECTING...' : (authModal.mode === 'magic' ? 'SEND MAGIC LINK' : 'ESTABLISH LINK')}
+                                    </button>
                                 </form>
-                                <button onClick={() => setAuthModal({...authModal, mode: authModal.mode==='login'?'signup':'login', error: ''})} className="w-full mt-10 text-[11px] font-black text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.3em]">{authModal.mode === 'login' ? "Request Access" : "Existing Member? Sign In"}</button>
+
+                                <div className="mt-8 flex flex-col gap-3">
+                                    {authModal.mode !== 'magic' && authModal.mode !== 'magic_sent' ? (
+                                        <button onClick={() => setAuthModal({...authModal, mode: 'magic', error: ''})} className="text-[10px] md:text-[11px] font-black text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-[0.2em] flex items-center justify-center gap-1 mx-auto">
+                                            <i data-lucide="sparkles" className="w-4 h-4"></i> Login with Magic Link
+                                        </button>
+                                    ) : (
+                                        <button onClick={() => setAuthModal({...authModal, mode: 'login', error: ''})} className="text-[10px] md:text-[11px] font-black text-slate-500 hover:text-slate-700 transition-colors uppercase tracking-[0.2em]">
+                                            Use Password Instead
+                                        </button>
+                                    )}
+                                    
+                                    <button onClick={() => setAuthModal({...authModal, mode: authModal.mode === 'login' || authModal.mode === 'magic' ? 'signup' : 'login', error: ''})} className="text-[10px] md:text-[11px] font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-[0.2em]">
+                                        {authModal.mode === 'signup' ? "Existing Member? Sign In" : "New Creator? Request Access"}
+                                    </button>
+                                </div>
+
                                 <button onClick={() => setAuthModal({...authModal, open: false})} className="w-full mt-6 text-[10px] font-black text-slate-200 uppercase tracking-widest hover:text-slate-400 transition-colors">Abort Tunnel</button>
                             </div>
                         </div>
