@@ -1219,13 +1219,21 @@
                                             {settingsSection !== 'menu' && <button onClick={() => setSettingsSection('menu')} className="mr-4 bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full text-slate-400 hover:text-blue-600 transition-colors"><Icon name="arrowleft" /></button>}
                                             <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase">{settingsSection === 'menu' ? 'Platform Settings' : settingsSection.replace(/_/g, ' ')}</h2>
                                         </div>
+                                        
                                         {settingsSection === 'menu' && (
                                             <div className="space-y-3">
                                                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">{isDarkMode ? <Icon name="sun" /> : <Icon name="moon" />}</div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span></div><div className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${isDarkMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'}`}><div className={`w-4 h-4 bg-white rounded-full absolute transition-transform ${isDarkMode ? 'translate-x-7' : 'translate-x-1'}`}></div></div></button>
                                                 <button onClick={() => setSettingsSection('Language')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="globe" /></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Language / භාෂාව</span></div><div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-400">{profileData.language || 'English'}</span><Icon name="chevronright" className="text-slate-300 dark:text-slate-500" /></div></button>
-                                                <button onClick={() => setSettingsSection('Delete_Account')} className="w-full flex items-center justify-between p-5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-2xl transition-colors group mt-6 border border-transparent dark:border-red-900/30"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-red-500 group-hover:text-red-600"><Icon name="trash" /></div><span className="font-extrabold text-[15px] text-red-600 dark:text-red-400">Delete Account</span></div></button>
+                                                
+                                                <button onClick={() => setSettingsSection('About_Nexia')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="sparkles" /></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">About Nexia</span></div><Icon name="chevronright" className="text-slate-300 dark:text-slate-500" /></button>
+                                                <button onClick={() => setSettingsSection('Contact_Us')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="message" /></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Contact & Support</span></div><Icon name="chevronright" className="text-slate-300 dark:text-slate-500" /></button>
+                                                <button onClick={() => setSettingsSection('Privacy_Policy')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="shield" /></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Privacy Policy</span></div><Icon name="chevronright" className="text-slate-300 dark:text-slate-500" /></button>
+                                                <button onClick={() => setSettingsSection('Terms_&_Conditions')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="filetext" /></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Terms & Conditions</span></div><Icon name="chevronright" className="text-slate-300 dark:text-slate-500" /></button>
+                                                
+                                                <button onClick={() => setSettingsSection('Delete_Account')} className="w-full flex items-center justify-between p-5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-2xl transition-colors group mt-6 border border-transparent dark:border-red-900/30"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-red-500 group-hover:text-red-600"><Icon name="trash" /></div><span className="font-extrabold text-[15px] text-red-600 dark:text-red-400">Delete Account</span></div><Icon name="chevronright" className="text-red-300 dark:text-red-900/50" /></button>
                                             </div>
                                         )}
+
                                         {settingsSection === 'Language' && (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {['English', 'Sinhala (සිංහල)', 'Spanish (Español)'].map(lang => (
@@ -1233,12 +1241,64 @@
                                                 ))}
                                             </div>
                                         )}
+
+                                        {settingsSection === 'About_Nexia' && (
+                                            <div className="text-slate-600 dark:text-slate-400 text-[15px] leading-relaxed space-y-6 text-center py-6">
+                                                <Icon name="nexia_logo" className="w-20 mx-auto mb-6" />
+                                                <h4 className="font-black text-3xl text-slate-900 dark:text-white font-outfit">NEXIA <span className="text-blue-600">PROMPTHUB</span></h4>
+                                                <p className="font-medium text-lg px-4">The World-Class AI Creator Network designed for Prompt Engineers, Digital Artists, and AI Enthusiasts.</p>
+                                                <p className="px-4">Our mission is to bridge the gap between imagination and generation by providing a global platform to share, discover, and learn the magic formulas behind stunning AI outputs.</p>
+                                                <div className="pt-8 border-t border-slate-100 dark:border-slate-700 mt-8">
+                                                    <p className="font-black text-[11px] uppercase tracking-widest text-slate-400 dark:text-slate-500">Version 1.0.0 (Elite Build)</p>
+                                                    <p className="font-black text-[11px] uppercase tracking-widest text-blue-500 mt-2">© 2026 Nexia AI Technologies.</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {settingsSection === 'Contact_Us' && (
+                                            <div className="text-slate-600 dark:text-slate-400 text-[15px] leading-relaxed space-y-8 py-4">
+                                                <p className="font-medium text-center mb-8 text-lg">Need help or want to collaborate? Reach out to our intelligence team!</p>
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 space-y-6">
+                                                    <div className="flex items-center gap-5"><div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-blue-500"><Icon name="message" /></div> <a href="mailto:support@nexia.ai" className="font-bold text-slate-800 dark:text-slate-200 text-sm md:text-base break-all hover:text-blue-600 transition-colors">support@nexia.ai</a></div>
+                                                    <div className="flex items-center gap-5"><div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-blue-500"><Icon name="globe" /></div> <span className="font-bold text-slate-800 dark:text-slate-200 text-sm md:text-base">www.nexia.ai</span></div>
+                                                    <div className="flex items-center gap-5"><div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-blue-500"><Icon name="pin" /></div> <span className="font-bold text-slate-800 dark:text-slate-200 text-sm md:text-base">Colombo, Sri Lanka</span></div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {settingsSection === 'Privacy_Policy' && (
+                                            <div className="text-slate-600 dark:text-slate-400 text-[15px] leading-relaxed space-y-6 py-4">
+                                                <p className="font-bold text-slate-900 dark:text-white text-lg">Your privacy is our priority at Nexia.</p>
+                                                <div className="space-y-5">
+                                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700">
+                                                        <h5 className="font-extrabold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-3"><Icon name="database" className="text-blue-500"/> Data Collection</h5>
+                                                        <p className="text-sm">We collect basic profile info and shared prompts to personalize your global experience.</p>
+                                                    </div>
+                                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700">
+                                                        <h5 className="font-extrabold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-3"><Icon name="shieldcheck" className="text-blue-500"/> Data Security</h5>
+                                                        <p className="text-sm">We use enterprise-grade security protocols to keep your intelligence safe.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {settingsSection === 'Terms_&_Conditions' && (
+                                            <div className="text-slate-600 dark:text-slate-400 text-[15px] leading-relaxed space-y-6 py-4">
+                                                <p className="font-bold text-slate-900 dark:text-white text-lg">By accessing Nexia, you agree to these terms:</p>
+                                                <ul className="space-y-4">
+                                                    <li className="flex items-start gap-4 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-[2rem] border border-slate-100 dark:border-slate-700"><Icon name="checkcircle" className="text-blue-500 flex-shrink-0 mt-0.5"/> <span className="text-sm"><strong>Respect the Community:</strong> Maintain a professional, creative environment.</span></li>
+                                                    <li className="flex items-start gap-4 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-[2rem] border border-slate-100 dark:border-slate-700"><Icon name="checkcircle" className="text-blue-500 flex-shrink-0 mt-0.5"/> <span className="text-sm"><strong>Originality:</strong> Only share AI prompts you have the rights to.</span></li>
+                                                </ul>
+                                            </div>
+                                        )}
+
                                         {settingsSection === 'Delete_Account' && (
                                             <div className="space-y-6 text-center">
                                                 <div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full mx-auto flex items-center justify-center"><Icon name="alert" className="w-10 h-10"/></div>
                                                 <h3 className="font-black text-2xl text-slate-900 dark:text-white">Delete Account</h3>
+                                                <p className="text-red-500 text-sm font-bold mb-4">This action is irreversible. All your data will be permanently removed.</p>
                                                 {user?.providerData?.[0]?.providerId !== 'google.com' && <input type="password" placeholder="Enter Password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 text-center font-bold dark:text-white outline-none focus:border-red-500" />}
-                                                <button onClick={handleDeleteAccount} className="w-full bg-red-600 text-white py-5 rounded-full font-black text-sm shadow-xl hover:bg-red-700 uppercase">Confirm Delete</button>
+                                                <button onClick={handleDeleteAccount} className="w-full bg-red-600 text-white py-5 rounded-full font-black text-sm shadow-xl hover:bg-red-700 uppercase mt-4">Confirm Delete</button>
                                             </div>
                                         )}
                                     </div>
