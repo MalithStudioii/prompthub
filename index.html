@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nexia - PromptHub | Global AI Creator Network</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -328,6 +333,7 @@
 
             const [notifications, setNotifications] = useState([]);
             const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+            const [liveAlert, setLiveAlert] = useState(null);
             const [allCreators, setAllCreators] = useState([]);
             const [allFollows, setAllFollows] = useState([]); 
             
@@ -435,49 +441,51 @@
 
             useEffect(() => {
                 if (!isReady) return;
-                const { auth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, isSignInWithEmailLink, signInWithEmailLink, db, appId, doc, setDoc, serverTimestamp, getDoc } = window.fb;
+                const { auth, onAuthStateChanged, signInAnonymously, isSignInWithEmailLink, signInWithEmailLink, db, appId, doc, setDoc, serverTimestamp, getDoc } = window.fb;
 
-                let isAuthenticating = false;
-
-                const initAuth = async () => {
-                    if (auth.currentUser || isAuthenticating) return; 
-                    isAuthenticating = true;
-                    try {
-                        if (isSignInWithEmailLink(auth, window.location.href)) {
-                            let email = null;
-                            try { email = window.localStorage.getItem('emailForSignIn'); } catch(e){}
-                            if (!email) email = window.prompt('Please confirm your email address to complete sign-in:');
-                            if (email) {
-                                try {
-                                    const result = await signInWithEmailLink(auth, email, window.location.href);
-                                    try { window.localStorage.removeItem('emailForSignIn'); } catch(e){}
-                                    const loggedInUser = result.user;
-                                    const profileRef = doc(db, 'artifacts', appId, 'users', loggedInUser.uid, 'profile', 'info');
-                                    const profileSnap = await getDoc(profileRef);
-                                    if (!profileSnap.exists()) {
-                                        await setDoc(profileRef, {
-                                            name: loggedInUser.email.split('@')[0], email: loggedInUser.email,
-                                            photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
-                                            bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', privacyLevel: 'public', birthday: '', hobbies: [], language: 'English',
-                                            createdAt: serverTimestamp(), provider: 'magic_link'
-                                        });
-                                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', loggedInUser.uid), {
-                                            name: loggedInUser.email.split('@')[0], photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, followersCount: 0, followingCount: 0, profilePicLikes: [], lastActive: Date.now()
-                                        }, { merge: true });
-                                    }
-                                    setAuthModal(prev => ({ ...prev, open: false, error: '' }));
-                                } catch (err) { alert("Magic link expired or invalid."); }
-                                return;
+                // Firebase එකෙන් පරණ ලොගින් එක කියවනකම් ඉඳලා තීරණයක් ගන්නවා
+                const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
+                    if (u) {
+                        // පරණ මතකයෙන් හරි අලුතින් හරි කෙනෙක් ලොග් වෙලා ඉන්නවා නම්, එයාට ඇතුළට යන්න දෙනවා
+                        setUser(u);
+                        setLoading(false);
+                    } else {
+                        // ඇත්තටම කවුරුත් ලොග් වෙලා නැත්නම් විතරක් Magic Link එකක්ද බලලා, Guest විදිහට ලොග් කරනවා
+                        try {
+                            if (isSignInWithEmailLink(auth, window.location.href)) {
+                                let email = null;
+                                try { email = window.localStorage.getItem('emailForSignIn'); } catch(e){}
+                                if (!email) email = window.prompt('Please confirm your email address to complete sign-in:');
+                                if (email) {
+                                    try {
+                                        const result = await signInWithEmailLink(auth, email, window.location.href);
+                                        try { window.localStorage.removeItem('emailForSignIn'); } catch(e){}
+                                        const loggedInUser = result.user;
+                                        const profileRef = doc(db, 'artifacts', appId, 'users', loggedInUser.uid, 'profile', 'info');
+                                        const profileSnap = await getDoc(profileRef);
+                                        if (!profileSnap.exists()) {
+                                            await setDoc(profileRef, {
+                                                name: loggedInUser.email.split('@')[0], email: loggedInUser.email,
+                                                photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
+                                                bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', privacyLevel: 'public', birthday: '', hobbies: [], language: 'English',
+                                                createdAt: serverTimestamp(), provider: 'magic_link'
+                                            });
+                                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', loggedInUser.uid), {
+                                                name: loggedInUser.email.split('@')[0], photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, followersCount: 0, followingCount: 0, profilePicLikes: [], lastActive: Date.now()
+                                            }, { merge: true });
+                                        }
+                                        setAuthModal(prev => ({ ...prev, open: false, error: '' }));
+                                    } catch (err) { alert("Magic link expired or invalid."); }
+                                }
+                            } else {
+                                await signInAnonymously(auth);
                             }
+                        } catch (e) {
+                            try { await signInAnonymously(auth); } catch (e2) {}
                         }
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            try { await signInWithCustomToken(auth, __initial_auth_token); } catch (e) { await signInAnonymously(auth); }
-                        } else { await signInAnonymously(auth); }
-                    } catch (e) { try { await signInAnonymously(auth); } catch (e2) {} } finally { isAuthenticating = false; }
-                };
-
-                initAuth();
-                const unsubscribeAuth = onAuthStateChanged(auth, (u) => { setUser(u); setLoading(false); });
+                    }
+                });
+                
                 return () => unsubscribeAuth();
             }, [isReady]);
 
