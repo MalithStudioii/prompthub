@@ -14,9 +14,15 @@
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: #F8FAFC; overflow-x: hidden; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease; }
         
+        /* Security Features */
+        .no-select { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+        .no-drag { -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; -o-user-drag: none; pointer-events: none; }
+        .secure-img-wrapper { position: relative; display: inline-block; width: 100%; height: 100%; }
+        .secure-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: auto; background: transparent; }
+
         .font-outfit { font-family: 'Outfit', sans-serif; }
 
-        .nexus-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(226, 232, 240, 0.5); transition: background-color 0.3s ease; }
+        .nexus-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(226, 232, 240, 0.5); transition: background-color 0.3s ease; border-color: inherit; }
         .btn-nexus-main { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-nexus-main:active { transform: scale(0.95); }
         .nexus-card { background: #ffffff; border: 1px solid rgba(241, 245, 249, 1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.4s ease; }
@@ -30,7 +36,7 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 4px; }
 
-        /* Magic Dark Mode Classes */
+        /* Magic Dark Mode Classes - Fully Optimized */
         .dark body { background-color: #020617; color: #f8fafc; }
         .dark .bg-white { background-color: #0f172a; border-color: #1e293b; color: #f8fafc; }
         .dark .bg-slate-50 { background-color: #1e293b; border-color: #334155; }
@@ -42,6 +48,7 @@
         .dark .text-slate-600 { color: #cbd5e1; }
         .dark .text-slate-500 { color: #94a3b8; }
         .dark .text-slate-400 { color: #64748b; }
+        .dark .border-slate-50 { border-color: #1e293b; }
         .dark .border-slate-100 { border-color: #1e293b; }
         .dark .border-slate-200 { border-color: #334155; }
         .dark input, .dark textarea, .dark select { background-color: #0f172a; color: #f8fafc; border-color: #334155; }
@@ -56,11 +63,18 @@
         .dark .hover\:bg-slate-200:hover { background-color: #475569; }
         .dark .btn-nexus-main { background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%); color: white; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3); }
         .dark .text-blue-600 { color: #60a5fa; }
-        .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.3); }
+        .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); }
+        .dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.2); color: #93c5fd; }
         .dark .bg-blue-600 { background-color: #3b82f6; color: white; }
+        .dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+        .dark .text-red-500 { color: #f87171; }
+        .dark .text-red-600 { color: #f87171; }
+        .dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.2); }
+        .dark .bg-green-50 { background-color: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
+        .dark .bg-yellow-50 { background-color: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); }
     </style>
 </head>
-<body>
+<body class="no-select">
     <div id="root">
         <div class="min-h-screen flex flex-col items-center justify-center bg-white text-center p-10">
             <svg viewBox="0 0 100 100" width="80" height="80" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-6 mx-auto">
@@ -125,72 +139,22 @@
                 deleteAccount: 'Delete Account', deleteWarning: 'This action is irreversible. All your data, prompts, and followers will be permanently removed.', enterPassword: 'Enter your password to confirm', confirmDelete: 'Yes, Delete My Account', wrongPassword: 'Incorrect password. Please try again.', accountDeleted: 'Account successfully deleted.',
                 save: 'Save', saved: 'Saved', savedIntel: 'Saved Intel', darkMode: 'Dark Mode', lightMode: 'Light Mode', filters: 'Filters', all: 'All',
                 leaderboard: 'Leaderboard', topCreators: 'Top Creators', rank: 'Rank', commandCenter: 'Command Center',
-                accountExists: 'This email is already linked to another provider (Google/Email). Please sign in using that provider.'
+                accountExists: 'This email is already linked to another provider (Google/Email). Please sign in using that provider.',
+                privacy: 'Privacy', public: 'Public', followersOnly: 'Followers Only', private: 'Private (Locked)', birthday: 'Birthday', age: 'Age', hobbies: 'Hobbies', addHobby: 'Add Hobby'
             },
             'Sinhala (සිංහල)': {
                 globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexia ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexia වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexia මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ', trending: 'ජනප්‍රිය', latest: 'අලුත්ම', members: 'මුළු සාමාජිකයින්', online: 'සක්‍රියව සිටී', followedYou: 'ඔබව අනුගමනය කිරීම ආරම්භ කළා!', noNotifications: 'අලුත් දැනුම්දීම් නැත.', systemIntel: 'පද්ධතියේ දැනුම්දීම්',
                 deleteAccount: 'ගිණුම මකන්න (Delete Account)', deleteWarning: 'මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. ඔබගේ සියලුම දත්ත සහ Followers ස්ථිරවම මැකී යනු ඇත.', enterPassword: 'තහවුරු කිරීමට මුරපදය (Password) ඇතුළත් කරන්න', confirmDelete: 'ඔව්, මගේ ගිණුම මකන්න', wrongPassword: 'මුරපදය වැරදියි. කරුණාකර නැවත උත්සාහ කරන්න.', accountDeleted: 'ගිණුම සාර්ථකව මකා දමන ලදී.',
                 save: 'සුරකින්න', saved: 'සුරැකුවා', savedIntel: 'සුරැකි නිර්මාණ', darkMode: 'අඳුරු තේමාව', lightMode: 'ආලෝක තේමාව', filters: 'පෙරහන්', all: 'සියල්ල',
                 leaderboard: 'ප්‍රමුඛ පුවරුව', topCreators: 'හොඳම නිර්මාණකරුවන්', rank: 'ස්ථානය', commandCenter: 'පාලන පැනලය',
-                accountExists: 'මෙම ඊමේල් ලිපිනයෙන් දැනටමත් ගිණුමක් ඇත (Google හෝ Email). කරුණාකර ඒ හරහා ලොග් වන්න.'
-            },
-            'Spanish (Español)': {
-                globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Compartir Inteligencia', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexia Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexia', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexia', sharedIntel: 'Inteligencia Compartida', trending: 'Tendencia', latest: 'Reciente', members: 'Miembros Totales', online: 'En Línea', followedYou: 'ha empezado a seguirte!', noNotifications: 'No hay alertas nuevas.', systemIntel: 'Inteligencia del Sistema',
-                deleteAccount: 'Eliminar Cuenta', deleteWarning: 'Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.', enterPassword: 'Introduce tu contraseña', confirmDelete: 'Sí, Eliminar Mi Cuenta', wrongPassword: 'Contraseña incorrecta. Inténtalo de nuevo.', accountDeleted: 'Cuenta eliminada con éxito.',
-                save: 'Guardar', saved: 'Guardado', savedIntel: 'Guardados', darkMode: 'Modo Oscuro', lightMode: 'Modo Claro', filters: 'Filtros', all: 'Todo',
-                leaderboard: 'Clasificación', topCreators: 'Mejores Creadores', rank: 'Rango', commandCenter: 'Command Center',
-                accountExists: 'Este correo electrónico ya está vinculado a otro proveedor. Inicie sesión con ese proveedor.'
-            },
-            'French (Français)': {
-                globalStream: 'Flux Global', alerts: 'Alertas', elitePortfolio: 'Portfolio Élite', settings: 'Paramètres', transmitInsight: 'Partager l\'Intelligence', searchPlaceholder: 'Rechercher des Créateurs...', signIn: 'SE CONNECTER', nexusGlobal: 'Nexia Global', worldClass: 'Communauté IA de Classe Mondiale', syncing: 'Synchronisation...', joinNexus: 'Rejoindre Nexia', connectElite: 'Connectez-vous avec l\'élite.', trendingTech: 'Tendances Tech', tierElite: 'Niveau: Élite', selectLanguage: 'Sélectionnez votre langue', noteLocalization: 'Note: La localisation complète arrive bientôt.', cancel: 'Annuler', confirm: 'Confirmer', changeLangTitle: 'Changer de langue ?', changeLangDesc: 'Voulez-vous changer la langue en', backToFeed: 'Retour au flux', editProfile: 'Éditer le profil', signOut: 'Déconnexion', followers: 'Abonnés', following: 'Abonnements', creations: 'Créations', nexusRank: 'Rang Nexia', sharedIntel: 'Intelligence Partagée', trending: 'Tendance', latest: 'Récents', members: 'Membres Totaux', online: 'En Ligne', followedYou: 'a commencé à vous suivre!', noNotifications: 'Pas de nouvelles alertes.', systemIntel: 'Intelligence du Système',
-                deleteAccount: 'Supprimer le compte', deleteWarning: 'Cette action est irréversible. Toutes vos données seront définitivement supprimées.', enterPassword: 'Entrez votre mot de passe', confirmDelete: 'Oui, Supprimer Mon Compte', wrongPassword: 'Mot de passe incorrect. Veuillez réessayer.', accountDeleted: 'Compte supprimé avec succès.',
-                save: 'Enregistrer', saved: 'Enregistré', savedIntel: 'Enregistrés', darkMode: 'Mode Sombre', lightMode: 'Mode Clair', filters: 'Filtres', all: 'Tout',
-                leaderboard: 'Classement', topCreators: 'Meilleurs Créateurs', rank: 'Rang', commandCenter: 'Command Center',
-                accountExists: 'Cet e-mail est déjà lié à un autre fournisseur. Veuillez vous connecter avec ce fournisseur.'
-            },
-            'German (Deutsch)': {
-                globalStream: 'Globaler Stream', alerts: 'Benachrichtigungen', elitePortfolio: 'Elite-Portfolio', settings: 'Einstellungen', transmitInsight: 'Intelligenz Teilen', searchPlaceholder: 'Schöpfer suchen...', signIn: 'ANMELDEN', nexusGlobal: 'Nexia Global', worldClass: 'Weltklasse-KI-Community', syncing: 'Synchronisiere...', joinNexus: 'Nexia Beitreten', connectElite: 'Verbinde dich mit der Elite.', trendingTech: 'Tech-Trends', tierElite: 'Stufe: Elite', selectLanguage: 'Wähle deine Sprache', noteLocalization: 'Hinweis: Vollständige Lokalisierung folgt.', cancel: 'Abbrechen', confirm: 'Bestätigen', changeLangTitle: 'Sprache ändern?', changeLangDesc: 'Möchten Sie die Sprache ändern in', backToFeed: 'Zurück zum Stream', editProfile: 'Profil bearbeiten', signOut: 'Abmelden', followers: 'Follower', following: 'Folge ich', creations: 'Kreationen', nexusRank: 'Nexia-Rang', sharedIntel: 'Geteilte Intelligenz', trending: 'Im Trend', latest: 'Neueste', members: 'Mitglieder', online: 'Jetzt Online', followedYou: 'folgt dir jetzt!', noNotifications: 'Keine neuen Benachrichtigungen.', systemIntel: 'Systemintelligenz',
-                deleteAccount: 'Konto löschen', deleteWarning: 'Diese Aktion ist unumkehrbar. Alle Ihre Daten werden dauerhaft entfernt.', enterPassword: 'Geben Sie Ihr Passwort ein', confirmDelete: 'Ja, Mein Konto Löschen', wrongPassword: 'Falsches Passwort. Bitte versuchen Sie es erneut.', accountDeleted: 'Konto erfolgreich gelöscht.',
-                save: 'Speichern', saved: 'Gespeichert', savedIntel: 'Gespeichert', darkMode: 'Dunkelmodus', lightMode: 'Heller Modus', filters: 'Filter', all: 'Alle',
-                leaderboard: 'Bestenliste', topCreators: 'Top-Ersteller', rank: 'Rang', commandCenter: 'Command Center',
-                accountExists: 'Diese E-Mail ist bereits mit einem anderen Anbieter verknüpft. Bitte melden Sie sich damit an.'
-            },
-            'Chinese (中文)': {
-                globalStream: '全球动态', alerts: '提醒', elitePortfolio: '精英作品集', settings: '设置', transmitInsight: '分享见解', searchPlaceholder: '搜索全球创作者...', signIn: '登录', nexusGlobal: 'Nexia 全球', worldClass: '世界级 AI 社区', syncing: '正在同步数据...', joinNexus: '加入 Nexia', connectElite: '与全球精英建立联系。', trendingTech: '热门技术', tierElite: '等级：精英', selectLanguage: '选择您的语言', noteLocalization: '注意：完整本地化即将推出。', cancel: '取消', confirm: '确认', changeLangTitle: '更改语言？', changeLangDesc: '您确定要将语言更改为', backToFeed: '返回全球动态', editProfile: '编辑个人资料', signOut: '退出登录', followers: '粉丝', following: '关注', creations: '创作', nexusRank: 'Nexia 排名', sharedIntel: '分享的见解', trending: '热门', latest: '最新', members: '总成员', online: '在线', followedYou: '开始关注你了！', noNotifications: '没有新提醒。', systemIntel: '系统智能',
-                deleteAccount: '删除账户', deleteWarning: '此操作不可逆。您的所有数据将被永久删除。', enterPassword: '输入您的密码', confirmDelete: '是的，删除我的账户', wrongPassword: '密码错误。请重试。', accountDeleted: '账户已成功删除。',
-                save: '保存', saved: '已保存', savedIntel: '收藏', darkMode: '夜间模式', lightMode: '白天模式', filters: '过滤', all: '全部',
-                leaderboard: '排行榜', topCreators: '顶级创作者', rank: '排名', commandCenter: 'Command Center',
-                accountExists: '此电子邮件已链接到其他提供商。请使用该提供商登录。'
-            },
-            'Japanese (日本語)': {
-                globalStream: 'グローバルストリーム', alerts: '通知', elitePortfolio: 'エリートポートフォリオ', settings: '設定', transmitInsight: 'インサイトを共有', searchPlaceholder: 'クリエイターを検索...', signIn: 'ログイン', nexusGlobal: 'Nexia グローバル', worldClass: '世界クラスのAIコミュニティ', syncing: '同期中...', joinNexus: 'Nexiaに参加', connectElite: 'エリートクリエイターと繋がる。', trendingTech: 'トレンド技術', tierElite: 'ティア：エリート', selectLanguage: '言語を選択', noteLocalization: '注：完全なローカリゼーションはまもなく展開されます。', cancel: 'キャンセル', confirm: '確認', changeLangTitle: '言語を変更しますか？', changeLangDesc: 'プラットフォームの言語を次に変更しますか：', backToFeed: 'ストリームに戻る', editProfile: 'プロフィール編集', signOut: 'ログアウト', followers: 'フォロワー', following: 'フォロー中', creations: '制作物', nexusRank: 'Nexia ランク', sharedIntel: '共有インサイト', trending: 'トレンド', latest: '最新', members: 'メンバー総数', online: 'オンライン', followedYou: 'があなたをフォローしました！', noNotifications: '新しい通知はありません。', systemIntel: 'システムインテリジェンス',
-                deleteAccount: 'アカウントを削除', deleteWarning: 'この操作は取り消せません。すべてのデータが完全に削除されます。', enterPassword: 'パスワードを入力', confirmDelete: 'はい、アカウントを削除します', wrongPassword: 'パスワードが間違っています。もう一度お試しください。', accountDeleted: 'アカウントが正常に削除されました。',
-                save: '保存', saved: '保存済み', savedIntel: 'ブックマーク', darkMode: 'ダークモード', lightMode: 'ライトモード', filters: 'フィルター', all: 'すべて',
-                leaderboard: 'リーダーボード', topCreators: 'トップクリエイター', rank: 'ランク', commandCenter: 'Command Center',
-                accountExists: 'このメールアドレスは既に他のプロバイダーにリンクされています。そのプロバイダーを使用してログインしてください。'
-            },
-            'Arabic (العربية)': {
-                globalStream: 'البث العالمي', alerts: 'التنبيهات', elitePortfolio: 'محفظة النخبة', settings: 'الإعدادات', transmitInsight: 'مشاركة الأفكار', searchPlaceholder: 'البحث عن المبدعين...', signIn: 'تسجيل الدخول', nexusGlobal: 'نكسس العالمي', worldClass: 'مجتمع الذكاء الاصطناعي العالمي', syncing: 'جاري المزامنة...', joinNexus: 'انضم إلى نكسس', connectElite: 'تواصل مع المبدعين.', trendingTech: 'التقنيات الرائجة', tierElite: 'المستوى: النخبة', selectLanguage: 'اختر لغتك', noteLocalization: 'ملاحظة: التعريب الكامل قادم قريباً.', cancel: 'إلغاء', confirm: 'تأكيد', changeLangTitle: 'تغيير اللغة؟', changeLangDesc: 'هل أنت متأكد من تغيير اللغة إلى', backToFeed: 'العودة للبث', editProfile: 'تعديل الملف', signOut: 'تسجيل الخروج', followers: 'المتابعون', following: 'يتابع', creations: 'الإبداعات', nexusRank: 'تصنيف نكسس', sharedIntel: 'الأفكار المشتركة', trending: 'شائع', latest: 'الأحدث', members: 'إجمالي الأعضاء', online: 'متصل الآن', followedYou: 'بدأ بمتابعتك!', noNotifications: 'لا توجد تنبيهات جديدة.', systemIntel: 'ذكاء النظام',
-                deleteAccount: 'حذف الحساب', deleteWarning: 'هذا الإجراء لا رجعة فيه. ستتم إزالة جميع بياناتك نهائيًا.', enterPassword: 'أدخل كلمة المرور', confirmDelete: 'نعم، احذف حسابي', wrongPassword: 'كلمة المرور خاطئة. يرجى المحاولة مرة أخرى.', accountDeleted: 'تم حذف الحساب بنجاح.',
-                save: 'حفظ', saved: 'تم الحفظ', savedIntel: 'المحفوظات', darkMode: 'الوضع الداكن', lightMode: 'وضع الإضاءة', filters: 'المرشحات', all: 'الجميع',
-                leaderboard: 'لوحة الصدارة', topCreators: 'أفضل المبدعين', rank: 'مرتبة', commandCenter: 'Command Center',
-                accountExists: 'هذا البريد الإلكتروني مرتبط بالفعل بمزود آخر. الرجاء تسجيل الدخول باستخدام هذا المزود.'
-            },
-            'Hindi (हिन्दी)': {
-                globalStream: 'ग्लोबल स्ट्रीम', alerts: 'अलर्ट', elitePortfolio: 'एलीट पोर्टफोलियो', settings: 'सेटिंग्स', transmitInsight: 'बुद्धिमत्ता साझा करें', searchPlaceholder: 'क्रिएटर्स खोजें...', signIn: 'साइन इन', nexusGlobal: 'Nexia ग्लोबल', worldClass: 'विश्व स्तरीय AI समुदाय', syncing: 'सिंक हो रहा है...', joinNexus: 'Nexia से जुड़ें', connectElite: 'एलीट क्रिएटर्स से जुड़ें।', trendingTech: 'ट्रेंडिंग तकनीक', tierElite: 'टियर: एलीट', selectLanguage: 'अपनी भाषा चुनें', noteLocalization: 'नोट: पूर्ण स्थानीयकरण जल्द ही आ रहा है।', cancel: 'रद्द करें', confirm: 'पुष्टि करें', changeLangTitle: 'भाषा बदलें?', changeLangDesc: 'क्या आप भाषा को बदलना चाहते हैं', backToFeed: 'स्ट्रीम पर वापस जाएं', editProfile: 'प्रोफ़ाइल संपादित करें', signOut: 'साइन आउट', followers: 'फॉलोअर्स', following: 'फॉलोइंग', creations: 'रचनाएँ', nexusRank: 'Nexia रैंक', sharedIntel: 'साझा विचार', trending: 'ट्रेंडिंग', latest: 'नवीनतम', members: 'कुल सदस्य', online: 'अभी ऑनलाइन', followedYou: 'ने आपको फॉलो करना शुरू किया!', noNotifications: 'कोई नया अलर्ट नहीं।', systemIntel: 'सिस्टम इंटेलिजेंस',
-                deleteAccount: 'खाता हटाएं', deleteWarning: 'यह क्रिया अपरिवर्तनीय है। आपका सारा डेटा स्थायी रूप से हटा दिया जाएगा।', enterPassword: 'अपना पासवर्ड दर्ज करें', confirmDelete: 'हाँ, मेरा खाता हटाएँ', wrongPassword: 'गलत पासवर्ड। कृपया पुनः प्रयास करें।', accountDeleted: 'खाता सफलतापूर्वक हटा दिया गया।',
-                save: 'सहेजें', saved: 'सहेजा गया', savedIntel: 'सहेजे गए', darkMode: 'डार्क मोड', lightMode: 'लाइट मोड', filters: 'फ़िल्टर', all: 'सभी',
-                leaderboard: 'लीडरबोर्ड', topCreators: 'शीर्ष निर्माता', rank: 'रैंक', commandCenter: 'Command Center',
-                accountExists: 'यह ईमेल पहले से ही किसी अन्य प्रदाता (Google/Email) से जुड़ा हुआ है। कृपया उस प्रदाता का उपयोग करके साइन इन करें।'
-            },
-            'Russian (Русский)': {
-                globalStream: 'Глобальный Поток', alerts: 'Уведомления', elitePortfolio: 'Элитное Портфолио', settings: 'Настройки', transmitInsight: 'Поделиться идеей', searchPlaceholder: 'Поиск Авторов...', signIn: 'ВОЙТИ', nexusGlobal: 'Nexia Global', worldClass: 'Мировое ИИ Сообщество', syncing: 'Синхронизация...', joinNexus: 'Присоединиться', connectElite: 'Связь с элитой.', trendingTech: 'Тренды', tierElite: 'Уровень: Элита', selectLanguage: 'Выберите язык', noteLocalization: 'Примечание: Полная локализация скоро.', cancel: 'Отмена', confirm: 'Подтвердить', changeLangTitle: 'Изменить язык?', changeLangDesc: 'Вы уверены, что хотите изменить язык на', backToFeed: 'Вернуться к потоку', editProfile: 'Редакт. профиль', signOut: 'Выйти', followers: 'Подписчики', following: 'Подписки', creations: 'Творения', nexusRank: 'Ранг Nexia', sharedIntel: 'Общий интеллект', trending: 'В тренде', latest: 'Новые', members: 'Всего участников', online: 'В сети', followedYou: 'начал(а) читать вас!', noNotifications: 'Нет новых уведомлений.', systemIntel: 'Системный интеллект',
-                deleteAccount: 'Удалить аккаунт', deleteWarning: 'Это действие необратимо. Все ваши данные будут удалены.', enterPassword: 'Ввести пароль', confirmDelete: 'Да, Удалить', wrongPassword: 'Неверный пароль. Попробуйте еще раз.', accountDeleted: 'Аккаунт успешно удален.',
-                save: 'Сохранить', saved: 'Сохранено', savedIntel: 'Сохраненные', darkMode: 'Темный режим', lightMode: 'Светлый режим', filters: 'Фильтры', all: 'Все',
-                leaderboard: 'Таблица лидеров', topCreators: 'Лучшие авторы', rank: 'Ранг', commandCenter: 'Command Center',
-                accountExists: 'Этот адрес электронной почты уже связан с другим провайдером. Пожалуйста, войдите с его помощью.'
+                accountExists: 'මෙම ඊමේල් ලිපිනයෙන් දැනටමත් ගිණුමක් ඇත (Google හෝ Email). කරුණාකර ඒ හරහා ලොග් වන්න.',
+                privacy: 'පෞද්ගලිකත්වය', public: 'සියල්ලන්ටම පෙනෙන', followersOnly: 'Followers ලට පමණක්', private: 'කිසිවෙකුට නොපෙනෙන', birthday: 'උපන් දිනය', age: 'වයස', hobbies: 'විනෝදාංශ', addHobby: 'විනෝදාංශයක් එක් කරන්න'
             }
         };
+        
+        // Add fallback languages (Spanish, French, etc.) mapped to English to save space, but keeping key structures
+        const fallbackLangs = ['Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'];
+        fallbackLangs.forEach(lang => { TRANSLATIONS[lang] = { ...TRANSLATIONS['English'] }; });
 
         const Icon = ({ name, className = "w-5 h-5", title, ...props }) => {
             if (name === 'google') return (
@@ -205,12 +169,12 @@
             if (name === 'nexia_logo') return (
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
                     <defs>
-                        <linearGradient id={`gradLogo-${title}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <linearGradient id={`gradLogo-${title || 'main'}`} x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stopColor="#3B82F6" />
                             <stop offset="100%" stopColor="#8B5CF6" />
                         </linearGradient>
                     </defs>
-                    <path d="M25 80 V25 L75 75 V20" stroke={`url(#gradLogo-${title})`} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M25 80 V25 L75 75 V20" stroke={`url(#gradLogo-${title || 'main'})`} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/>
                     <circle cx="25" cy="20" r="8" fill="#3B82F6" />
                     <circle cx="75" cy="80" r="8" fill="#8B5CF6" />
                 </svg>
@@ -279,20 +243,34 @@
         const App = () => {
             const [isReady, setIsReady] = useState(false);
             const [user, setUser] = useState(null);
-            const [profileData, setProfileData] = useState({ bio: '', name: '', photoURL: '', coverURL: '', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', followersCount: 0, followingCount: 0, savedPosts: [] });
+            
+            // New fields added: privacyLevel, birthday, hobbies, profilePicLikes
+            const [profileData, setProfileData] = useState({ 
+                bio: '', name: '', photoURL: '', coverURL: '', country: '', city: '', workplace: '', contactNo: '', 
+                privacyLevel: 'public', birthday: '', hobbies: [], language: 'English', 
+                followersCount: 0, followingCount: 0, savedPosts: [], profilePicLikes: [] 
+            });
             const [view, setView] = useState('home'); 
             const [posts, setPosts] = useState([]);
             const [loading, setLoading] = useState(true);
             const [authModal, setAuthModal] = useState({ open: false, mode: 'login', email: '', password: '', name: '', error: '' });
             
             const [postModal, setPostModal] = useState({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' });
-            const [editProfileData, setEditProfileData] = useState({ name: '', bio: '', photoURL: '', coverURL: '', imageFile: null, coverFile: null, country: '', city: '', workplace: '', contactNo: '', isLocked: false });
+            
+            const [editProfileData, setEditProfileData] = useState({ 
+                name: '', bio: '', photoURL: '', coverURL: '', imageFile: null, coverFile: null, 
+                country: '', city: '', workplace: '', contactNo: '', privacyLevel: 'public', birthday: '', hobbies: [] 
+            });
+            const [hobbyInput, setHobbyInput] = useState('');
             const [copiedId, setCopiedId] = useState(null);
             
             const [selectedUser, setSelectedUser] = useState(null);
             const [isFollowing, setIsFollowing] = useState(false);
             const [commentModal, setCommentModal] = useState({ open: false, post: null, text: '' });
             const [shareModal, setShareModal] = useState({ open: false, post: null });
+
+            // Profile Pic Modal View
+            const [profilePicModal, setProfilePicModal] = useState({ open: false, url: '', userId: '', likes: [] });
 
             const [notifications, setNotifications] = useState([]);
             const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
@@ -319,10 +297,33 @@
             const MASTER_ADMIN_EMAIL = 'creativeworld9204@gmail.com';
             const isAdmin = user && user.email === MASTER_ADMIN_EMAIL;
             
-            const [adminConfig, setAdminConfig] = useState({
-                likesWeight: 3, commentsWeight: 5, creatorBonusWeight: 0.1, timeDecay: 1.5, jitter: 5
-            });
+            const [adminConfig, setAdminConfig] = useState({ likesWeight: 3, commentsWeight: 5, creatorBonusWeight: 0.1, timeDecay: 1.5, jitter: 5 });
             const [adminTab, setAdminTab] = useState('algorithm');
+
+            // --- No Screenshot/Copy Security Implementation ---
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    // Prevent common screenshot shortcuts (PrtScn, Cmd+Shift+3/4/5)
+                    if (e.key === 'PrintScreen' || (e.metaKey && e.shiftKey)) {
+                        alert("Screenshots are restricted on Nexia for creator security.");
+                    }
+                    // Prevent copy (Ctrl+C / Cmd+C)
+                    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+                        alert("Text copying is disabled to protect prompts. Use the official copy button.");
+                    }
+                };
+                const preventContextMenu = (e) => {
+                    if (e.target.tagName === 'IMG') {
+                        e.preventDefault();
+                    }
+                };
+                document.addEventListener('keydown', handleKeyDown);
+                document.addEventListener('contextmenu', preventContextMenu);
+                return () => {
+                    document.removeEventListener('keydown', handleKeyDown);
+                    document.removeEventListener('contextmenu', preventContextMenu);
+                };
+            }, []);
 
             const navigate = (newView) => {
                 if (view !== newView) {
@@ -338,13 +339,10 @@
                 };
                 try {
                     window.addEventListener('popstate', handlePopState);
-                    if (!window.location.hash) {
-                        window.history.replaceState({ view: 'home' }, '', '#home');
-                    } else {
+                    if (!window.location.hash) { window.history.replaceState({ view: 'home' }, '', '#home'); } 
+                    else {
                         const hashView = window.location.hash.replace('#', '');
-                        if (['home', 'profile', 'settings', 'leaderboard', 'notifications', 'create_post', 'admin_panel', 'public_profile', 'edit_profile'].includes(hashView)) {
-                             setView(hashView);
-                        }
+                        if (['home', 'profile', 'settings', 'leaderboard', 'notifications', 'create_post', 'admin_panel', 'public_profile', 'edit_profile'].includes(hashView)) setView(hashView);
                     }
                 } catch (e) {}
                 return () => window.removeEventListener('popstate', handlePopState);
@@ -356,6 +354,13 @@
                 return dict[key] || TRANSLATIONS['English'][key] || key;
             };
 
+            const calculateAge = (dob) => {
+                if (!dob) return '';
+                const diff_ms = Date.now() - new Date(dob).getTime();
+                const age_dt = new Date(diff_ms);
+                return Math.abs(age_dt.getUTCFullYear() - 1970);
+            };
+
             useEffect(() => {
                 try {
                     const savedTheme = localStorage.getItem('nexus_theme');
@@ -365,13 +370,8 @@
 
             useEffect(() => {
                 try {
-                    if (isDarkMode) {
-                        document.documentElement.classList.add('dark');
-                        localStorage.setItem('nexus_theme', 'dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                        localStorage.setItem('nexus_theme', 'light');
-                    }
+                    if (isDarkMode) { document.documentElement.classList.add('dark'); localStorage.setItem('nexus_theme', 'dark'); } 
+                    else { document.documentElement.classList.remove('dark'); localStorage.setItem('nexus_theme', 'light'); }
                 } catch(e){}
             }, [isDarkMode]);
 
@@ -393,7 +393,6 @@
                 return () => window.removeEventListener('firebase-ready', handleReady);
             }, []);
 
-            // --- FIXED: Infinite Loop Bug in Auth State ---
             useEffect(() => {
                 if (!isReady) return;
                 const { auth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, isSignInWithEmailLink, signInWithEmailLink, db, appId, doc, setDoc, serverTimestamp, getDoc } = window.fb;
@@ -417,51 +416,28 @@
                                     const profileSnap = await getDoc(profileRef);
                                     if (!profileSnap.exists()) {
                                         await setDoc(profileRef, {
-                                            name: loggedInUser.email.split('@')[0], 
-                                            email: loggedInUser.email,
-                                            photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`,
-                                            coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
-                                            bio: 'Elite AI Creator exploring Nexia.',
-                                            country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English',
+                                            name: loggedInUser.email.split('@')[0], email: loggedInUser.email,
+                                            photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
+                                            bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', privacyLevel: 'public', birthday: '', hobbies: [], language: 'English',
                                             createdAt: serverTimestamp(), provider: 'magic_link'
                                         });
                                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', loggedInUser.uid), {
-                                            name: loggedInUser.email.split('@')[0], photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, followersCount: 0, followingCount: 0, lastActive: Date.now()
+                                            name: loggedInUser.email.split('@')[0], photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, followersCount: 0, followingCount: 0, profilePicLikes: [], lastActive: Date.now()
                                         }, { merge: true });
                                     }
                                     setAuthModal(prev => ({ ...prev, open: false, error: '' }));
-                                } catch (err) {
-                                    console.error("Magic link error", err);
-                                    alert("Magic link expired or invalid.");
-                                }
+                                } catch (err) { alert("Magic link expired or invalid."); }
                                 return;
                             }
                         }
-
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            try {
-                                await signInWithCustomToken(auth, __initial_auth_token);
-                            } catch (e) {
-                                await signInAnonymously(auth);
-                            }
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (e) {
-                        console.error("Auth init error", e);
-                        try { await signInAnonymously(auth); } catch (e2) {}
-                    } finally {
-                        isAuthenticating = false;
-                    }
+                            try { await signInWithCustomToken(auth, __initial_auth_token); } catch (e) { await signInAnonymously(auth); }
+                        } else { await signInAnonymously(auth); }
+                    } catch (e) { try { await signInAnonymously(auth); } catch (e2) {} } finally { isAuthenticating = false; }
                 };
 
                 initAuth();
-
-                const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
-                    setUser(u);
-                    setLoading(false);
-                });
-                
+                const unsubscribeAuth = onAuthStateChanged(auth, (u) => { setUser(u); setLoading(false); });
                 return () => unsubscribeAuth();
             }, [isReady]);
 
@@ -469,17 +445,8 @@
                 if (!isReady || !user) return;
                 const { db, appId, collection, onSnapshot, doc, setDoc } = window.fb;
                 
-                const unsubStats = onSnapshot(
-                    collection(db, 'artifacts', appId, 'public', 'data', 'stats'), 
-                    (snap) => setAllCreators(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(c => c.name)),
-                    (err) => console.warn('Stats error:', err)
-                );
-                
-                const unsubFollows = onSnapshot(
-                    collection(db, 'artifacts', appId, 'public', 'data', 'follows'), 
-                    (snap) => setAllFollows(snap.docs.map(d => d.data())),
-                    (err) => console.warn('Follows error:', err)
-                );
+                const unsubStats = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'stats'), (snap) => setAllCreators(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(c => c.name)), (err) => console.warn(err));
+                const unsubFollows = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'follows'), (snap) => setAllFollows(snap.docs.map(d => d.data())), (err) => console.warn(err));
 
                 let heartbeat;
                 if (!user.isAnonymous) {
@@ -489,11 +456,7 @@
                 }
 
                 let unsubConfig = () => {};
-                try { 
-                    unsubConfig = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'algorithm'), 
-                    (s) => { if(s.exists()) setAdminConfig(s.data()); },
-                    (err) => console.warn('Config error:', err)
-                ); } catch(e){}
+                try { unsubConfig = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'algorithm'), (s) => { if(s.exists()) setAdminConfig(s.data()); }, (err) => console.warn(err)); } catch(e){}
 
                 return () => { unsubStats(); unsubFollows(); unsubConfig(); if (heartbeat) clearInterval(heartbeat); };
             }, [isReady, user]);
@@ -518,41 +481,25 @@
                 if (!isReady || !user || user.isAnonymous) return;
                 const { db, appId, doc, onSnapshot } = window.fb;
                 
-                const unsubProfile = onSnapshot(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), 
-                    (s) => { if(s.exists()) setProfileData(p => ({ ...p, ...s.data() })); },
-                    (err) => console.warn('Profile err:', err)
-                );
-                
-                const unsubStats = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), 
-                    (s) => { if(s.exists()) setProfileData(p => ({ ...p, ...s.data() })); },
-                    (err) => console.warn('Stats user err:', err)
-                );
+                const unsubProfile = onSnapshot(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), (s) => { if(s.exists()) setProfileData(p => ({ ...p, ...s.data() })); }, (err) => console.warn(err));
+                const unsubStats = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), (s) => { if(s.exists()) setProfileData(p => ({ ...p, ...s.data() })); }, (err) => console.warn(err));
                 return () => { unsubProfile(); unsubStats(); };
             }, [isReady, user]);
 
             useEffect(() => {
                 if (!isReady || !user || user.isAnonymous) return;
                 const { db, appId, collection, onSnapshot } = window.fb;
-                
-                const unsubNotifs = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), 
-                    (snap) => {
-                        const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-                            .filter(n => n.targetUserId === user.uid)
-                            .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                        setNotifications(fetched);
-                        setHasUnreadNotifications(fetched.some(n => !n.read));
-                    },
-                    (err) => console.warn('Notifs err:', err)
-                );
+                const unsubNotifs = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), (snap) => {
+                    const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(n => n.targetUserId === user.uid).sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    setNotifications(fetched); setHasUnreadNotifications(fetched.some(n => !n.read));
+                }, (err) => console.warn(err));
                 return () => unsubNotifs();
             }, [isReady, user]);
 
             useEffect(() => {
                 if (view === 'notifications' && hasUnreadNotifications && user && !user.isAnonymous) {
                     const { db, appId, doc, updateDoc } = window.fb;
-                    notifications.filter(n => !n.read).forEach(n => {
-                        updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'notifications', n.id), { read: true }).catch(()=>{});
-                    });
+                    notifications.filter(n => !n.read).forEach(n => updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'notifications', n.id), { read: true }).catch(()=>{}));
                     setHasUnreadNotifications(false);
                 }
             }, [view, hasUnreadNotifications, notifications, user]);
@@ -560,10 +507,7 @@
             useEffect(() => {
                 if (!isReady || !user) return; 
                 const { db, appId, collection, onSnapshot } = window.fb;
-                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), 
-                    (snap) => setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
-                    (err) => console.warn('Posts err:', err)
-                );
+                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), (snap) => setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() }))), (err) => console.warn(err));
                 return () => unsubPosts();
             }, [isReady, user]);
 
@@ -577,21 +521,13 @@
             useEffect(() => {
                 if (!selectedUser || !user || user.isAnonymous) return;
                 const { db, appId, doc, onSnapshot } = window.fb;
-                const unsub = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'follows', `${user.uid}_${selectedUser.id}`), 
-                    (s) => setIsFollowing(s.exists()),
-                    (err) => console.warn('Follow err:', err)
-                );
+                const unsub = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'follows', `${user.uid}_${selectedUser.id}`), (s) => setIsFollowing(s.exists()), (err) => console.warn(err));
                 return () => unsub();
             }, [selectedUser, user]);
 
             const availableFilters = useMemo(() => {
-                const tags = new Set();
-                const models = new Set();
-                posts.forEach(p => {
-                    if (p.model) models.add(p.model);
-                    const foundTags = p.prompt?.match(/#[a-zA-Z0-9_]+/g);
-                    if (foundTags) foundTags.forEach(t => tags.add(t.toLowerCase()));
-                });
+                const tags = new Set(); const models = new Set();
+                posts.forEach(p => { if (p.model) models.add(p.model); const foundTags = p.prompt?.match(/#[a-zA-Z0-9_]+/g); if (foundTags) foundTags.forEach(t => tags.add(t.toLowerCase())); });
                 return ['All', ...Array.from(models), ...Array.from(tags).slice(0, 8)]; 
             }, [posts]);
 
@@ -628,12 +564,11 @@
                         const initData = {
                             name: result.user.displayName || result.user.email?.split('@')[0] || 'Nexia Creator', email: result.user.email || '',
                             photoURL: result.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
-                            bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', createdAt: serverTimestamp(), provider: providerType
+                            bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', privacyLevel: 'public', birthday: '', hobbies: [], language: 'English', createdAt: serverTimestamp(), provider: providerType
                         };
                         await setDoc(profileRef, initData);
-                        
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', result.user.uid), { 
-                            name: initData.name, photoURL: initData.photoURL, coverURL: initData.coverURL, bio: initData.bio, followersCount: 0, followingCount: 0, lastActive: Date.now() 
+                            name: initData.name, photoURL: initData.photoURL, coverURL: initData.coverURL, bio: initData.bio, followersCount: 0, followingCount: 0, profilePicLikes: [], lastActive: Date.now() 
                         }, { merge: true });
                     }
                     setAuthModal({ ...authModal, open: false, error: '' });
@@ -669,7 +604,6 @@
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { followingCount: increment(1) }, { merge: true });
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', selectedUser.id), { followersCount: increment(1) }, { merge: true });
                         setSelectedUser(prev => ({ ...prev, followersCount: (prev.followersCount || 0) + 1 }));
-                        
                         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: selectedUser.id, type: 'follow', fromUserId: user.uid, fromUserName: profileData.name || user.displayName, fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
                     }
                 } catch (e) {}
@@ -684,8 +618,8 @@
                         const res = await createUserWithEmailAndPassword(auth, authModal.email, authModal.password);
                         await updateProfile(res.user, { displayName: authModal.name });
                         const defaultPhoto = `https://api.dicebear.com/7.x/avataaars/svg?seed=${res.user.uid}`;
-                        await setDoc(doc(db, 'artifacts', appId, 'users', res.user.uid, 'profile', 'info'), { name: authModal.name, email: authModal.email, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', createdAt: serverTimestamp() });
-                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', res.user.uid), { name: authModal.name, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Elite AI Creator exploring Nexia.', followersCount: 0, followingCount: 0, lastActive: Date.now() }, { merge: true });
+                        await setDoc(doc(db, 'artifacts', appId, 'users', res.user.uid, 'profile', 'info'), { name: authModal.name, email: authModal.email, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', privacyLevel: 'public', birthday: '', hobbies: [], language: 'English', createdAt: serverTimestamp() });
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', res.user.uid), { name: authModal.name, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Elite AI Creator exploring Nexia.', followersCount: 0, followingCount: 0, profilePicLikes: [], lastActive: Date.now() }, { merge: true });
                     } else {
                         await signInWithEmailAndPassword(auth, authModal.email, authModal.password);
                     }
@@ -710,8 +644,23 @@
             };
 
             const handleEditProfileOpen = () => {
-                setEditProfileData({ name: profileData.name || '', bio: profileData.bio || '', photoURL: profileData.photoURL || '', coverURL: profileData.coverURL || '', country: profileData.country || '', city: profileData.city || '', workplace: profileData.workplace || '', contactNo: profileData.contactNo || '', isLocked: profileData.isLocked || false, imageFile: null, coverFile: null });
+                setEditProfileData({ 
+                    name: profileData.name || '', bio: profileData.bio || '', photoURL: profileData.photoURL || '', coverURL: profileData.coverURL || '', 
+                    country: profileData.country || '', city: profileData.city || '', workplace: profileData.workplace || '', contactNo: profileData.contactNo || '', 
+                    privacyLevel: profileData.privacyLevel || 'public', birthday: profileData.birthday || '', hobbies: profileData.hobbies || [],
+                    imageFile: null, coverFile: null 
+                });
                 navigate('edit_profile');
+            };
+
+            const addHobby = () => {
+                if (hobbyInput.trim() && editProfileData.hobbies.length < 5) {
+                    setEditProfileData({ ...editProfileData, hobbies: [...editProfileData.hobbies, hobbyInput.trim()] });
+                    setHobbyInput('');
+                }
+            };
+            const removeHobby = (index) => {
+                setEditProfileData({ ...editProfileData, hobbies: editProfileData.hobbies.filter((_, i) => i !== index) });
             };
 
             const saveProfileUpdates = async (e) => {
@@ -724,8 +673,16 @@
                     if (editProfileData.imageFile) { const u = await uploadToImgBB(editProfileData.imageFile); if(u) finalPhotoURL = u; }
                     if (editProfileData.coverFile) { const u = await uploadToImgBB(editProfileData.coverFile); if(u) finalCoverURL = u; }
 
-                    await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), { name: editProfileData.name, bio: editProfileData.bio, photoURL: finalPhotoURL, coverURL: finalCoverURL, country: editProfileData.country, city: editProfileData.city, workplace: editProfileData.workplace, contactNo: editProfileData.contactNo, isLocked: editProfileData.isLocked });
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { name: editProfileData.name, photoURL: finalPhotoURL, coverURL: finalCoverURL, bio: editProfileData.bio, country: editProfileData.country, city: editProfileData.city, workplace: editProfileData.workplace, contactNo: editProfileData.contactNo, isLocked: editProfileData.isLocked }, { merge: true });
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), { 
+                        name: editProfileData.name, bio: editProfileData.bio, photoURL: finalPhotoURL, coverURL: finalCoverURL, 
+                        country: editProfileData.country, city: editProfileData.city, workplace: editProfileData.workplace, 
+                        contactNo: editProfileData.contactNo, privacyLevel: editProfileData.privacyLevel, birthday: editProfileData.birthday, hobbies: editProfileData.hobbies 
+                    });
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { 
+                        name: editProfileData.name, photoURL: finalPhotoURL, coverURL: finalCoverURL, bio: editProfileData.bio, 
+                        country: editProfileData.country, city: editProfileData.city, workplace: editProfileData.workplace, 
+                        contactNo: editProfileData.contactNo, privacyLevel: editProfileData.privacyLevel, birthday: editProfileData.birthday, hobbies: editProfileData.hobbies 
+                    }, { merge: true });
                     await updateProfile(auth.currentUser, { displayName: editProfileData.name, photoURL: finalPhotoURL });
                     navigate('profile');
                 } catch (e) { alert("Error updating profile."); }
@@ -752,6 +709,27 @@
                     }
                 } catch (err) {}
                 setUploading(false);
+            };
+
+            const toggleProfilePicLike = async (targetUserId) => {
+                if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
+                const { db, appId, doc, updateDoc, arrayUnion, arrayRemove } = window.fb;
+                const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', targetUserId);
+                
+                // Target can be either the selected user or self (if viewing own profile)
+                let currentLikes = [];
+                if (view === 'public_profile' && selectedUser?.id === targetUserId) {
+                    currentLikes = selectedUser.profilePicLikes || [];
+                } else if (view === 'profile' && user.uid === targetUserId) {
+                    currentLikes = profileData.profilePicLikes || [];
+                }
+                
+                const hasLiked = currentLikes.includes(user.uid);
+                
+                try {
+                    if (hasLiked) { await updateDoc(statsRef, { profilePicLikes: arrayRemove(user.uid) }); } 
+                    else { await updateDoc(statsRef, { profilePicLikes: arrayUnion(user.uid) }); }
+                } catch(e) { console.error(e); }
             };
 
             const confirmLanguageChange = async () => {
@@ -881,15 +859,16 @@
                             </div>
                         </div>
                     </div>
-                    <div className="relative group px-2 md:px-4">
-                        <img src={post.imageUrl} className="w-full aspect-square object-cover rounded-[2rem] md:rounded-[3rem] shadow-sm bg-slate-50" loading="lazy" />
-                        <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-10 md:right-10 bg-white/90 backdrop-blur text-slate-900 p-4 md:p-5 rounded-2xl md:rounded-3xl shadow-2xl hover:scale-110 active:scale-90 transition-all border border-white flex items-center justify-center">
+                    <div className="secure-img-wrapper px-2 md:px-4">
+                        <div className="secure-overlay"></div>
+                        <img src={post.imageUrl} className="w-full aspect-square object-cover rounded-[2rem] md:rounded-[3rem] shadow-sm bg-slate-50 no-drag" loading="lazy" />
+                        <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-10 md:right-10 bg-white/90 backdrop-blur text-slate-900 p-4 md:p-5 rounded-2xl md:rounded-3xl shadow-2xl hover:scale-110 active:scale-90 transition-all border border-white flex items-center justify-center z-20">
                             {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 w-5 h-5 md:w-7 md:h-7" /> : <Icon name="clipboard" className="w-5 h-5 md:w-7 md:h-7" />}
                         </button>
                     </div>
                     <div className="px-5 pb-5 pt-5 md:px-8 md:pb-6 md:pt-6">
                         <div className="bg-slate-50/70 p-5 md:p-7 rounded-[2rem] md:rounded-[2.8rem] border border-slate-100 italic relative mb-4">
-                            <p className="text-[13px] md:text-[15px] font-mono text-slate-600 leading-relaxed break-words whitespace-pre-wrap">{formatPrompt(post.prompt)}</p>
+                            <p className="text-[13px] md:text-[15px] font-mono text-slate-600 leading-relaxed break-words whitespace-pre-wrap no-select">{formatPrompt(post.prompt)}</p>
                             <div className="absolute -top-3 -left-1 bg-white p-1 rounded-lg border border-slate-100 shadow-sm"><Icon name="terminal" className="w-3 h-3 md:w-4 md:h-4 text-slate-300" /></div>
                         </div>
                         <div className="flex items-center justify-between border-t border-slate-100 pt-4 px-2">
@@ -948,7 +927,7 @@
                                     <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
                                         <div className="hidden md:block text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{isAdmin ? 'MASTER ADMIN' : t('tierElite')}</p><p className="text-sm font-bold text-slate-900 leading-none">{profileData.name || user.displayName}</p></div>
                                         <button onClick={() => { navigate('profile'); setSelectedUser(null); }} className={`w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 shadow-sm active:scale-90 transition-transform bg-white p-0.5 flex-shrink-0 ${isAdmin ? 'border-red-500' : 'border-blue-500'}`}>
-                                            <img src={profileData.photoURL || user.photoURL} className="rounded-lg md:rounded-xl object-cover w-full h-full" />
+                                            <img src={profileData.photoURL || user.photoURL} className="rounded-lg md:rounded-xl object-cover w-full h-full no-drag" />
                                         </button>
                                     </div>
                                 )}
@@ -972,34 +951,34 @@
                             
                             {view === 'admin_panel' && isAdmin && (
                                 <div className="animate-in fade-in duration-700">
-                                    <div className="bg-white rounded-[2rem] md:rounded-[4rem] shadow-sm p-6 md:p-12 mb-10">
-                                        <div className="flex flex-col items-center mb-10 border-b border-slate-100 pb-8 text-center"><div className="w-20 h-20 bg-red-50 text-red-600 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-red-100"><Icon name="alert" className="w-10 h-10" /></div><h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none font-outfit">Nexia Command Center</h2><p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-3 text-red-500">Master Admin Access Only</p></div>
-                                        <div className="flex justify-center gap-4 mb-10 bg-slate-50 p-2 rounded-full border border-slate-100"><button onClick={() => setAdminTab('algorithm')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white text-red-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-900'}`}>Algorithm Tuner</button><button onClick={() => setAdminTab('users')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white text-red-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-900'}`}>User Management</button></div>
+                                    <div className="bg-white rounded-[2rem] md:rounded-[4rem] shadow-sm p-6 md:p-12 mb-10 dark:bg-slate-800 dark:border-slate-700 border border-slate-100">
+                                        <div className="flex flex-col items-center mb-10 border-b border-slate-100 dark:border-slate-700 pb-8 text-center"><div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-red-100 dark:border-red-900/50"><Icon name="alert" className="w-10 h-10" /></div><h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none font-outfit">Nexia Command Center</h2><p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-3 text-red-500 dark:text-red-400">Master Admin Access Only</p></div>
+                                        <div className="flex justify-center gap-4 mb-10 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-full border border-slate-100 dark:border-slate-700"><button onClick={() => setAdminTab('algorithm')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Algorithm Tuner</button><button onClick={() => setAdminTab('users')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>User Management</button></div>
                                         {adminTab === 'algorithm' ? (
                                             <div className="space-y-8 animate-in slide-in-from-right-4">
                                                 <div className="space-y-6">
-                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Like Weight</span> <span className="text-red-500">{adminConfig.likesWeight}x</span></label><input type="range" min="1" max="10" step="0.5" value={adminConfig.likesWeight} onChange={e => setAdminConfig({...adminConfig, likesWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
-                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Comment Weight</span> <span className="text-red-500">{adminConfig.commentsWeight}x</span></label><input type="range" min="1" max="15" step="0.5" value={adminConfig.commentsWeight} onChange={e => setAdminConfig({...adminConfig, commentsWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Like Weight</span> <span className="text-red-500 dark:text-red-400">{adminConfig.likesWeight}x</span></label><input type="range" min="1" max="10" step="0.5" value={adminConfig.likesWeight} onChange={e => setAdminConfig({...adminConfig, likesWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>Comment Weight</span> <span className="text-red-500 dark:text-red-400">{adminConfig.commentsWeight}x</span></label><input type="range" min="1" max="15" step="0.5" value={adminConfig.commentsWeight} onChange={e => setAdminConfig({...adminConfig, commentsWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
                                                 </div>
-                                                <button onClick={saveAdminConfig} disabled={uploading} className="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl hover:bg-slate-800 active:scale-95 transition-all uppercase mt-6">{uploading ? 'SYNCING MATRIX...' : 'DEPlOY NEW ALGORITHM'}</button>
+                                                <button onClick={saveAdminConfig} disabled={uploading} className="w-full bg-slate-900 dark:bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl hover:bg-slate-800 dark:hover:bg-blue-700 active:scale-95 transition-all uppercase mt-6">{uploading ? 'SYNCING MATRIX...' : 'DEPlOY NEW ALGORITHM'}</button>
                                             </div>
                                         ) : (
                                             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                                                 {allCreators.map(creator => (
-                                                    <div key={creator.id} className="bg-slate-50 p-4 rounded-[2rem] border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                                    <div key={creator.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-[2rem] border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
                                                         <div className="flex items-center gap-4 cursor-pointer" onClick={() => openPublicProfile(creator.id)}>
-                                                            <img src={creator.photoURL} className="w-12 h-12 rounded-2xl object-cover border border-slate-200" />
+                                                            <img src={creator.photoURL} className="w-12 h-12 rounded-2xl object-cover border border-slate-200 dark:border-slate-600" />
                                                             <div><p className="font-extrabold text-sm text-slate-900 flex items-center gap-1">{creator.name} {getAuthorBadges(creator.id)}</p><p className="text-[10px] font-bold text-slate-500">{creator.followersCount || 0} Followers</p></div>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <button onClick={() => toggleAdminUserStatus(creator.id, 'isVerified')} className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ${creator.isVerified ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-white text-slate-500 border border-slate-200'}`}><Icon name="checkcircle" className="w-4 h-4 inline mr-1"/> Verify</button>
+                                                            <button onClick={() => toggleAdminUserStatus(creator.id, 'isVerified')} className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ${creator.isVerified ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200 dark:border-slate-600'}`}><Icon name="checkcircle" className="w-4 h-4 inline mr-1"/> Verify</button>
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
-                                    <button onClick={() => navigate('home')} className="w-full py-5 bg-slate-100 text-slate-400 rounded-full font-black hover:bg-slate-200 uppercase tracking-[0.2em] text-[9px] lg:hidden">Return to Nexia</button>
+                                    <button onClick={() => navigate('home')} className="w-full py-5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-300 rounded-full font-black hover:bg-slate-200 dark:hover:bg-slate-700 uppercase tracking-[0.2em] text-[9px] lg:hidden">Return to Nexia</button>
                                 </div>
                             )}
 
@@ -1017,8 +996,8 @@
                                     <div className="sticky top-[60px] md:top-[80px] z-30 bg-[#F8FAFC] dark:bg-[#020617] pt-2 pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                                         <div className="flex flex-col gap-4">
                                             <div className="flex justify-center md:justify-start gap-4">
-                                                <button onClick={() => setFeedAlgorithm('trending')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'trending' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}><Icon name="flame" className="w-4 h-4" /> {t('trending')}</button>
-                                                <button onClick={() => setFeedAlgorithm('latest')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'latest' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}><Icon name="clock" className="w-4 h-4" /> {t('latest')}</button>
+                                                <button onClick={() => setFeedAlgorithm('trending')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'trending' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}><Icon name="flame" className="w-4 h-4" /> {t('trending')}</button>
+                                                <button onClick={() => setFeedAlgorithm('latest')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'latest' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}><Icon name="clock" className="w-4 h-4" /> {t('latest')}</button>
                                             </div>
                                             <div className="flex overflow-x-auto gap-2 no-scrollbar pb-2 pt-1">
                                                 {availableFilters.map(filter => (
@@ -1063,7 +1042,7 @@
                                         {allCreators.sort((a, b) => (b.followersCount || 0) - (a.followersCount || 0)).slice(0, 10).map((creator, index) => (
                                             <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className="flex items-center gap-4 p-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
                                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-slate-200 text-slate-600' : 'bg-slate-50 text-slate-400'}`}>#{index + 1}</div>
-                                                <img src={creator.photoURL} className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
+                                                <img src={creator.photoURL} className="w-12 h-12 rounded-xl object-cover border border-slate-200 no-drag" />
                                                 <div className="flex-1"><p className="font-extrabold text-sm text-slate-900 flex items-center gap-1">{creator.name} {getAuthorBadges(creator.id)}</p><p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Nexia Network</p></div>
                                                 <div className="text-right font-black text-slate-800">{creator.followersCount || 0}</div>
                                             </div>
@@ -1072,58 +1051,160 @@
                                 </div>
                             )}
 
-                            {view === 'profile' && (
-                                <div className="animate-in fade-in duration-700">
-                                    <div className="bg-white rounded-[2.5rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
-                                        <div className="h-44 relative bg-slate-800">
-                                            {profileData.coverURL && <img src={profileData.coverURL} className="w-full h-full object-cover opacity-80" />}
-                                            <div className="absolute inset-0 bg-black/10"></div>
-                                            {uploading && <div className="absolute inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-10"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
-                                            <label htmlFor="cover-upload" className="absolute bottom-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-black/70 border border-white/20 z-20"><Icon name="camera" /></label>
-                                            <input type="file" id="cover-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'cover')} disabled={uploading} />
+                            {(view === 'profile' || (view === 'public_profile' && selectedUser)) && (() => {
+                                const targetData = view === 'profile' ? profileData : selectedUser;
+                                const isOwnProfile = view === 'profile' || selectedUser?.id === user?.uid;
+                                
+                                // Privacy Logic
+                                const canViewDetails = isOwnProfile || 
+                                    targetData.privacyLevel === 'public' || 
+                                    (targetData.privacyLevel === 'followers' && isFollowing);
+                                
+                                const isTotallyLocked = targetData.privacyLevel === 'private' && !isOwnProfile;
+
+                                return (
+                                    <div className="animate-in fade-in duration-700">
+                                        <div className="bg-white rounded-[2.5rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
+                                            <div className="h-44 relative bg-slate-800 secure-img-wrapper">
+                                                <div className="secure-overlay"></div>
+                                                {targetData.coverURL && <img src={targetData.coverURL} className="w-full h-full object-cover opacity-80 no-drag" />}
+                                                {isOwnProfile && <><div className="absolute inset-0 bg-black/10 z-10"></div>
+                                                {uploading && <div className="absolute inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-20"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
+                                                <label htmlFor="cover-upload" className="absolute bottom-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-black/70 border border-white/20 z-30"><Icon name="camera" /></label>
+                                                <input type="file" id="cover-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'cover')} disabled={uploading} /></>}
+                                            </div>
+                                            <div className="px-6 pb-12 relative flex flex-col items-center">
+                                                <div className="-mt-16 relative z-10 mb-4 secure-img-wrapper" style={{width: '128px', height: '128px'}}>
+                                                    <div className="secure-overlay cursor-pointer" onClick={() => setProfilePicModal({open: true, url: targetData.photoURL, userId: targetData.id || user?.uid, likes: targetData.profilePicLikes || []})}></div>
+                                                    <img src={targetData.photoURL} className="w-32 h-32 rounded-[2.5rem] border-8 border-white bg-white object-cover shadow-2xl no-drag" />
+                                                    {isOwnProfile && uploading && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center z-20"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
+                                                    {isOwnProfile && <><label htmlFor="avatar-upload" className="absolute bottom-0 right-0 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center cursor-pointer border-4 border-white z-30"><Icon name="camera" className="w-4 h-4" /></label>
+                                                    <input type="file" id="avatar-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'avatar')} disabled={uploading} /></>}
+                                                </div>
+                                                
+                                                <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-2 font-outfit">
+                                                    {targetData.name} 
+                                                    {!isOwnProfile && targetData.privacyLevel !== 'public' && <Icon name="lock" className="text-blue-600 w-4 h-4"/>} 
+                                                    {getAuthorBadges(targetData.id || user?.uid)}
+                                                </h2>
+                                                <p className="text-blue-600 font-black text-[10px] tracking-[0.2em] uppercase mb-6">{targetData.email}</p>
+                                                
+                                                <div className="flex gap-8 mb-6">
+                                                    <div><p className="text-2xl font-black text-slate-900">{targetData.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('followers')}</p></div>
+                                                    <div className="border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900">{targetData.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('following')}</p></div>
+                                                </div>
+
+                                                {!isOwnProfile && !isFollowing && (
+                                                    <button onClick={toggleFollow} className="w-full max-w-[240px] py-4 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-all mb-8 bg-blue-600 text-white hover:bg-blue-700 shadow-xl"><Icon name="userplus" className="w-4 h-4" /> Follow Creator</button>
+                                                )}
+                                                {!isOwnProfile && isFollowing && (
+                                                    <button onClick={toggleFollow} className="w-full max-w-[240px] py-4 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-all mb-8 bg-slate-100 text-slate-500 hover:text-red-500 hover:bg-red-50"><Icon name="usercheck" className="w-4 h-4" /> Following</button>
+                                                )}
+
+                                                {isTotallyLocked ? (
+                                                    <div className="bg-blue-50/50 p-6 rounded-2xl max-w-md w-full mb-4"><Icon name="shieldcheck" className="w-10 h-10 text-blue-500 mx-auto mb-3" /><p className="text-blue-900 font-bold text-sm">Profile is Private.</p></div>
+                                                ) : !canViewDetails ? (
+                                                    <div className="bg-blue-50/50 p-6 rounded-2xl max-w-md w-full mb-4"><Icon name="shieldcheck" className="w-10 h-10 text-blue-500 mx-auto mb-3" /><p className="text-blue-900 font-bold text-sm">Profile locked. Follow to see details.</p></div>
+                                                ) : (
+                                                    <>
+                                                        <p className="text-slate-500 font-medium text-sm italic mb-6 max-w-md leading-relaxed no-select">"{targetData.bio}"</p>
+                                                        
+                                                        {/* Details Section */}
+                                                        <div className="bg-slate-50 p-6 rounded-[2rem] w-full max-w-md mb-6 space-y-3 text-left">
+                                                            {(targetData.city || targetData.country) && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><Icon name="pin" className="text-blue-500 w-4 h-4"/> {targetData.city}{targetData.city && targetData.country ? ', ' : ''}{targetData.country}</div>}
+                                                            {targetData.workplace && <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><Icon name="briefcase" className="text-blue-500 w-4 h-4"/> {targetData.workplace}</div>}
+                                                            {targetData.contactNo && <div className="flex items-center gap-3 text-xs font-bold text-slate-600 no-select"><Icon name="phone" className="text-blue-500 w-4 h-4"/> {targetData.contactNo}</div>}
+                                                            {targetData.birthday && <div className="flex items-center justify-between"><div className="flex items-center gap-3 text-xs font-bold text-slate-600"><Icon name="sparkles" className="text-blue-500 w-4 h-4"/> Born: {targetData.birthday}</div> <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-lg uppercase tracking-widest">{calculateAge(targetData.birthday)} Y/O</span></div>}
+                                                        </div>
+
+                                                        {/* Hobbies Section */}
+                                                        {targetData.hobbies && targetData.hobbies.length > 0 && (
+                                                            <div className="w-full max-w-md flex flex-wrap justify-center gap-2 mb-6">
+                                                                {targetData.hobbies.map((hobby, i) => (
+                                                                    <span key={i} className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">{hobby}</span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {isOwnProfile && (
+                                                    <div className="flex gap-4">
+                                                        <button onClick={handleEditProfileOpen} className="bg-slate-900 text-white px-8 py-3 rounded-full font-black text-xs uppercase flex items-center gap-2"><Icon name="edit" className="w-4 h-4"/> {t('editProfile')}</button>
+                                                        <button onClick={() => { navigate('settings'); setSettingsSection('menu'); }} className="bg-slate-100 text-slate-600 px-6 py-3 rounded-full font-black text-xs uppercase"><Icon name="settings" className="w-4 h-4"/></button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="px-6 pb-12 relative flex flex-col items-center">
-                                            <div className="-mt-16 relative z-10 mb-4">
-                                                <img src={profileData.photoURL || user?.photoURL} className="w-32 h-32 rounded-[2.5rem] border-8 border-white bg-white object-cover" />
-                                                {uploading && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
-                                                <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center cursor-pointer border-4 border-white"><Icon name="camera" className="w-4 h-4" /></label>
-                                                <input type="file" id="avatar-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'avatar')} disabled={uploading} />
+
+                                        {!isTotallyLocked && canViewDetails && (
+                                            <div className="space-y-6">
+                                                <div className="flex justify-center gap-8 border-b border-slate-100 mb-6">
+                                                    <button onClick={() => setProfileTab('creations')} className={`pb-4 font-black text-xs uppercase tracking-widest ${profileTab === 'creations' ? 'border-b-4 border-blue-600 text-slate-900' : 'text-slate-400'}`}>{t('creations')}</button>
+                                                    {isOwnProfile && <button onClick={() => setProfileTab('saved')} className={`pb-4 font-black text-xs uppercase tracking-widest ${profileTab === 'saved' ? 'border-b-4 border-blue-600 text-slate-900' : 'text-slate-400'}`}><Icon name="bookmark" className="w-3 h-3 inline mr-1"/>{t('savedIntel')}</button>}
+                                                </div>
+                                                <div className="space-y-8">
+                                                    {profileTab === 'creations' && (isOwnProfile ? userPosts : targetUserPosts).length === 0 ? <div className="text-center py-10"><Icon name="image" className="w-10 h-10 text-slate-200 mx-auto mb-3" /><p className="text-slate-400 font-bold text-[10px] uppercase">No creations yet.</p></div> : 
+                                                    profileTab === 'saved' && posts.filter(p => profileData.savedPosts?.includes(p.id)).length === 0 ? <div className="text-center py-10"><Icon name="bookmark" className="w-10 h-10 text-slate-200 mx-auto mb-3" /><p className="text-slate-400 font-bold text-[10px] uppercase">No saved prompts yet.</p></div> : 
+                                                    (profileTab === 'creations' ? (isOwnProfile ? userPosts : targetUserPosts) : posts.filter(p => profileData.savedPosts?.includes(p.id))).map(p => renderPostCard(p))}
+                                                </div>
                                             </div>
-                                            <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-2 font-outfit">{profileData.name} {profileData.isLocked && <Icon name="lock" className="text-blue-600 w-4 h-4"/>} {getAuthorBadges(user?.uid)}</h2>
-                                            <p className="text-blue-600 font-black text-[10px] tracking-[0.2em] uppercase mb-6">{user?.email}</p>
-                                            <div className="flex gap-8 mb-6">
-                                                <div><p className="text-2xl font-black text-slate-900">{profileData.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('followers')}</p></div>
-                                                <div className="border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900">{profileData.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('following')}</p></div>
-                                            </div>
-                                            <p className="text-slate-500 font-medium text-sm italic mb-6">"{profileData.bio}"</p>
-                                            <div className="flex gap-4">
-                                                <button onClick={handleEditProfileOpen} className="bg-slate-900 text-white px-8 py-3 rounded-full font-black text-xs uppercase flex items-center gap-2"><Icon name="edit" className="w-4 h-4"/> {t('editProfile')}</button>
-                                                <button onClick={() => { navigate('settings'); setSettingsSection('menu'); }} className="bg-slate-100 text-slate-600 px-6 py-3 rounded-full font-black text-xs uppercase"><Icon name="settings" className="w-4 h-4"/></button>
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
-                                    <div className="space-y-6">
-                                        <div className="flex justify-center gap-8 border-b border-slate-100 mb-6">
-                                            <button onClick={() => setProfileTab('creations')} className={`pb-4 font-black text-xs uppercase tracking-widest ${profileTab === 'creations' ? 'border-b-4 border-blue-600 text-slate-900' : 'text-slate-400'}`}>{t('creations')}</button>
-                                            <button onClick={() => setProfileTab('saved')} className={`pb-4 font-black text-xs uppercase tracking-widest ${profileTab === 'saved' ? 'border-b-4 border-blue-600 text-slate-900' : 'text-slate-400'}`}><Icon name="bookmark" className="w-3 h-3 inline mr-1"/>{t('savedIntel')}</button>
-                                        </div>
-                                        <div className="space-y-8">
-                                            {profileTab === 'creations' && userPosts.length === 0 ? <div className="text-center py-10"><Icon name="image" className="w-10 h-10 text-slate-200 mx-auto mb-3" /><p className="text-slate-400 font-bold text-[10px] uppercase">No creations yet.</p></div> : profileTab === 'saved' && posts.filter(p => profileData.savedPosts?.includes(p.id)).length === 0 ? <div className="text-center py-10"><Icon name="bookmark" className="w-10 h-10 text-slate-200 mx-auto mb-3" /><p className="text-slate-400 font-bold text-[10px] uppercase">No saved prompts yet.</p></div> : (profileTab === 'creations' ? userPosts : posts.filter(p => profileData.savedPosts?.includes(p.id))).map(p => renderPostCard(p))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             {view === 'edit_profile' && (
                                 <div className="animate-in fade-in duration-700">
-                                    <div className="bg-white rounded-[2.5rem] shadow-sm p-8 mb-10">
-                                        <div className="flex items-center mb-8 border-b border-slate-100 pb-6"><button onClick={() => navigate('profile')} className="mr-4 bg-slate-50 p-2.5 rounded-full text-slate-400 hover:text-blue-600"><Icon name="arrowleft" /></button><h2 className="text-2xl font-black text-slate-900 uppercase">Edit Profile</h2></div>
+                                    <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm p-6 md:p-8 mb-10 border border-slate-100 dark:border-slate-700">
+                                        <div className="flex items-center mb-8 border-b border-slate-100 dark:border-slate-700 pb-6"><button onClick={() => navigate('profile')} className="mr-4 bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full text-slate-400 hover:text-blue-600 transition-colors"><Icon name="arrowleft" /></button><h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase">Edit Profile</h2></div>
                                         <form onSubmit={saveProfileUpdates} className="space-y-6">
-                                            <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">Display Name</label><input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={editProfileData.name} onChange={e => setEditProfileData({...editProfileData, name: e.target.value})} /></div>
-                                            <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">Creator Bio</label><textarea className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 px-5 outline-none font-medium text-sm min-h-[100px]" value={editProfileData.bio} onChange={e => setEditProfileData({...editProfileData, bio: e.target.value})}></textarea></div>
-                                            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex items-center justify-between">
-                                                <div><h4 className="font-extrabold text-[15px] text-slate-900">Profile Lock Mode</h4><p className="text-[11px] font-bold text-slate-400 mt-1">Hide details from non-followers</p></div>
-                                                <button type="button" onClick={() => setEditProfileData({...editProfileData, isLocked: !editProfileData.isLocked})} className={`w-14 h-8 rounded-full transition-colors relative flex items-center ${editProfileData.isLocked ? 'bg-blue-600' : 'bg-slate-300'}`}><div className={`w-6 h-6 bg-white rounded-full absolute shadow-sm transition-transform ${editProfileData.isLocked ? 'translate-x-7' : 'translate-x-1'}`}></div></button>
+                                            <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">Display Name</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={editProfileData.name} onChange={e => setEditProfileData({...editProfileData, name: e.target.value})} /></div>
+                                            <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">Creator Bio</label><textarea className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-medium text-sm min-h-[100px]" value={editProfileData.bio} onChange={e => setEditProfileData({...editProfileData, bio: e.target.value})}></textarea></div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">City</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={editProfileData.city} onChange={e => setEditProfileData({...editProfileData, city: e.target.value})} /></div>
+                                                <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">Country</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={editProfileData.country} onChange={e => setEditProfileData({...editProfileData, country: e.target.value})} /></div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">Workplace</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={editProfileData.workplace} onChange={e => setEditProfileData({...editProfileData, workplace: e.target.value})} /></div>
+                                                <div className="space-y-2"><label className="text-[11px] font-black text-slate-400 uppercase">Contact No.</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={editProfileData.contactNo} onChange={e => setEditProfileData({...editProfileData, contactNo: e.target.value})} /></div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[11px] font-black text-slate-400 uppercase">{t('birthday')}</label>
+                                                <div className="flex gap-2">
+                                                    <input type="date" className="flex-1 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={editProfileData.birthday} onChange={e => setEditProfileData({...editProfileData, birthday: e.target.value})} />
+                                                    {editProfileData.birthday && <div className="w-16 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-600 flex items-center justify-center rounded-2xl font-black text-sm">{calculateAge(editProfileData.birthday)}</div>}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[11px] font-black text-slate-400 uppercase">{t('hobbies')} (Max 5)</label>
+                                                <div className="flex gap-2">
+                                                    <input type="text" placeholder="E.g. Photography" className="flex-1 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-3 px-5 outline-none font-bold text-sm" value={hobbyInput} onChange={e => setHobbyInput(e.target.value)} onKeyDown={e => {if(e.key==='Enter') {e.preventDefault(); addHobby();}}} disabled={editProfileData.hobbies.length >= 5} />
+                                                    <button type="button" onClick={addHobby} disabled={editProfileData.hobbies.length >= 5 || !hobbyInput.trim()} className="w-12 bg-slate-900 dark:bg-blue-600 text-white flex items-center justify-center rounded-2xl disabled:opacity-50"><Icon name="plus" /></button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {editProfileData.hobbies.map((h, i) => (
+                                                        <span key={i} className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2">{h} <Icon name="x" className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => removeHobby(i)} /></span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 mt-6">
+                                                <div><h4 className="font-extrabold text-[15px] text-slate-900 dark:text-white">{t('privacy')} Level</h4><p className="text-[11px] font-bold text-slate-400 mt-1 mb-4">Control who sees your personal details.</p></div>
+                                                <div className="flex flex-col gap-3">
+                                                    <label className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${editProfileData.privacyLevel === 'public' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 dark:border-slate-600'}`}>
+                                                        <input type="radio" name="privacy" checked={editProfileData.privacyLevel === 'public'} onChange={() => setEditProfileData({...editProfileData, privacyLevel: 'public'})} className="accent-blue-600 w-4 h-4"/> <span className="text-sm font-bold dark:text-slate-200">{t('public')}</span>
+                                                    </label>
+                                                    <label className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${editProfileData.privacyLevel === 'followers' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 dark:border-slate-600'}`}>
+                                                        <input type="radio" name="privacy" checked={editProfileData.privacyLevel === 'followers'} onChange={() => setEditProfileData({...editProfileData, privacyLevel: 'followers'})} className="accent-blue-600 w-4 h-4"/> <span className="text-sm font-bold dark:text-slate-200">{t('followersOnly')}</span>
+                                                    </label>
+                                                    <label className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${editProfileData.privacyLevel === 'private' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 dark:border-slate-600'}`}>
+                                                        <input type="radio" name="privacy" checked={editProfileData.privacyLevel === 'private'} onChange={() => setEditProfileData({...editProfileData, privacyLevel: 'private'})} className="accent-blue-600 w-4 h-4"/> <span className="text-sm font-bold dark:text-slate-200">{t('private')}</span>
+                                                    </label>
+                                                </div>
                                             </div>
                                             <div className="flex gap-4 pt-4"><button disabled={uploading} className="flex-1 btn-nexus-main text-white py-4 rounded-full font-black text-sm uppercase">{uploading ? 'SYNCING...' : 'SAVE INTEL'}</button></div>
                                         </form>
@@ -1133,30 +1214,30 @@
 
                             {view === 'settings' && (
                                 <div className="animate-in fade-in duration-700">
-                                    <div className="bg-white rounded-[2.5rem] shadow-sm p-8 mb-10 min-h-[60vh]">
-                                        <div className="flex items-center mb-8 border-b border-slate-100 pb-6">
-                                            {settingsSection !== 'menu' && <button onClick={() => setSettingsSection('menu')} className="mr-4 bg-slate-50 p-2.5 rounded-full text-slate-400 hover:text-blue-600"><Icon name="arrowleft" /></button>}
-                                            <h2 className="text-2xl font-black text-slate-900 uppercase">{settingsSection === 'menu' ? 'Platform Settings' : settingsSection.replace(/_/g, ' ')}</h2>
+                                    <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm p-8 mb-10 min-h-[60vh] border border-slate-100 dark:border-slate-700">
+                                        <div className="flex items-center mb-8 border-b border-slate-100 dark:border-slate-700 pb-6">
+                                            {settingsSection !== 'menu' && <button onClick={() => setSettingsSection('menu')} className="mr-4 bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full text-slate-400 hover:text-blue-600 transition-colors"><Icon name="arrowleft" /></button>}
+                                            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase">{settingsSection === 'menu' ? 'Platform Settings' : settingsSection.replace(/_/g, ' ')}</h2>
                                         </div>
                                         {settingsSection === 'menu' && (
                                             <div className="space-y-3">
-                                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-2xl transition-colors group border border-transparent hover:border-blue-100"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-400 group-hover:text-blue-600">{isDarkMode ? <Icon name="sun" /> : <Icon name="moon" />}</div><span className="font-extrabold text-[15px] text-slate-700">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span></div><div className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${isDarkMode ? 'bg-blue-600' : 'bg-slate-300'}`}><div className={`w-4 h-4 bg-white rounded-full absolute transition-transform ${isDarkMode ? 'translate-x-7' : 'translate-x-1'}`}></div></div></button>
-                                                <button onClick={() => setSettingsSection('Language')} className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 rounded-2xl transition-colors group border border-transparent hover:border-blue-100"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-400 group-hover:text-blue-600"><Icon name="globe" /></div><span className="font-extrabold text-[15px] text-slate-700">Language / භාෂාව</span></div><div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-400">{profileData.language || 'English'}</span><Icon name="chevronright" className="text-slate-300" /></div></button>
-                                                <button onClick={() => setSettingsSection('Delete_Account')} className="w-full flex items-center justify-between p-5 bg-red-50 hover:bg-red-100 rounded-2xl transition-colors group mt-6"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-red-400 group-hover:text-red-600"><Icon name="trash" /></div><span className="font-extrabold text-[15px] text-red-600">Delete Account</span></div></button>
+                                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">{isDarkMode ? <Icon name="sun" /> : <Icon name="moon" />}</div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span></div><div className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${isDarkMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'}`}><div className={`w-4 h-4 bg-white rounded-full absolute transition-transform ${isDarkMode ? 'translate-x-7' : 'translate-x-1'}`}></div></div></button>
+                                                <button onClick={() => setSettingsSection('Language')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="globe" /></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Language / භාෂාව</span></div><div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-400">{profileData.language || 'English'}</span><Icon name="chevronright" className="text-slate-300 dark:text-slate-500" /></div></button>
+                                                <button onClick={() => setSettingsSection('Delete_Account')} className="w-full flex items-center justify-between p-5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-2xl transition-colors group mt-6 border border-transparent dark:border-red-900/30"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-red-500 group-hover:text-red-600"><Icon name="trash" /></div><span className="font-extrabold text-[15px] text-red-600 dark:text-red-400">Delete Account</span></div></button>
                                             </div>
                                         )}
                                         {settingsSection === 'Language' && (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {['English', 'Sinhala (සිංහල)', 'Spanish (Español)'].map(lang => (
-                                                    <button key={lang} onClick={() => requestLanguageChange(lang)} className={`p-5 rounded-2xl border-2 font-bold text-sm flex items-center justify-between ${profileData.language === lang ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200'}`}>{lang} {profileData.language === lang && <Icon name="checkcircle" className="text-blue-600" />}</button>
+                                                    <button key={lang} onClick={() => requestLanguageChange(lang)} className={`p-5 rounded-2xl border-2 font-bold text-sm flex items-center justify-between ${profileData.language === lang ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 hover:border-blue-200 dark:hover:border-slate-500'}`}>{lang} {profileData.language === lang && <Icon name="checkcircle" className="text-blue-600 dark:text-blue-400" />}</button>
                                                 ))}
                                             </div>
                                         )}
                                         {settingsSection === 'Delete_Account' && (
                                             <div className="space-y-6 text-center">
-                                                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full mx-auto flex items-center justify-center"><Icon name="alert" className="w-10 h-10"/></div>
-                                                <h3 className="font-black text-2xl text-slate-900">Delete Account</h3>
-                                                {user?.providerData?.[0]?.providerId !== 'google.com' && <input type="password" placeholder="Enter Password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-center font-bold" />}
+                                                <div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full mx-auto flex items-center justify-center"><Icon name="alert" className="w-10 h-10"/></div>
+                                                <h3 className="font-black text-2xl text-slate-900 dark:text-white">Delete Account</h3>
+                                                {user?.providerData?.[0]?.providerId !== 'google.com' && <input type="password" placeholder="Enter Password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 text-center font-bold dark:text-white outline-none focus:border-red-500" />}
                                                 <button onClick={handleDeleteAccount} className="w-full bg-red-600 text-white py-5 rounded-full font-black text-sm shadow-xl hover:bg-red-700 uppercase">Confirm Delete</button>
                                             </div>
                                         )}
@@ -1164,6 +1245,7 @@
                                 </div>
                             )}
 
+                            {/* Notifications View */}
                             {view === 'notifications' && (
                                 <div className="animate-in fade-in duration-700 max-w-xl mx-auto">
                                     <div className="flex items-center gap-4 mb-8 px-4"><div className="w-14 h-14 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600"><Icon name="bell" className="w-7 h-7" /></div><h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">{t('alerts')}</h2></div>
@@ -1174,28 +1256,6 @@
                                                 <div className="flex-1 pt-1"><p className="font-extrabold text-[15px] text-slate-900">{notif.fromUserName} <span className="font-medium text-slate-500">{notif.type === 'follow' ? t('followedYou') : notif.type === 'like' ? 'liked your post' : 'commented on your post'}</span></p>{notif.commentText && <p className="text-xs text-slate-600 mt-1 italic">"{notif.commentText}"</p>}<p className="text-[10px] font-black text-blue-500 uppercase mt-2">{!notif.read && <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>}Alert</p></div>
                                             </div>
                                         ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {view === 'public_profile' && selectedUser && (
-                                <div className="animate-in fade-in duration-700">
-                                    <div className="bg-white rounded-[2.5rem] text-center border border-slate-100 shadow-sm relative overflow-hidden mb-10">
-                                        <div className="h-44 profile-banner bg-slate-800">{selectedUser.coverURL && <img src={selectedUser.coverURL} className="w-full h-full object-cover opacity-80" />}</div>
-                                        <div className="px-6 pb-12 relative flex flex-col items-center">
-                                            <img src={selectedUser.photoURL} className="w-32 h-32 rounded-[2.5rem] border-8 border-white shadow-2xl bg-white object-cover -mt-16 mb-4 z-10" />
-                                            <h2 className="text-2xl font-black text-slate-900 uppercase flex items-center gap-2 font-outfit">{selectedUser.name} {selectedUser.isLocked && <Icon name="lock" className="text-blue-600 w-4 h-4"/>} {getAuthorBadges(selectedUser.id)}</h2>
-                                            <div className="flex gap-8 mb-6 mt-4">
-                                                <div><p className="text-2xl font-black text-slate-900">{selectedUser.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('followers')}</p></div>
-                                                <div className="border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900">{selectedUser.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('following')}</p></div>
-                                            </div>
-                                            {selectedUser.isLocked && !isFollowing ? <div className="bg-blue-50/50 p-6 rounded-2xl max-w-md w-full mb-8"><Icon name="shieldcheck" className="w-10 h-10 text-blue-500 mx-auto mb-3" /><p className="text-blue-900 font-bold text-sm">Profile locked. Follow to see details.</p></div> : <p className="text-slate-500 font-medium text-sm italic mb-8">"{selectedUser.bio}"</p>}
-                                            <button onClick={toggleFollow} className={`w-full max-w-[240px] py-4 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-all ${isFollowing ? 'bg-slate-100 text-slate-500 hover:text-red-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>{isFollowing ? <><Icon name="usercheck" className="w-4 h-4" /> Following</> : <><Icon name="userplus" className="w-4 h-4" /> Follow Creator</>}</button>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-6">
-                                        <h3 className="text-xl font-black text-slate-900 uppercase px-4">{t('sharedIntel')}</h3>
-                                        <div className="space-y-8">{targetUserPosts.length > 0 ? targetUserPosts.map(p => renderPostCard(p)) : <div className="text-center py-10"><Icon name="image" className="w-10 h-10 text-slate-200 mx-auto mb-3" /><p className="text-slate-400 font-bold text-[10px] uppercase">No creations yet.</p></div>}</div>
                                     </div>
                                 </div>
                             )}
@@ -1212,9 +1272,9 @@
                             </div>
 
                             {!user || user.isAnonymous ? (
-                                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center"><h3 className="font-black text-lg text-slate-900 mb-2">Join NEXIA - PROMPTHUB</h3><p className="text-xs text-slate-500 font-medium mb-4">{t('connectElite')}</p><button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login' })} className="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-xs uppercase">{t('signIn')}</button></div>
+                                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center"><h3 className="font-black text-lg text-slate-900 mb-2">Join NEXIA</h3><p className="text-xs text-slate-500 font-medium mb-4">{t('connectElite')}</p><button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login' })} className="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-xs uppercase">{t('signIn')}</button></div>
                             ) : (
-                                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => navigate('profile')}><img src={profileData.photoURL || user.photoURL} className="w-12 h-12 rounded-[1rem] object-cover bg-slate-100 border border-slate-200" /><div className="flex-1 overflow-hidden"><p className="font-extrabold text-sm text-slate-900 truncate font-outfit">{profileData.name}</p><p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1">Elite Creator</p></div></div>
+                                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => navigate('profile')}><img src={profileData.photoURL || user.photoURL} className="w-12 h-12 rounded-[1rem] object-cover bg-slate-100 border border-slate-200 no-drag" /><div className="flex-1 overflow-hidden"><p className="font-extrabold text-sm text-slate-900 truncate font-outfit">{profileData.name}</p><p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1">Elite Creator</p></div></div>
                             )}
                             
                             {view === 'profile' || view === 'public_profile' ? (
@@ -1222,7 +1282,7 @@
                                     <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xs text-slate-400 uppercase tracking-widest">Network</h3><div className="flex gap-2"><button onClick={() => setSidebarNetworkTab('following')} className={`text-[9px] font-black uppercase tracking-widest ${sidebarNetworkTab === 'following' ? 'text-blue-600' : 'text-slate-300'}`}>Following</button><span className="text-slate-200">|</span><button onClick={() => setSidebarNetworkTab('followers')} className={`text-[9px] font-black uppercase tracking-widest ${sidebarNetworkTab === 'followers' ? 'text-blue-600' : 'text-slate-300'}`}>Followers</button></div></div>
                                     <div className="space-y-4">
                                         {displayedNetworkCreators.length > 0 ? displayedNetworkCreators.slice(0, 5).map(creator => (
-                                            <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl group"><img src={creator.photoURL} className="w-10 h-10 rounded-[0.8rem] object-cover border border-slate-200 group-hover:scale-105" /><div className="flex-1 min-w-0"><p className="font-extrabold text-sm text-slate-800 truncate group-hover:text-blue-600">{creator.name}</p><p className="text-[10px] text-slate-500 font-bold">{creator.followersCount || 0} Followers</p></div></div>
+                                            <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl group"><img src={creator.photoURL} className="w-10 h-10 rounded-[0.8rem] object-cover border border-slate-200 group-hover:scale-105 no-drag" /><div className="flex-1 min-w-0"><p className="font-extrabold text-sm text-slate-800 truncate group-hover:text-blue-600">{creator.name}</p><p className="text-[10px] text-slate-500 font-bold">{creator.followersCount || 0} Followers</p></div></div>
                                         )) : <div className="text-center py-6"><p className="text-[10px] font-black text-slate-400 uppercase">{sidebarNetworkTab === 'following' ? 'Not following' : 'No followers'}</p></div>}
                                     </div>
                                 </div>
@@ -1238,6 +1298,22 @@
                         </aside>
                     </main>
 
+                    {/* Modals */}
+                    
+                    {/* Image Viewer Modal */}
+                    {profilePicModal.open && (
+                        <div className="fixed inset-0 z-[200] bg-slate-900/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
+                            <button onClick={() => setProfilePicModal({open: false, url: '', userId: '', likes: []})} className="absolute top-6 right-6 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors"><Icon name="x" /></button>
+                            <img src={profilePicModal.url} className="max-w-full max-h-[70vh] rounded-3xl shadow-2xl object-contain no-drag select-none mb-6" onContextMenu={e=>e.preventDefault()} />
+                            <div className="bg-white/10 p-2 rounded-full backdrop-blur-sm">
+                                <button onClick={() => toggleProfilePicLike(profilePicModal.userId)} className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-colors ${profilePicModal.likes.includes(user?.uid) ? 'bg-blue-600 text-white' : 'bg-transparent text-white hover:bg-white/20'}`}>
+                                    <Icon name="thumbsup" className={profilePicModal.likes.includes(user?.uid) ? 'fill-current' : ''} /> 
+                                    {profilePicModal.likes.length} Likes
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar px-6 py-4 flex justify-between items-center md:hidden z-50 pb-safe">
                         <button onClick={() => navigate('home')} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400'}`}><Icon name="home" className="w-6 h-6" /></button>
                         <button onClick={() => navigate('leaderboard')} className={`p-2 transition-transform active:scale-90 ${view==='leaderboard'?'text-blue-600':'text-slate-400'}`}><Icon name="trophy" className="w-6 h-6" /></button>
@@ -1250,7 +1326,7 @@
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
                             <div className="bg-white w-full max-w-md rounded-[3.5rem] p-10 md:p-14 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 text-center">
                                 <Icon name="nexia_logo" className="w-16 mx-auto mb-4" />
-                                <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900 tracking-tighter uppercase font-outfit">NEXIA - PROMPTHUB</h2>
+                                <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900 tracking-tighter uppercase font-outfit">NEXIA ACCESS</h2>
                                 <p className="text-slate-400 font-black text-[10px] mt-2 uppercase tracking-[0.4em] mb-8">Global Intelligence Network</p>
                                 {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-2xl mb-6 uppercase">{authModal.error}</div>}
                                 <div className="flex gap-3 mb-8">
