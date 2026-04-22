@@ -3,16 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PromptHub Nexus | Global AI Creator Network</title>
+    <title>Nexia | Global AI Creator Network</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: #F8FAFC; overflow-x: hidden; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease; }
+        
+        /* Nexia Logo Animations */
+        @keyframes pulseDot1 {
+            0%, 100% { fill: #3B82F6; filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.8)); transform: scale(1); }
+            50% { fill: #EC4899; filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.9)); transform: scale(1.3); }
+        }
+        @keyframes pulseDot2 {
+            0%, 100% { fill: #8B5CF6; filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.8)); transform: scale(1); }
+            50% { fill: #10B981; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9)); transform: scale(1.3); }
+        }
+        .dot-1 { animation: pulseDot1 3s ease-in-out infinite; transform-origin: 25px 20px; }
+        .dot-2 { animation: pulseDot2 3s ease-in-out infinite 1.5s; transform-origin: 75px 80px; }
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+
         .nexus-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(226, 232, 240, 0.5); transition: background-color 0.3s ease; }
         .btn-nexus-main { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-nexus-main:active { transform: scale(0.95); }
@@ -60,9 +74,13 @@
 <body>
     <div id="root">
         <div class="min-h-screen flex flex-col items-center justify-center bg-white text-center p-10">
-            <div class="loader-spinner ease-linear rounded-full border-4 border-t-4 border-gray-100 h-12 w-12 mb-6"></div>
-            <h1 class="text-xl font-extrabold text-slate-900 tracking-tighter uppercase">Initializing Nexus Protocol</h1>
-            <p class="text-slate-400 mt-2 text-sm font-medium tracking-wide uppercase">Establishing Global Uplink...</p>
+            <svg viewBox="0 0 100 100" width="80" height="80" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-6 mx-auto animate-pulse">
+                <defs><linearGradient id="loadGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3B82F6" /><stop offset="100%" stop-color="#8B5CF6" /></linearGradient></defs>
+                <path d="M25 80 V25 L75 75 V20" stroke="url(#loadGrad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="25" cy="20" r="8" class="dot-1"/><circle cx="75" cy="80" r="8" class="dot-2"/>
+            </svg>
+            <h1 class="text-2xl font-black tracking-tighter uppercase font-outfit">Initializing <span class="text-blue-600">Nexia</span> Core</h1>
+            <p class="text-slate-400 mt-2 text-xs font-bold tracking-[0.2em] uppercase">Establishing Global Uplink...</p>
         </div>
     </div>
 
@@ -113,74 +131,25 @@
 
         const TRANSLATIONS = {
             'English': {
-                globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Share Intelligence', searchPlaceholder: 'Search Global Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexus Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Global Data Stream...', joinNexus: 'Join Nexus', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexus Rank', sharedIntel: 'Shared Intel', trending: 'Trending', latest: 'Latest', members: 'Total Members', online: 'Online Now', followedYou: 'started following you!', noNotifications: 'No new alerts.', systemIntel: 'System Intelligence',
+                globalStream: 'Global Stream', alerts: 'Alerts', elitePortfolio: 'Elite Portfolio', settings: 'Settings', transmitInsight: 'Share Intelligence', searchPlaceholder: 'Search Creators...', signIn: 'SIGN IN', nexusGlobal: 'Nexia Global', worldClass: 'World-Class AI Intel Community', syncing: 'Syncing Nexia Data Stream...', joinNexus: 'Join Nexia', connectElite: 'Connect with elite AI creators globally.', trendingTech: 'Trending Tech', tierElite: 'Tier: Elite', selectLanguage: 'Select your preferred language', noteLocalization: 'Note: Full localization is rolling out to all regions soon.', cancel: 'Cancel', confirm: 'Confirm', changeLangTitle: 'Change Language?', changeLangDesc: 'Are you sure you want to change the platform language to', backToFeed: 'Return to Global Stream', editProfile: 'Edit Profile', signOut: 'Sign Out', followers: 'Followers', following: 'Following', creations: 'Creations', nexusRank: 'Nexia Rank', sharedIntel: 'Shared Intel', trending: 'Trending', latest: 'Latest', members: 'Total Members', online: 'Online Now', followedYou: 'started following you!', noNotifications: 'No new alerts.', systemIntel: 'System Intelligence',
                 deleteAccount: 'Delete Account', deleteWarning: 'This action is irreversible. All your data, prompts, and followers will be permanently removed.', enterPassword: 'Enter your password to confirm', confirmDelete: 'Yes, Delete My Account', wrongPassword: 'Incorrect password. Please try again.', accountDeleted: 'Account successfully deleted.',
                 save: 'Save', saved: 'Saved', savedIntel: 'Saved Intel', darkMode: 'Dark Mode', lightMode: 'Light Mode', filters: 'Filters', all: 'All',
                 leaderboard: 'Leaderboard', topCreators: 'Top Creators', rank: 'Rank', commandCenter: 'Command Center',
                 accountExists: 'This email is already linked to another provider (Google/Email). Please sign in using that provider.'
             },
             'Sinhala (සිංහල)': {
-                globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexus ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexus වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexus මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ', trending: 'ජනප්‍රිය', latest: 'අලුත්ම', members: 'මුළු සාමාජිකයින්', online: 'සක්‍රියව සිටී', followedYou: 'ඔබව අනුගමනය කිරීම ආරම්භ කළා!', noNotifications: 'අලුත් දැනුම්දීම් නැත.', systemIntel: 'පද්ධතියේ දැනුම්දීම්',
+                globalStream: 'ප්‍රධාන පිටුව', alerts: 'දැනුම්දීම්', elitePortfolio: 'මගේ ගිණුම', settings: 'සැකසුම්', transmitInsight: 'අලුත් පෝස්ට් එකක්', searchPlaceholder: 'නිර්මාණකරුවන් සොයන්න...', signIn: 'ලොග් වෙන්න', nexusGlobal: 'Nexia ප්‍රධාන පිටුව', worldClass: 'ලෝක මට්ටමේ AI නිර්මාණකරුවන්', syncing: 'දත්ත ලබාගනිමින් පවතී...', joinNexus: 'Nexia වෙත එකතු වෙන්න', connectElite: 'ලෝකයේ සිටින AI නිර්මාණකරුවන් හා එක්වන්න.', trendingTech: 'නවීන තාක්ෂණයන්', tierElite: 'මට්ටම: Elite', selectLanguage: 'ඔබේ භාෂාව තෝරන්න', noteLocalization: 'සටහන: අනෙකුත් භාෂාවන් ඉදිරියේදී සම්පූර්ණයෙන්ම එකතු වේ.', cancel: 'අවලංගු කරන්න', confirm: 'ඔව්, මාරු කරන්න', changeLangTitle: 'භාෂාව වෙනස් කරන්නද?', changeLangDesc: 'ඔබට වේදිකාවේ භාෂාව පහත භාෂාවට වෙනස් කිරීමට අවශ්‍යද:', backToFeed: 'ප්‍රධාන පිටුවට යන්න', editProfile: 'ගිණුම වෙනස් කරන්න', signOut: 'ඉවත් වෙන්න (Sign Out)', followers: 'අනුගාමිකයින්', following: 'අනුගමනය කරන', creations: 'නිර්මාණ', nexusRank: 'Nexia මට්ටම', sharedIntel: 'ඔබේ නිර්මාණ', trending: 'ජනප්‍රිය', latest: 'අලුත්ම', members: 'මුළු සාමාජිකයින්', online: 'සක්‍රියව සිටී', followedYou: 'ඔබව අනුගමනය කිරීම ආරම්භ කළා!', noNotifications: 'අලුත් දැනුම්දීම් නැත.', systemIntel: 'පද්ධතියේ දැනුම්දීම්',
                 deleteAccount: 'ගිණුම මකන්න (Delete Account)', deleteWarning: 'මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. ඔබගේ සියලුම දත්ත සහ Followers ස්ථිරවම මැකී යනු ඇත.', enterPassword: 'තහවුරු කිරීමට මුරපදය (Password) ඇතුළත් කරන්න', confirmDelete: 'ඔව්, මගේ ගිණුම මකන්න', wrongPassword: 'මුරපදය වැරදියි. කරුණාකර නැවත උත්සාහ කරන්න.', accountDeleted: 'ගිණුම සාර්ථකව මකා දමන ලදී.',
                 save: 'සුරකින්න', saved: 'සුරැකුවා', savedIntel: 'සුරැකි නිර්මාණ', darkMode: 'අඳුරු තේමාව', lightMode: 'ආලෝක තේමාව', filters: 'පෙරහන්', all: 'සියල්ල',
                 leaderboard: 'ප්‍රමුඛ පුවරුව', topCreators: 'හොඳම නිර්මාණකරුවන්', rank: 'ස්ථානය', commandCenter: 'පාලන පැනලය',
                 accountExists: 'මෙම ඊමේල් ලිපිනයෙන් දැනටමත් ගිණුමක් ඇත (Google හෝ Email). කරුණාකර ඒ හරහා ලොග් වන්න.'
             },
             'Spanish (Español)': {
-                globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Compartir Inteligencia', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexus Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexus', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexus', sharedIntel: 'Inteligencia Compartida', trending: 'Tendencia', latest: 'Reciente', members: 'Miembros Totales', online: 'En Línea', followedYou: 'ha empezado a seguirte!', noNotifications: 'No hay alertas nuevas.', systemIntel: 'Inteligencia del Sistema',
+                globalStream: 'Flujo Global', alerts: 'Alertas', elitePortfolio: 'Portafolio Élite', settings: 'Ajustes', transmitInsight: 'Compartir Inteligencia', searchPlaceholder: 'Buscar Creadores...', signIn: 'INICIAR SESIÓN', nexusGlobal: 'Nexia Global', worldClass: 'Comunidad de IA de Clase Mundial', syncing: 'Sincronizando datos...', joinNexus: 'Únete a Nexia', connectElite: 'Conecta con creadores de élite.', trendingTech: 'Tecnología Tendencia', tierElite: 'Nivel: Élite', selectLanguage: 'Selecciona tu idioma', noteLocalization: 'Nota: La localización completa llegará pronto.', cancel: 'Cancelar', confirm: 'Confirmar', changeLangTitle: '¿Cambiar idioma?', changeLangDesc: '¿Seguro que quieres cambiar el idioma a', backToFeed: 'Volver al flujo', editProfile: 'Editar perfil', signOut: 'Cerrar sesión', followers: 'Seguidores', following: 'Siguiendo', creations: 'Creaciones', nexusRank: 'Rango Nexia', sharedIntel: 'Inteligencia Compartida', trending: 'Tendencia', latest: 'Reciente', members: 'Miembros Totales', online: 'En Línea', followedYou: 'ha empezado a seguirte!', noNotifications: 'No hay alertas nuevas.', systemIntel: 'Inteligencia del Sistema',
                 deleteAccount: 'Eliminar Cuenta', deleteWarning: 'Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.', enterPassword: 'Introduce tu contraseña', confirmDelete: 'Sí, Eliminar Mi Cuenta', wrongPassword: 'Contraseña incorrecta. Inténtalo de nuevo.', accountDeleted: 'Cuenta eliminada con éxito.',
                 save: 'Guardar', saved: 'Guardado', savedIntel: 'Guardados', darkMode: 'Modo Oscuro', lightMode: 'Modo Claro', filters: 'Filtros', all: 'Todo',
-                leaderboard: 'Clasificación', topCreators: 'Meilleurs Créateurs', rank: 'Rango', commandCenter: 'Command Center',
+                leaderboard: 'Clasificación', topCreators: 'Mejores Creadores', rank: 'Rango', commandCenter: 'Command Center',
                 accountExists: 'Este correo electrónico ya está vinculado a otro proveedor. Inicie sesión con ese proveedor.'
-            },
-            'French (Français)': {
-                globalStream: 'Flux Global', alerts: 'Alertes', elitePortfolio: 'Portfolio Élite', settings: 'Paramètres', transmitInsight: 'Partager l\'Intelligence', searchPlaceholder: 'Rechercher des Créateurs...', signIn: 'SE CONNECTER', nexusGlobal: 'Nexus Global', worldClass: 'Communauté IA de Classe Mondiale', syncing: 'Synchronisation...', joinNexus: 'Rejoindre Nexus', connectElite: 'Connectez-vous avec l\'élite.', trendingTech: 'Tendances Tech', tierElite: 'Niveau: Élite', selectLanguage: 'Sélectionnez votre langue', noteLocalization: 'Note: La localisation complète arrive bientôt.', cancel: 'Annuler', confirm: 'Confirmer', changeLangTitle: 'Changer de langue ?', changeLangDesc: 'Voulez-vous changer la langue en', backToFeed: 'Retour au flux', editProfile: 'Éditer le profil', signOut: 'Déconnexion', followers: 'Abonnés', following: 'Abonnements', creations: 'Créations', nexusRank: 'Rang Nexus', sharedIntel: 'Intelligence Partagée', trending: 'Tendance', latest: 'Récents', members: 'Membres Totaux', online: 'En Ligne', followedYou: 'a commencé à vous suivre!', noNotifications: 'Pas de nouvelles alertes.', systemIntel: 'Intelligence du Système',
-                deleteAccount: 'Supprimer le compte', deleteWarning: 'Cette action est irréversible. Toutes vos données seront définitivement supprimées.', enterPassword: 'Entrez votre mot de passe', confirmDelete: 'Oui, Supprimer Mon Compte', wrongPassword: 'Mot de passe incorrect. Veuillez réessayer.', accountDeleted: 'Compte supprimé avec succès.',
-                save: 'Enregistrer', saved: 'Enregistré', savedIntel: 'Enregistrés', darkMode: 'Mode Sombre', lightMode: 'Mode Clair', filters: 'Filtres', all: 'Tout',
-                leaderboard: 'Classement', topCreators: 'Meilleurs Créateurs', rank: 'Rang', commandCenter: 'Command Center',
-                accountExists: 'Cet e-mail est déjà lié à un autre fournisseur. Veuillez vous connecter avec ce fournisseur.'
-            },
-            'German (Deutsch)': {
-                globalStream: 'Globaler Stream', alerts: 'Benachrichtigungen', elitePortfolio: 'Elite-Portfolio', settings: 'Einstellungen', transmitInsight: 'Intelligenz Teilen', searchPlaceholder: 'Schöpfer suchen...', signIn: 'ANMELDEN', nexusGlobal: 'Nexus Global', worldClass: 'Weltklasse-KI-Community', syncing: 'Synchronisiere...', joinNexus: 'Nexus Beitreten', connectElite: 'Verbinde dich mit der Elite.', trendingTech: 'Tech-Trends', tierElite: 'Stufe: Elite', selectLanguage: 'Wähle deine Sprache', noteLocalization: 'Hinweis: Vollständige Lokalisierung folgt.', cancel: 'Abbrechen', confirm: 'Bestätigen', changeLangTitle: 'Sprache ändern?', changeLangDesc: 'Möchten Sie die Sprache ändern in', backToFeed: 'Zurück zum Stream', editProfile: 'Profil bearbeiten', signOut: 'Abmelden', followers: 'Follower', following: 'Folge ich', creations: 'Kreationen', nexusRank: 'Nexus-Rang', sharedIntel: 'Geteilte Intelligenz', trending: 'Im Trend', latest: 'Neueste', members: 'Mitglieder', online: 'Jetzt Online', followedYou: 'folgt dir jetzt!', noNotifications: 'Keine neuen Benachrichtigungen.', systemIntel: 'Systemintelligenz',
-                deleteAccount: 'Konto löschen', deleteWarning: 'Diese Aktion ist unumkehrbar. Alle Ihre Daten werden dauerhaft entfernt.', enterPassword: 'Geben Sie Ihr Passwort ein', confirmDelete: 'Ja, Mein Konto Löschen', wrongPassword: 'Falsches Passwort. Bitte versuchen Sie es erneut.', accountDeleted: 'Konto erfolgreich gelöscht.',
-                save: 'Speichern', saved: 'Gespeichert', savedIntel: 'Gespeichert', darkMode: 'Dunkelmodus', lightMode: 'Heller Modus', filters: 'Filter', all: 'Alle',
-                leaderboard: 'Bestenliste', topCreators: 'Top-Ersteller', rank: 'Rang', commandCenter: 'Command Center',
-                accountExists: 'Diese E-Mail ist bereits mit einem anderen Anbieter verknüpft. Bitte melden Sie sich damit an.'
-            },
-            'Chinese (中文)': {
-                globalStream: '全球动态', alerts: '提醒', elitePortfolio: '精英作品集', settings: '设置', transmitInsight: '分享见解', searchPlaceholder: '搜索全球创作者...', signIn: '登录', nexusGlobal: 'Nexus 全球', worldClass: '世界级 AI 社区', syncing: '正在同步数据...', joinNexus: '加入 Nexus', connectElite: '与全球精英建立联系。', trendingTech: '热门技术', tierElite: '等级：精英', selectLanguage: '选择您的语言', noteLocalization: '注意：完整本地化即将推出。', cancel: '取消', confirm: '确认', changeLangTitle: '更改语言？', changeLangDesc: '您确定要将语言更改为', backToFeed: '返回全球动态', editProfile: '编辑个人资料', signOut: '退出登录', followers: '粉丝', following: '关注', creations: '创作', nexusRank: 'Nexus 排名', sharedIntel: '分享的见解', trending: '热门', latest: '最新', members: '总成员', online: '在线', followedYou: '开始关注你了！', noNotifications: '没有新提醒。', systemIntel: '系统智能',
-                deleteAccount: '删除账户', deleteWarning: '此操作不可逆。您的所有数据将被永久删除。', enterPassword: '输入您的密码', confirmDelete: '是的，删除我的账户', wrongPassword: '密码错误。请重试。', accountDeleted: '账户已成功删除。',
-                save: '保存', saved: '已保存', savedIntel: '收藏', darkMode: '夜间模式', lightMode: '白天模式', filters: '过滤', all: '全部',
-                leaderboard: '排行榜', topCreators: '顶级创作者', rank: '排名', commandCenter: 'Command Center',
-                accountExists: '此电子邮件已链接到其他提供商。请使用该提供商登录。'
-            },
-            'Japanese (日本語)': {
-                globalStream: 'グローバルストリーム', alerts: '通知', elitePortfolio: 'エリートポートフォリオ', settings: '設定', transmitInsight: 'インサイトを共有', searchPlaceholder: 'クリエイターを検索...', signIn: 'ログイン', nexusGlobal: 'Nexus グローバル', worldClass: '世界クラスのAIコミュニティ', syncing: '同期中...', joinNexus: 'Nexusに参加', connectElite: 'エリートクリエイターと繋がる。', trendingTech: 'トレンド技術', tierElite: 'ティア：エリート', selectLanguage: '言語を選択', noteLocalization: '注：完全なローカリゼーションはまもなく展開されます。', cancel: 'キャンセル', confirm: '確認', changeLangTitle: '言語を変更しますか？', changeLangDesc: 'プラットフォームの言語を次に変更しますか：', backToFeed: 'ストリームに戻る', editProfile: 'プロフィール編集', signOut: 'ログアウト', followers: 'フォロワー', following: 'フォロー中', creations: '制作物', nexusRank: 'Nexus ランク', sharedIntel: '共有インサイト', trending: 'トレンド', latest: '最新', members: 'メンバー総数', online: 'オンライン', followedYou: 'があなたをフォローしました！', noNotifications: '新しい通知はありません。', systemIntel: 'システムインテリジェンス',
-                deleteAccount: 'アカウントを削除', deleteWarning: 'この操作は取り消せません。すべてのデータが完全に削除されます。', enterPassword: 'パスワードを入力', confirmDelete: 'はい、アカウントを削除します', wrongPassword: 'パスワードが間違っています。もう一度お試しください。', accountDeleted: 'アカウントが正常に削除されました。',
-                save: '保存', saved: '保存済み', savedIntel: 'ブックマーク', darkMode: 'ダークモード', lightMode: 'ライトモード', filters: 'フィルター', all: 'すべて',
-                leaderboard: 'リーダーボード', topCreators: 'トップクリエイター', rank: 'ランク', commandCenter: 'Command Center',
-                accountExists: 'このメールアドレスは既に他のプロバイダーにリンクされています。そのプロバイダーを使用してログインしてください。'
-            },
-            'Arabic (العربية)': {
-                globalStream: 'البث العالمي', alerts: 'التنبيهات', elitePortfolio: 'محفظة النخبة', settings: 'الإعدادات', transmitInsight: 'مشاركة الأفكار', searchPlaceholder: 'البحث عن المبدعين...', signIn: 'تسجيل الدخول', nexusGlobal: 'نكسس العالمي', worldClass: 'مجتمع الذكاء الاصطناعي العالمي', syncing: 'جاري المزامنة...', joinNexus: 'انضم إلى نكسس', connectElite: 'تواصل مع المبدعين.', trendingTech: 'التقنيات الرائجة', tierElite: 'المستوى: النخبة', selectLanguage: 'اختر لغتك', noteLocalization: 'ملاحظة: التعريب الكامل قادم قريباً.', cancel: 'إلغاء', confirm: 'تأكيد', changeLangTitle: 'تغيير اللغة؟', changeLangDesc: 'هل أنت متأكد من تغيير اللغة إلى', backToFeed: 'العودة للبث', editProfile: 'تعديل الملف', signOut: 'تسجيل الخروج', followers: 'المتابعون', following: 'يتابع', creations: 'الإبداعات', nexusRank: 'تصنيف نكسس', sharedIntel: 'الأفكار المشتركة', trending: 'شائع', latest: 'الأحدث', members: 'إجمالي الأعضاء', online: 'متصل الآن', followedYou: 'بدأ بمتابعتك!', noNotifications: 'لا توجد تنبيهات جديدة.', systemIntel: 'ذكاء النظام',
-                deleteAccount: 'حذف الحساب', deleteWarning: 'هذا الإجراء لا رجعة فيه. ستتم إزالة جميع بياناتك نهائيًا.', enterPassword: 'أدخل كلمة المرور', confirmDelete: 'نعم، احذف حسابي', wrongPassword: 'كلمة المرور خاطئة. يرجى المحاولة مرة أخرى.', accountDeleted: 'تم حذف الحساب بنجاح.',
-                save: 'حفظ', saved: 'تم الحفظ', savedIntel: 'المحفوظات', darkMode: 'الوضع الداكن', lightMode: 'وضع الإضاءة', filters: 'المرشحات', all: 'الجميع',
-                leaderboard: 'لوحة الصدارة', topCreators: 'أفضل المبدعين', rank: 'مرتبة', commandCenter: 'Command Center',
-                accountExists: 'هذا البريد الإلكتروني مرتبط بالفعل بمزود آخر. الرجاء تسجيل الدخول باستخدام هذا المزود.'
-            },
-            'Hindi (हिन्दी)': {
-                globalStream: 'ग्लोबल स्ट्रीम', alerts: 'अलर्ट', elitePortfolio: 'एलीट पोर्टफोलियो', settings: 'सेटिंग्स', transmitInsight: 'बुद्धिमत्ता साझा करें', searchPlaceholder: 'क्रिएटर्स खोजें...', signIn: 'साइन इन', nexusGlobal: 'नेक्सस ग्लोबल', worldClass: 'विश्व स्तरीय AI समुदाय', syncing: 'सिंक हो रहा है...', joinNexus: 'नेक्सस से जुड़ें', connectElite: 'एलीट क्रिएटर्स से जुड़ें।', trendingTech: 'ट्रेंडिंग तकनीक', tierElite: 'टियर: एलीट', selectLanguage: 'अपनी भाषा चुनें', noteLocalization: 'नोट: पूर्ण स्थानीयकरण जल्द ही आ रहा है।', cancel: 'रद्द करें', confirm: 'पुष्टि करें', changeLangTitle: 'भाषा बदलें?', changeLangDesc: 'क्या आप भाषा को बदलना चाहते हैं', backToFeed: 'स्ट्रीम पर वापस जाएं', editProfile: 'प्रोफ़ाइल संपादित करें', signOut: 'साइन आउट', followers: 'फॉलोअर्स', following: 'फॉलोइंग', creations: 'रचनाएँ', nexusRank: 'नेक्सस रैंक', sharedIntel: 'साझा विचार', trending: 'ट्रेंडिंग', latest: 'नवीनतम', members: 'कुल सदस्य', online: 'अभी ऑनलाइन', followedYou: 'ने आपको फॉलो करना शुरू किया!', noNotifications: 'कोई नया अलर्ट नहीं।', systemIntel: 'सिस्टम इंटेलिजेंस',
-                deleteAccount: 'खाता हटाएं', deleteWarning: 'यह क्रिया अपरिवर्तनीय है। आपका सारा डेटा स्थायी रूप से हटा दिया जाएगा।', enterPassword: 'अपना पासवर्ड दर्ज करें', confirmDelete: 'हाँ, मेरा खाता हटाएँ', wrongPassword: 'गलत पासवर्ड। कृपया पुनः प्रयास करें।', accountDeleted: 'खाता सफलतापूर्वक हटा दिया गया।',
-                save: 'सहेजें', saved: 'सहेजा गया', savedIntel: 'सहेजे गए', darkMode: 'डार्क मोड', lightMode: 'लाइट मोड', filters: 'फ़िल्टर', all: 'सभी',
-                leaderboard: 'लीडरबोर्ड', topCreators: 'शीर्ष निर्माता', rank: 'रैंक', commandCenter: 'Command Center',
-                accountExists: 'यह ईमेल पहले से ही किसी अन्य प्रदाता (Google/Email) से जुड़ा हुआ है। कृपया उस प्रदाता का उपयोग करके साइन इन करें।'
-            },
-            'Russian (Русский)': {
-                globalStream: 'Глобальный Поток', alerts: 'Уведомления', elitePortfolio: 'Элитное Портфолио', settings: 'Настройки', transmitInsight: 'Поделиться идеей', searchPlaceholder: 'Поиск Авторов...', signIn: 'ВОЙТИ', nexusGlobal: 'Nexus Global', worldClass: 'Мировое ИИ Сообщество', syncing: 'Синхронизация...', joinNexus: 'Присоединиться', connectElite: 'Связь с элитой.', trendingTech: 'Тренды', tierElite: 'Уровень: Элита', selectLanguage: 'Выберите язык', noteLocalization: 'Примечание: Полная локализация скоро.', cancel: 'Отмена', confirm: 'Подтвердить', changeLangTitle: 'Изменить язык?', changeLangDesc: 'Вы уверены, что хотите изменить язык на', backToFeed: 'Вернуться к потоку', editProfile: 'Редакт. профиль', signOut: 'Выйти', followers: 'Подписчики', following: 'Подписки', creations: 'Творения', nexusRank: 'Ранг Nexus', sharedIntel: 'Общий интеллект', trending: 'В тренде', latest: 'Новые', members: 'Всего участников', online: 'В сети', followedYou: 'начал(а) читать вас!', noNotifications: 'Нет новых уведомлений.', systemIntel: 'Системный интеллект',
-                deleteAccount: 'Удалить аккаунт', deleteWarning: 'Это действие необратимо. Все ваши данные будут удалены.', enterPassword: 'Ввести пароль', confirmDelete: 'Да, Удалить', wrongPassword: 'Неверный пароль. Попробуйте еще раз.', accountDeleted: 'Аккаунт успешно удален.',
-                save: 'Сохранить', saved: 'Сохранено', savedIntel: 'Сохраненные', darkMode: 'Темный режим', lightMode: 'Светлый режим', filters: 'Фильтры', all: 'Все',
-                leaderboard: 'Таблица лидеров', topCreators: 'Лучшие авторы', rank: 'Ранг', commandCenter: 'Command Center',
-                accountExists: 'Этот адрес электронной почты уже связан с другим провайдером. Пожалуйста, войдите с его помощью.'
             }
         };
 
@@ -194,8 +163,22 @@
                 </svg>
             );
 
+            // Nexia Logo Dynamic Icon Component
+            if (name === 'nexia_logo') return (
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+                    <defs>
+                        <linearGradient id={`gradLogo-${title}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#3B82F6" />
+                            <stop offset="100%" stopColor="#8B5CF6" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M25 80 V25 L75 75 V20" stroke={`url(#gradLogo-${title})`} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="25" cy="20" r="8" className="dot-1"/>
+                    <circle cx="75" cy="80" r="8" className="dot-2"/>
+                </svg>
+            );
+
             const paths = {
-                zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>,
                 search: <><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>,
                 moon: <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>,
                 sun: <><circle cx="12" cy="12" r="5"/><line x1="12" x2="12" y1="1" y2="3"/><line x1="12" x2="12" y1="21" y2="23"/><line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/><line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/><line x1="1" x2="3" y1="12" y2="12"/><line x1="21" x2="23" y1="12" y2="12"/><line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/><line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/></>,
@@ -243,7 +226,8 @@
                 send: <><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></>,
                 arrowleft: <><line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/></>,
                 github: <><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></>,
-                twitter: <><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></>
+                twitter: <><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></>,
+                zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             };
 
             return (
@@ -374,56 +358,68 @@
             useEffect(() => {
                 if (!isReady) return;
                 const { auth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, isSignInWithEmailLink, signInWithEmailLink, db, appId, doc, setDoc, serverTimestamp, getDoc } = window.fb;
-                
-                if (isSignInWithEmailLink(auth, window.location.href)) {
-                    let email = null;
-                    try { email = window.localStorage.getItem('emailForSignIn'); } catch(e){}
-                    if (!email) email = window.prompt('Please confirm your email address to complete sign-in:');
-                    if (email) {
-                        signInWithEmailLink(auth, email, window.location.href)
-                            .then(async (result) => {
-                                try { window.localStorage.removeItem('emailForSignIn'); } catch(e){}
-                                const loggedInUser = result.user;
-                                const profileRef = doc(db, 'artifacts', appId, 'users', loggedInUser.uid, 'profile', 'info');
-                                const profileSnap = await getDoc(profileRef);
-                                if (!profileSnap.exists()) {
-                                    await setDoc(profileRef, {
-                                        name: loggedInUser.email.split('@')[0], 
-                                        email: loggedInUser.email,
-                                        photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`,
-                                        coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
-                                        bio: 'Elite AI Creator exploring the Nexus.',
-                                        country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English',
-                                        createdAt: serverTimestamp(), provider: 'magic_link'
-                                    });
-                                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', loggedInUser.uid), {
-                                        name: loggedInUser.email.split('@')[0], photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, followersCount: 0, followingCount: 0, lastActive: Date.now()
-                                    }, { merge: true });
-                                }
-                                setAuthModal({ ...authModal, open: false, error: '' });
-                            }).catch(() => alert("Magic link expired or invalid."));
-                    }
-                }
 
                 const initAuth = async () => {
-                    if (auth.currentUser) return; 
                     try {
+                        if (isSignInWithEmailLink(auth, window.location.href)) {
+                            let email = null;
+                            try { email = window.localStorage.getItem('emailForSignIn'); } catch(e){}
+                            if (!email) email = window.prompt('Please confirm your email address to complete sign-in:');
+                            if (email) {
+                                try {
+                                    const result = await signInWithEmailLink(auth, email, window.location.href);
+                                    try { window.localStorage.removeItem('emailForSignIn'); } catch(e){}
+                                    const loggedInUser = result.user;
+                                    const profileRef = doc(db, 'artifacts', appId, 'users', loggedInUser.uid, 'profile', 'info');
+                                    const profileSnap = await getDoc(profileRef);
+                                    if (!profileSnap.exists()) {
+                                        await setDoc(profileRef, {
+                                            name: loggedInUser.email.split('@')[0], 
+                                            email: loggedInUser.email,
+                                            photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`,
+                                            coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
+                                            bio: 'Elite AI Creator exploring Nexia.',
+                                            country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English',
+                                            createdAt: serverTimestamp(), provider: 'magic_link'
+                                        });
+                                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', loggedInUser.uid), {
+                                            name: loggedInUser.email.split('@')[0], photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${loggedInUser.uid}`, followersCount: 0, followingCount: 0, lastActive: Date.now()
+                                        }, { merge: true });
+                                    }
+                                    setAuthModal(prev => ({ ...prev, open: false, error: '' }));
+                                } catch (err) {
+                                    console.error("Magic link error", err);
+                                    alert("Magic link expired or invalid.");
+                                }
+                                return;
+                            }
+                        }
+
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            try { await signInWithCustomToken(auth, __initial_auth_token); } 
-                            catch (e) { await signInAnonymously(auth); }
-                        } else if (!isSignInWithEmailLink(auth, window.location.href)) {
+                            try {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } catch (e) {
+                                await signInAnonymously(auth);
+                            }
+                        } else {
                             await signInAnonymously(auth);
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        console.error("Auth init error", e);
+                        try { await signInAnonymously(auth); } catch (e2) {}
+                    }
                 };
-                
-                const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
-                    if (u) { setUser(u); setLoading(false); } else initAuth();
+
+                initAuth();
+
+                const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
+                    setUser(u);
+                    setLoading(false);
                 });
+                
                 return () => unsubscribeAuth();
             }, [isReady]);
 
-            // --- ALUTH FIX: Added error handlers to ALL onSnapshot listeners to prevent uncaught Permission Errors ---
             useEffect(() => {
                 if (!isReady || !user) return;
                 const { db, appId, collection, onSnapshot, doc, setDoc } = window.fb;
@@ -493,7 +489,6 @@
                 if (!isReady || !user || user.isAnonymous) return;
                 const { db, appId, collection, onSnapshot } = window.fb;
                 
-                // --- ALUTH FIX: Notifications moved to public path to allow cross-user writing ---
                 const unsubNotifs = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), 
                     (snap) => {
                         const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }))
@@ -586,13 +581,12 @@
                     const profileRef = doc(db, 'artifacts', appId, 'users', result.user.uid, 'profile', 'info');
                     if (!(await getDoc(profileRef)).exists()) {
                         const initData = {
-                            name: result.user.displayName || result.user.email?.split('@')[0] || 'Nexus Creator', email: result.user.email || '',
+                            name: result.user.displayName || result.user.email?.split('@')[0] || 'Nexia Creator', email: result.user.email || '',
                             photoURL: result.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop',
-                            bio: 'Elite AI Creator exploring the Nexus.', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', createdAt: serverTimestamp(), provider: providerType
+                            bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', createdAt: serverTimestamp(), provider: providerType
                         };
                         await setDoc(profileRef, initData);
                         
-                        // --- ALUTH FIX: Mirror full public data to stats ---
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', result.user.uid), { 
                             name: initData.name, photoURL: initData.photoURL, coverURL: initData.coverURL, bio: initData.bio, followersCount: 0, followingCount: 0, lastActive: Date.now() 
                         }, { merge: true });
@@ -631,7 +625,6 @@
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', selectedUser.id), { followersCount: increment(1) }, { merge: true });
                         setSelectedUser(prev => ({ ...prev, followersCount: (prev.followersCount || 0) + 1 }));
                         
-                        // Notifications fix
                         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: selectedUser.id, type: 'follow', fromUserId: user.uid, fromUserName: profileData.name || user.displayName, fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
                     }
                 } catch (e) {}
@@ -646,8 +639,8 @@
                         const res = await createUserWithEmailAndPassword(auth, authModal.email, authModal.password);
                         await updateProfile(res.user, { displayName: authModal.name });
                         const defaultPhoto = `https://api.dicebear.com/7.x/avataaars/svg?seed=${res.user.uid}`;
-                        await setDoc(doc(db, 'artifacts', appId, 'users', res.user.uid, 'profile', 'info'), { name: authModal.name, email: authModal.email, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Newly authorized intelligence in the Nexus.', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', createdAt: serverTimestamp() });
-                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', res.user.uid), { name: authModal.name, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Newly authorized intelligence in the Nexus.', followersCount: 0, followingCount: 0, lastActive: Date.now() }, { merge: true });
+                        await setDoc(doc(db, 'artifacts', appId, 'users', res.user.uid, 'profile', 'info'), { name: authModal.name, email: authModal.email, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Elite AI Creator exploring Nexia.', country: '', city: '', workplace: '', contactNo: '', isLocked: false, language: 'English', createdAt: serverTimestamp() });
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', res.user.uid), { name: authModal.name, photoURL: defaultPhoto, coverURL: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop', bio: 'Elite AI Creator exploring Nexia.', followersCount: 0, followingCount: 0, lastActive: Date.now() }, { merge: true });
                     } else {
                         await signInWithEmailAndPassword(auth, authModal.email, authModal.password);
                     }
@@ -660,7 +653,6 @@
                 if (targetUserId === user?.uid) return navigate('profile');
                 const { db, appId, doc, getDoc } = window.fb;
                 try {
-                    // --- ALUTH FIX: Only fetch from public stats to prevent permission error reading other user's private node ---
                     const statsSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', targetUserId));
                     if (statsSnap.exists()) {
                         setSelectedUser({ id: targetUserId, ...statsSnap.data() });
@@ -775,7 +767,7 @@
                     else { 
                         await updateDoc(postRef, { likes: arrayUnion(user.uid) }); 
                         if (post.userId !== user.uid) {
-                            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: post.userId, type: 'like', postId: post.id, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexus User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
+                            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: post.userId, type: 'like', postId: post.id, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexia User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
                         }
                     }
                 } catch (e) {}
@@ -795,11 +787,11 @@
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
                 if (!commentModal.text.trim()) return;
                 const { db, appId, doc, updateDoc, arrayUnion, addDoc, collection, serverTimestamp } = window.fb;
-                const newComment = { id: Date.now().toString(), userId: user.uid, userName: profileData.name || user.displayName || 'Nexus User', userPhoto: profileData.photoURL || user.photoURL, text: commentModal.text, timestamp: new Date().toISOString() };
+                const newComment = { id: Date.now().toString(), userId: user.uid, userName: profileData.name || user.displayName || 'Nexia User', userPhoto: profileData.photoURL || user.photoURL, text: commentModal.text, timestamp: new Date().toISOString() };
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', commentModal.post.id), { comments: arrayUnion(newComment) });
                     if (commentModal.post.userId !== user.uid) {
-                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: commentModal.post.userId, type: 'comment', postId: commentModal.post.id, commentText: commentModal.text, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexus User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: commentModal.post.userId, type: 'comment', postId: commentModal.post.id, commentText: commentModal.text, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexia User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
                     }
                     setCommentModal({ ...commentModal, text: '' });
                 } catch (e) {}
@@ -807,7 +799,7 @@
 
             const handleShare = async (post) => {
                 if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
-                    try { await navigator.share({ title: 'PromptHub Nexus', text: `Check out this AI Prompt by ${post.userName}: "${post.prompt}"`, url: window.location.href }); } catch (err) {}
+                    try { await navigator.share({ title: 'Nexia AI', text: `Check out this AI Prompt by ${post.userName}: "${post.prompt}"`, url: window.location.href }); } catch (err) {}
                 } else setShareModal({ open: true, post: post });
             };
 
@@ -879,8 +871,10 @@
                     <nav className="sticky top-0 z-50 nexus-nav px-4 md:px-6 py-3 md:py-4">
                         <div className="max-w-7xl mx-auto flex items-center justify-between">
                             <div className="flex items-center gap-2 cursor-pointer group min-w-0" onClick={() => { navigate('home'); setSelectedUser(null); }}>
-                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-[0.8rem] md:rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform flex-shrink-0"><Icon name="zap" /></div>
-                                <h1 className="text-[17px] xs:text-xl md:text-2xl font-black tracking-tighter text-slate-900 uppercase whitespace-nowrap overflow-hidden text-ellipsis">PROMPTHUB<span className="text-blue-600 ml-1">NEXUS</span></h1>
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-[0.8rem] md:rounded-2xl flex items-center justify-center text-white active:scale-90 transition-transform flex-shrink-0">
+                                    <Icon name="nexia_logo" className="w-10 md:w-12 group-hover:scale-110 transition-transform" />
+                                </div>
+                                <h1 className="text-[17px] xs:text-xl md:text-2xl font-black tracking-tighter text-slate-900 uppercase whitespace-nowrap overflow-hidden text-ellipsis font-outfit">NEXIA<span className="text-blue-600 ml-1 text-sm md:text-lg">AI</span></h1>
                             </div>
                             
                             <div className="hidden md:block flex-1 max-w-md mx-8 relative">
@@ -934,7 +928,7 @@
                             {view === 'admin_panel' && isAdmin && (
                                 <div className="animate-in fade-in duration-700">
                                     <div className="bg-white rounded-[2rem] md:rounded-[4rem] shadow-sm p-6 md:p-12 mb-10">
-                                        <div className="flex flex-col items-center mb-10 border-b border-slate-100 pb-8 text-center"><div className="w-20 h-20 bg-red-50 text-red-600 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-red-100"><Icon name="alert" className="w-10 h-10" /></div><h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">Nexus Command Center</h2><p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-3 text-red-500">Master Admin Access Only</p></div>
+                                        <div className="flex flex-col items-center mb-10 border-b border-slate-100 pb-8 text-center"><div className="w-20 h-20 bg-red-50 text-red-600 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-red-100"><Icon name="alert" className="w-10 h-10" /></div><h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none font-outfit">Nexia Command Center</h2><p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-3 text-red-500">Master Admin Access Only</p></div>
                                         <div className="flex justify-center gap-4 mb-10 bg-slate-50 p-2 rounded-full border border-slate-100"><button onClick={() => setAdminTab('algorithm')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white text-red-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-900'}`}>Algorithm Tuner</button><button onClick={() => setAdminTab('users')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white text-red-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-900'}`}>User Management</button></div>
                                         {adminTab === 'algorithm' ? (
                                             <div className="space-y-8 animate-in slide-in-from-right-4">
@@ -960,7 +954,7 @@
                                             </div>
                                         )}
                                     </div>
-                                    <button onClick={() => navigate('home')} className="w-full py-5 bg-slate-100 text-slate-400 rounded-full font-black hover:bg-slate-200 uppercase tracking-[0.2em] text-[9px] lg:hidden">Return to Nexus</button>
+                                    <button onClick={() => navigate('home')} className="w-full py-5 bg-slate-100 text-slate-400 rounded-full font-black hover:bg-slate-200 uppercase tracking-[0.2em] text-[9px] lg:hidden">Return to Nexia</button>
                                 </div>
                             )}
 
@@ -1010,8 +1004,8 @@
                                                 </div>
                                             </div>
                                             <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Creative Formula</label><textarea placeholder="Specify the magic... Use #tags!" className="w-full bg-slate-50 border border-slate-100 rounded-[2.8rem] p-6 min-h-[160px] font-mono text-sm outline-none focus:ring-4 focus:ring-blue-500/10" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea></div>
-                                            <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Model</label><select className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] py-5 px-6 font-black text-xs outline-none" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}><option>Midjourney v6.1 Pro</option><option>DALL-E 3 Nexus</option><option>Stable Diffusion XL Turbo</option><option>Flux.1 Dev</option></select></div>
-                                            <button disabled={uploading} className="w-full btn-nexus-main text-white py-6 rounded-[3rem] font-black text-xs tracking-[0.3em] uppercase">{uploading ? 'TRANSMITTING...' : 'TRANSMIT TO NEXUS'}</button>
+                                            <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Model</label><select className="w-full bg-slate-50 border border-slate-100 rounded-[2.2rem] py-5 px-6 font-black text-xs outline-none" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}><option>Midjourney v6.1 Pro</option><option>DALL-E 3 Nexia</option><option>Stable Diffusion XL Turbo</option><option>Flux.1 Dev</option></select></div>
+                                            <button disabled={uploading} className="w-full btn-nexus-main text-white py-6 rounded-[3rem] font-black text-xs tracking-[0.3em] uppercase">{uploading ? 'TRANSMITTING...' : 'TRANSMIT TO NEXIA'}</button>
                                         </form>
                                     </div>
                                 </div>
@@ -1025,7 +1019,7 @@
                                             <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className="flex items-center gap-4 p-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
                                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-slate-200 text-slate-600' : 'bg-slate-50 text-slate-400'}`}>#{index + 1}</div>
                                                 <img src={creator.photoURL} className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
-                                                <div className="flex-1"><p className="font-extrabold text-sm text-slate-900 flex items-center gap-1">{creator.name} {getAuthorBadges(creator.id)}</p><p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Nexus Network</p></div>
+                                                <div className="flex-1"><p className="font-extrabold text-sm text-slate-900 flex items-center gap-1">{creator.name} {getAuthorBadges(creator.id)}</p><p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Nexia Network</p></div>
                                                 <div className="text-right font-black text-slate-800">{creator.followersCount || 0}</div>
                                             </div>
                                         ))}
@@ -1050,7 +1044,7 @@
                                                 <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center cursor-pointer border-4 border-white"><Icon name="camera" className="w-4 h-4" /></label>
                                                 <input type="file" id="avatar-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'avatar')} disabled={uploading} />
                                             </div>
-                                            <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-2">{profileData.name} {profileData.isLocked && <Icon name="lock" className="text-blue-600 w-4 h-4"/>} {getAuthorBadges(user?.uid)}</h2>
+                                            <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-2 font-outfit">{profileData.name} {profileData.isLocked && <Icon name="lock" className="text-blue-600 w-4 h-4"/>} {getAuthorBadges(user?.uid)}</h2>
                                             <p className="text-blue-600 font-black text-[10px] tracking-[0.2em] uppercase mb-6">{user?.email}</p>
                                             <div className="flex gap-8 mb-6">
                                                 <div><p className="text-2xl font-black text-slate-900">{profileData.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('followers')}</p></div>
@@ -1145,7 +1139,7 @@
                                         <div className="h-44 profile-banner bg-slate-800">{selectedUser.coverURL && <img src={selectedUser.coverURL} className="w-full h-full object-cover opacity-80" />}</div>
                                         <div className="px-6 pb-12 relative flex flex-col items-center">
                                             <img src={selectedUser.photoURL} className="w-32 h-32 rounded-[2.5rem] border-8 border-white shadow-2xl bg-white object-cover -mt-16 mb-4 z-10" />
-                                            <h2 className="text-2xl font-black text-slate-900 uppercase flex items-center gap-2">{selectedUser.name} {selectedUser.isLocked && <Icon name="lock" className="text-blue-600 w-4 h-4"/>} {getAuthorBadges(selectedUser.id)}</h2>
+                                            <h2 className="text-2xl font-black text-slate-900 uppercase flex items-center gap-2 font-outfit">{selectedUser.name} {selectedUser.isLocked && <Icon name="lock" className="text-blue-600 w-4 h-4"/>} {getAuthorBadges(selectedUser.id)}</h2>
                                             <div className="flex gap-8 mb-6 mt-4">
                                                 <div><p className="text-2xl font-black text-slate-900">{selectedUser.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('followers')}</p></div>
                                                 <div className="border-l border-slate-100 pl-8"><p className="text-2xl font-black text-slate-900">{selectedUser.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase">{t('following')}</p></div>
@@ -1165,7 +1159,7 @@
 
                         <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 sticky top-28 h-fit space-y-6">
                             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                                <h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Nexus Network</h3>
+                                <h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Nexia Network</h3>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between bg-slate-50 p-3 rounded-2xl"><div className="flex items-center gap-3"><Icon name="users" className="text-slate-400 w-4 h-4"/><span className="text-xs font-bold text-slate-600">{t('members')}</span></div><span className="font-black text-sm text-slate-900">{totalMembers}</span></div>
                                     <div className="flex items-center justify-between bg-green-50 p-3 rounded-2xl border border-green-100"><div className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse ml-1"></span><span className="text-xs font-bold text-green-700">{t('online')}</span></div><span className="font-black text-sm text-green-700">{onlineMembers}</span></div>
@@ -1175,7 +1169,7 @@
                             {!user || user.isAnonymous ? (
                                 <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center"><h3 className="font-black text-lg text-slate-900 mb-2">{t('joinNexus')}</h3><p className="text-xs text-slate-500 font-medium mb-4">{t('connectElite')}</p><button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login' })} className="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-xs uppercase">{t('signIn')}</button></div>
                             ) : (
-                                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => navigate('profile')}><img src={profileData.photoURL || user.photoURL} className="w-12 h-12 rounded-[1rem] object-cover bg-slate-100 border border-slate-200" /><div className="flex-1 overflow-hidden"><p className="font-extrabold text-sm text-slate-900 truncate">{profileData.name}</p><p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1">Elite Creator</p></div></div>
+                                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => navigate('profile')}><img src={profileData.photoURL || user.photoURL} className="w-12 h-12 rounded-[1rem] object-cover bg-slate-100 border border-slate-200" /><div className="flex-1 overflow-hidden"><p className="font-extrabold text-sm text-slate-900 truncate font-outfit">{profileData.name}</p><p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1">Elite Creator</p></div></div>
                             )}
                             
                             {view === 'profile' || view === 'public_profile' ? (
@@ -1188,15 +1182,21 @@
                                     </div>
                                 </div>
                             ) : (
-                                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm"><h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">{t('trendingTech')}</h3><div className="space-y-4"><div className="flex flex-col cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-colors"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">#1 IN AI ART</span><span className="font-extrabold text-sm text-slate-800">Midjourney v6.1</span></div><div className="flex flex-col cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-colors"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">#2 IN DESIGN</span><span className="font-extrabold text-sm text-slate-800">DALL-E 3 Nexus</span></div></div></div>
+                                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm"><h3 className="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">{t('trendingTech')}</h3><div className="space-y-4"><div className="flex flex-col cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-colors"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">#1 IN AI ART</span><span className="font-extrabold text-sm text-slate-800">Midjourney v6.1</span></div><div className="flex flex-col cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-colors"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">#2 IN DESIGN</span><span className="font-extrabold text-sm text-slate-800">DALL-E 3 Nexia</span></div></div></div>
                             )}
+                            
+                            <div className="text-center mt-8">
+                                <Icon name="nexia_logo" className="w-8 mx-auto mb-2 opacity-50 grayscale" />
+                                <p className="text-[10px] font-bold text-slate-400">© 2026 Nexia AI Technologies.</p>
+                                <p className="text-[9px] text-slate-300 mt-1">Global AI Network</p>
+                            </div>
                         </aside>
                     </main>
 
                     <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar px-6 py-4 flex justify-between items-center md:hidden z-50 pb-safe">
                         <button onClick={() => navigate('home')} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400'}`}><Icon name="home" className="w-6 h-6" /></button>
                         <button onClick={() => navigate('leaderboard')} className={`p-2 transition-transform active:scale-90 ${view==='leaderboard'?'text-blue-600':'text-slate-400'}`}><Icon name="trophy" className="w-6 h-6" /></button>
-                        <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else navigate('create_post'); }} className="w-14 h-14 btn-nexus-main rounded-[1.8rem] flex items-center justify-center text-white -mt-8 shadow-2xl active:scale-95 border-4 border-white"><Icon name="plus" className="w-6 h-6" /></button>
+                        <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login', error: ''}); else navigate('create_post'); }} className="w-14 h-14 btn-nexus-main rounded-[1.8rem] flex items-center justify-center text-white -mt-8 shadow-2xl active:scale-95 border-4 border-white"><Icon name="plus" className="w-6 h-6" /></button>
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400'}`}><Icon name="bell" className="w-6 h-6" />{hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}</button>
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400'}`}><Icon name="user" className="w-6 h-6" /></button>
                     </div>
@@ -1204,8 +1204,9 @@
                     {authModal.open && (
                         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
                             <div className="bg-white w-full max-w-md rounded-[3.5rem] p-10 md:p-14 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 text-center">
-                                <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900 tracking-tighter uppercase">{authModal.mode === 'login' ? 'IDENTITY PORTAL' : 'NEXUS ORIGIN'}</h2>
-                                <p className="text-slate-400 font-black text-[10px] mt-2 uppercase tracking-[0.4em] italic mb-8">Secure Access</p>
+                                <Icon name="nexia_logo" className="w-16 mx-auto mb-4" />
+                                <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900 tracking-tighter uppercase font-outfit">Nexia Access</h2>
+                                <p className="text-slate-400 font-black text-[10px] mt-2 uppercase tracking-[0.4em] mb-8">Global Intelligence Network</p>
                                 {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-2xl mb-6 uppercase">{authModal.error}</div>}
                                 <div className="flex gap-3 mb-8">
                                     <button onClick={() => handleSocialSignIn('google')} className="flex-1 flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-50 py-4 rounded-[1.8rem] font-black text-[10px] text-slate-700 hover:bg-slate-50 shadow-sm active:scale-95"><Icon name="google" className="w-6 h-6" /> Google</button>
