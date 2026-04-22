@@ -1244,12 +1244,25 @@
 
                                         {settingsSection === 'Language' && (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {['English', 'Sinhala (සිංහල)', 'Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'].map(lang => (
-                                                    <button key={lang} onClick={() => requestLanguageChange(lang)} className={`p-5 rounded-2xl border-2 font-bold text-sm flex items-center justify-between ${profileData.language === lang ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 hover:border-blue-200 dark:hover:border-slate-500'}`}>
-                                                        {lang} 
-                                                        {profileData.language === lang && <Icon name="checkcircle" className="text-blue-600 dark:text-blue-400 w-6 h-6 flex-shrink-0" />}
-                                                    </button>
-                                                ))}
+                                                {['English', 'Sinhala (සිංහල)', 'Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'].map(lang => {
+                                                    const isSelected = profileData.language === lang || (!profileData.language && lang === 'English');
+                                                    return (
+                                                        <button 
+                                                            key={lang} 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                if (!isSelected) {
+                                                                    requestLanguageChange(lang);
+                                                                }
+                                                            }} 
+                                                            className={`p-5 rounded-2xl border-2 font-bold text-sm flex items-center justify-between transition-all ${isSelected ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 hover:border-blue-200 dark:hover:border-slate-500 cursor-pointer'}`}
+                                                        >
+                                                            {lang} 
+                                                            {isSelected && <Icon name="checkcircle" className="text-blue-600 dark:text-blue-400 w-6 h-6 flex-shrink-0" />}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         )}
 
