@@ -1382,26 +1382,19 @@
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400'}`}><Icon name="user" className="w-6 h-6" /></button>
                     </div>
 
-                    {authModal.open && (
-                        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
-                            <div className="bg-white w-full max-w-md rounded-[3.5rem] p-10 md:p-14 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 text-center">
-                                <Icon name="nexia_logo" className="w-16 mx-auto mb-4" />
-                                <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900 tracking-tighter uppercase font-outfit">NEXIA ACCESS</h2>
-                                <p className="text-slate-400 font-black text-[10px] mt-2 uppercase tracking-[0.4em] mb-8">Global Intelligence Network</p>
-                                {authModal.error && <div className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-2xl mb-6 uppercase">{authModal.error}</div>}
-                                <div className="flex gap-3 mb-8">
-                                    <button onClick={() => handleSocialSignIn('google')} className="flex-1 flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-50 py-4 rounded-[1.8rem] font-black text-[10px] text-slate-700 hover:bg-slate-50 shadow-sm active:scale-95"><Icon name="google" className="w-6 h-6" /> Google</button>
-                                    <button onClick={() => handleSocialSignIn('github')} className="flex-1 flex flex-col items-center justify-center gap-2 bg-slate-900 border-2 border-slate-900 py-4 rounded-[1.8rem] font-black text-[10px] text-white hover:bg-slate-800 shadow-sm active:scale-95"><Icon name="github" className="w-6 h-6" /> GitHub</button>
+                    {/* Language Confirmation Modal */}
+                    {showLangConfirm && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
+                            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 text-center border border-slate-100 dark:border-slate-700">
+                                <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Icon name="globe" className="w-8 h-8" />
                                 </div>
-                                <div className="flex items-center gap-4 mb-8"><div className="h-px bg-slate-100 flex-1"></div><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">OR USE EMAIL</span><div className="h-px bg-slate-100 flex-1"></div></div>
-                                <form onSubmit={handleAuth} className="space-y-4">
-                                    {authModal.mode === 'signup' && <input type="text" placeholder="DISPLAY NAME" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest" required value={authModal.name} onChange={e => setAuthModal({...authModal, name: e.target.value})} />}
-                                    <input type="email" placeholder="EMAIL ADDRESS" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest" required value={authModal.email} onChange={e => setAuthModal({...authModal, email: e.target.value})} />
-                                    <input type="password" placeholder="SECURITY KEY" className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-sm tracking-widest" required value={authModal.password} onChange={e => setAuthModal({...authModal, password: e.target.value})} />
-                                    <button disabled={loading} className="w-full btn-nexus-main text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.3em] uppercase">{loading ? 'CONNECTING...' : 'ESTABLISH LINK'}</button>
-                                </form>
-                                <div className="mt-8"><button onClick={() => setAuthModal({...authModal, mode: authModal.mode === 'login' ? 'signup' : 'login', error: ''})} className="text-[10px] font-black text-slate-400 hover:text-slate-600 uppercase tracking-[0.2em]">{authModal.mode === 'signup' ? "Existing Member? Sign In" : "New Creator? Request Access"}</button></div>
-                                <button onClick={() => setAuthModal({...authModal, open: false})} className="w-full mt-6 text-[10px] font-black text-slate-200 uppercase tracking-widest hover:text-slate-400 transition-colors">Abort Tunnel</button>
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{t('changeLangTitle')}</h3>
+                                <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mb-8">{t('changeLangDesc')} <b className="text-blue-600 dark:text-blue-400">{pendingLanguage}</b>?</p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setShowLangConfirm(false)} className="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 py-4 rounded-2xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">{t('cancel')}</button>
+                                    <button onClick={confirmLanguageChange} className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">{t('confirm')}</button>
+                                </div>
                             </div>
                         </div>
                     )}
