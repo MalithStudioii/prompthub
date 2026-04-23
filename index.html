@@ -392,7 +392,7 @@
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
                         userId: 'nexia_official_system',
                         userName: 'NEXIA - OFFICIAL',
-                        userPhoto: 'https://api.dicebear.com/7.x/shapes/svg?seed=NexiaCore&backgroundColor=2563eb',
+                        userPhoto: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM0ZjQ2ZTUiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMzYjgyZjYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjI1IiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAiIHk9IjcwIiBmb250LWZhbWlseT0iJ3N5c3RlbS11aScsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5OPC90ZXh0Pjwvc3ZnPg==',
                         prompt: officialPost.prompt,
                         imageUrl: finalImageUrl,
                         model: 'System Announcement',
@@ -991,7 +991,10 @@
                         userId: user.uid, userName: profileData.name || user.displayName, userPhoto: profileData.photoURL || user.photoURL, prompt: postModal.prompt, imageUrl: finalImageUrl, model: postModal.model, createdAt: serverTimestamp(), likes: [], comments: []
                     });
                     setPostModal({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' }); navigate('home');
-                } catch (err) { alert("Upload error"); }
+                } catch (err) { 
+                    // සැබෑ දෝෂය කුමක්දැයි හඳුනා ගැනීමට err.message එක alert කරන්න
+                    alert("⚠️ ERROR DURING UPLOAD: " + err.message); 
+                }
                 setUploading(false);
             };
 
@@ -1170,7 +1173,7 @@
                                     <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); }}></div>
                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-in zoom-in-95 duration-200 p-1">
                                         
-                                        {post.userId === user?.uid ? (
+                                        {(post.userId === user?.uid || isAdmin) ? (
                                             // Owner Options (Edit & Delete)
                                             <>
                                                 <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); setEditPostModal({ open: true, post: post, newPrompt: post.prompt }); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-xl text-slate-700 dark:text-slate-200">
@@ -1943,10 +1946,9 @@
                         </div>
                     )}
 
-                    <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar px-6 py-4 flex justify-between items-center md:hidden z-50 pb-safe">
+                    <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar py-4 flex justify-around items-center md:hidden z-50 pb-safe">
                         <button onClick={() => navigate('home')} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="home" className="w-6 h-6" /></button>
                         <button onClick={() => navigate('leaderboard')} className={`p-2 transition-transform active:scale-90 ${view==='leaderboard'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="trophy" className="w-6 h-6" /></button>
-                        <button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login', error: ''}); else navigate('create_post'); }} className="w-14 h-14 btn-nexus-main rounded-[1.8rem] flex items-center justify-center text-white -mt-8 shadow-2xl active:scale-95 border-4 border-white dark:border-slate-900"><Icon name="plus" className="w-6 h-6" /></button>
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="bell" className="w-6 h-6" />{hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}</button>
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="user" className="w-6 h-6" /></button>
                     </div>
