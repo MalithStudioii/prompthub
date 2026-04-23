@@ -366,6 +366,34 @@
             
             const [adminConfig, setAdminConfig] = useState({ likesWeight: 3, commentsWeight: 5, creatorBonusWeight: 0.1, timeDecay: 1.5, jitter: 5 });
             const [adminTab, setAdminTab] = useState('algorithm');
+            const [allReports, setAllReports] = useState([]);
+
+            // Admin Reports Fetcher
+            useEffect(() => {
+                if (!isReady || !user || !isAdmin) return;
+                const { db, appId, collection, onSnapshot } = window.fb;
+                const unsubReports = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'reports'), (snap) => {
+                    setAllReports(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+                });
+                return () => unsubReports();
+            }, [isReady, user, isAdmin]);
+
+            const resolveReport = async (reportId, postId, ownerId, actionType) => {
+                const { db, appId, doc, deleteDoc, setDoc } = window.fb;
+                if (!window.confirm("CEO, are you sure you want to take this action?")) return;
+                setUploading(true);
+                try {
+                    if (actionType === 'delete_post' || actionType === 'ban_user') {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId)); // පෝස්ට් එක මකනවා
+                    }
+                    if (actionType === 'ban_user') {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', ownerId), { isSuspended: true }, { merge: true }); // Account එක Suspend කරනවා
+                    }
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', reportId)); // අන්තිමට රිපෝට් එක අයින් කරනවා
+                    alert("Action completed successfully! 🛡️");
+                } catch(e) { console.error(e); alert("Action failed."); }
+                setUploading(false);
+            };
 
             useEffect(() => {
                 const handleKeyDown = (e) => {
@@ -612,7 +640,22 @@
                         const getScore = (p) => {
                             const cInfo = allCreators.find(c => c.id === p.userId);
                             const age = ((Date.now() / 1000) - (p.createdAt?.seconds || Date.now() / 1000)) / 3600;
-                            return ((typeof p.likes === 'number' ? p.likes : (p.likes?.length || 0)) * adminConfig.likesWeight) + ((p.comments?.length || 0) * adminConfig.commentsWeight) + ((cInfo?.followersCount || 0) * adminConfig.creatorBonusWeight) - (age * adminConfig.timeDecay) + (Math.random() * adminConfig.jitter);
+                            
+                            // Boost Check (පැය 24කට ලොකු Boost එකක් දෙනවා)
+                            const isBoosted = p.boostedAt && ((Date.now() / 1000) - p.boostedAt.seconds < 86400);
+                            const boostScore = isBoosted ? 100 : 0; 
+                            
+                            // Verified Creator Check
+                            const verifiedScore = cInfo?.isVerified ? (adminConfig.verifiedBonus || 20) : 0;
+                            
+                            return ((typeof p.likes === 'number' ? p.likes : (p.likes?.length || 0)) * adminConfig.likesWeight) 
+                                 + ((p.comments?.length || 0) * adminConfig.commentsWeight) 
+                                 + ((p.savesCount || 0) * (adminConfig.savesWeight || 8))
+                                 + ((cInfo?.followersCount || 0) * adminConfig.creatorBonusWeight) 
+                                 + verifiedScore
+                                 + boostScore
+                                 - (age * adminConfig.timeDecay) 
+                                 + (Math.random() * adminConfig.jitter);
                         };
                         return getScore(b) - getScore(a);
                     });
@@ -939,11 +982,45 @@
 
             const toggleSave = async (post) => {
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
-                const { db, appId, doc, updateDoc, arrayUnion, arrayRemove } = window.fb;
+                const { db, appId, doc, updateDoc, arrayUnion, arrayRemove, increment } = window.fb;
                 const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', post.id);
                 const hasSaved = profileData.savedPosts?.includes(post.id);
+                
                 setProfileData(prev => ({ ...prev, savedPosts: hasSaved ? (prev.savedPosts || []).filter(id => id !== post.id) : [...(prev.savedPosts || []), post.id] }));
-                try { await updateDoc(profileRef, { savedPosts: hasSaved ? arrayRemove(post.id) : arrayUnion(post.id) }); } catch (e) {}
+                try { 
+                    await updateDoc(profileRef, { savedPosts: hasSaved ? arrayRemove(post.id) : arrayUnion(post.id) }); 
+                    await updateDoc(postRef, { savesCount: increment(hasSaved ? -1 : 1) }); // Saves ගාණ Post එකටත් ලියනවා
+                } catch (e) {}
+            };
+
+            const handleBoostPost = async (postId) => {
+                if (!user || user.isAnonymous) return;
+                const currentCoins = profileData.coins ?? 100; // අලුත් අයට Default 100ක් දෙනවා
+                
+                if (currentCoins < 50) {
+                    alert("Not enough Nexia Coins! You need 50 coins to boost.");
+                    return;
+                }
+                if (!window.confirm(`Boost this post for 24 hours? This will deduct 50 coins from your wallet. (Current balance: ${currentCoins} Coins)`)) return;
+                
+                setUploading(true);
+                const { db, appId, doc, updateDoc, serverTimestamp, increment } = window.fb;
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), {
+                        isBoosted: true,
+                        boostedAt: serverTimestamp()
+                    });
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info'), {
+                        coins: increment(-50)
+                    });
+                    setProfileData(prev => ({ ...prev, coins: currentCoins - 50 }));
+                    alert("🚀 Post Boosted Successfully! It will stay trending for 24 hours.");
+                } catch (error) {
+                    console.error("Boost error", error);
+                    alert("Failed to boost post.");
+                }
+                setUploading(false);
             };
 
             const toggleCommentLike = async (commentId) => {
@@ -1033,7 +1110,11 @@
                         <div className="flex items-center gap-3 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.userId)}>
                             <div className="p-0.5 rounded-xl md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={post.userPhoto} className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
                             <div className="flex flex-col">
-                                <span className="font-extrabold text-[14px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1">{post.userName} {getAuthorBadges(post.userId)}</span>
+                                <span className="font-extrabold text-[14px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1 flex-wrap">
+                                    {post.userName} 
+                                    {getAuthorBadges(post.userId)}
+                                    {post.boostedAt && ((Date.now() / 1000) - post.boostedAt.seconds < 86400) && <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="flame" className="w-2.5 h-2.5" /> Boosted</span>}
+                                </span>
                                 <span className="text-[9px] md:text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80 mt-1.5"><Icon name="cpu" className="w-3 mr-1" />{post.model}</span>
                             </div>
                         </div>
@@ -1097,6 +1178,9 @@
                             <p className="text-[13px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap no-select">{formatPrompt(post.prompt)}</p>
                             <div className="absolute -top-3 -left-1 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-3 h-3 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
                         </div>
+                        {post.userId === user?.uid && (!post.boostedAt || ((Date.now() / 1000) - post.boostedAt.seconds > 86400)) && (
+                            <button onClick={(e) => { e.stopPropagation(); handleBoostPost(post.id); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-[11px] uppercase tracking-widest py-2.5 rounded-xl shadow-md hover:scale-[1.02] active:scale-95 transition-all mb-4"><Icon name="flame" className="w-4 h-4" /> Boost Post (50 Coins)</button>
+                        )}
                         <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4 px-2">
                             <button onClick={() => toggleLike(post)} className={`flex items-center gap-1.5 md:gap-2 font-bold text-[11px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-4 h-4 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
                             <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors"><Icon name="message" className="w-4 h-4 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
@@ -1151,7 +1235,10 @@
                                     <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-5 py-2 md:px-7 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('signIn')}</button>
                                 ) : (
                                     <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
-                                        <div className="hidden md:block text-right"><p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">{isAdmin ? 'MASTER ADMIN' : t('tierElite')}</p><p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{profileData.name || user.displayName}</p></div>
+                                        <div className="hidden md:flex flex-col items-end mr-2">
+                                            <div className="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-[10px] font-black px-2.5 py-0.5 rounded-lg mb-1 flex items-center gap-1 border border-yellow-200 dark:border-yellow-800 shadow-sm"><Icon name="database" className="w-3 h-3" /> {profileData.coins ?? 100} Coins</div>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{profileData.name || user.displayName}</p>
+                                        </div>
                                         <button onClick={() => { navigate('profile'); setSelectedUser(null); }} className={`w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 shadow-sm active:scale-90 transition-transform bg-white dark:bg-slate-800 p-0.5 flex-shrink-0 ${isAdmin ? 'border-red-500' : 'border-blue-500'}`}>
                                             <img src={profileData.photoURL || user.photoURL} className="rounded-lg md:rounded-xl object-cover w-full h-full no-drag" />
                                         </button>
@@ -1179,25 +1266,68 @@
                                 <div className="animate-in fade-in duration-700">
                                     <div className="bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[4rem] shadow-sm p-6 md:p-12 mb-10 border border-slate-100 dark:border-slate-700">
                                         <div className="flex flex-col items-center mb-10 border-b border-slate-100 dark:border-slate-700 pb-8 text-center"><div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-red-100 dark:border-red-900/50"><Icon name="alert" className="w-10 h-10" /></div><h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none font-outfit">Nexia Command Center</h2><p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-3 text-red-500 dark:text-red-400">Master Admin Access Only</p></div>
-                                        <div className="flex justify-center gap-4 mb-10 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-full border border-slate-100 dark:border-slate-700"><button onClick={() => setAdminTab('algorithm')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Algorithm Tuner</button><button onClick={() => setAdminTab('users')} className={`flex-1 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>User Management</button></div>
-                                        {adminTab === 'algorithm' ? (
+                                        
+                                        <div className="flex justify-center gap-4 mb-10 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-[2rem] border border-slate-100 dark:border-slate-700 flex-wrap md:flex-nowrap">
+                                            <button onClick={() => setAdminTab('algorithm')} className={`flex-1 min-w-[120px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Algorithm</button>
+                                            <button onClick={() => setAdminTab('users')} className={`flex-1 min-w-[120px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Users</button>
+                                            <button onClick={() => setAdminTab('reports')} className={`flex-1 min-w-[120px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all relative ${adminTab === 'reports' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>
+                                                Reports {allReports.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-slate-800"></span>}
+                                            </button>
+                                        </div>
+
+                                        {adminTab === 'algorithm' && (
                                             <div className="space-y-8 animate-in slide-in-from-right-4">
-                                                <div className="space-y-6">
-                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"><span>Like Weight</span> <span className="text-red-500 dark:text-red-400">{adminConfig.likesWeight}x</span></label><input type="range" min="1" max="10" step="0.5" value={adminConfig.likesWeight} onChange={e => setAdminConfig({...adminConfig, likesWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
-                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"><span>Comment Weight</span> <span className="text-red-500 dark:text-red-400">{adminConfig.commentsWeight}x</span></label><input type="range" min="1" max="15" step="0.5" value={adminConfig.commentsWeight} onChange={e => setAdminConfig({...adminConfig, commentsWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30 mb-6">
+                                                    <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-start gap-2"><Icon name="alert" className="w-4 h-4 flex-shrink-0 mt-0.5" /> Adjust these weights to instantly change how the "Trending" feed is calculated globally. Higher values mean that factor has more impact.</p>
                                                 </div>
-                                                <button onClick={saveAdminConfig} disabled={uploading} className="w-full bg-slate-900 dark:bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl hover:bg-slate-800 dark:hover:bg-blue-700 active:scale-95 transition-all uppercase mt-6">{uploading ? 'SYNCING MATRIX...' : 'DEPlOY NEW ALGORITHM'}</button>
+                                                <div className="space-y-6">
+                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"><span>Like Weight</span> <span className="text-red-500 dark:text-red-400">{adminConfig.likesWeight}X</span></label><input type="range" min="1" max="10" step="0.5" value={adminConfig.likesWeight} onChange={e => setAdminConfig({...adminConfig, likesWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                    
+                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"><span>Comment Weight</span> <span className="text-red-500 dark:text-red-400">{adminConfig.commentsWeight}X</span></label><input type="range" min="1" max="15" step="0.5" value={adminConfig.commentsWeight} onChange={e => setAdminConfig({...adminConfig, commentsWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                    
+                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"><span>Follower Bonus</span> <span className="text-red-500 dark:text-red-400">{adminConfig.creatorBonusWeight}X</span></label><input type="range" min="0" max="1" step="0.1" value={adminConfig.creatorBonusWeight} onChange={e => setAdminConfig({...adminConfig, creatorBonusWeight: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                    
+                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"><span>Time Decay (Age Penalty)</span> <span className="text-red-500 dark:text-red-400">-{adminConfig.timeDecay}X / HR</span></label><input type="range" min="0.1" max="5" step="0.1" value={adminConfig.timeDecay} onChange={e => setAdminConfig({...adminConfig, timeDecay: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                    
+                                                    <div><label className="flex justify-between text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"><span>Random Jitter</span> <span className="text-red-500 dark:text-red-400">MAX +{adminConfig.jitter} PTS</span></label><input type="range" min="0" max="20" step="1" value={adminConfig.jitter} onChange={e => setAdminConfig({...adminConfig, jitter: parseFloat(e.target.value)})} className="w-full accent-red-600" /></div>
+                                                </div>
+                                                <button onClick={saveAdminConfig} disabled={uploading} className="w-full bg-slate-900 dark:bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm tracking-[0.2em] shadow-xl hover:bg-slate-800 dark:hover:bg-blue-700 active:scale-95 transition-all uppercase mt-6">{uploading ? 'SYNCING MATRIX...' : 'DEPLOY NEW ALGORITHM'}</button>
                                             </div>
-                                        ) : (
+                                        )}
+
+                                        {adminTab === 'users' && (
                                             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                                                 {allCreators.map(creator => (
-                                                    <div key={creator.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-[2rem] border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                                    <div key={creator.id} className={`bg-slate-50 dark:bg-slate-800/50 p-4 rounded-[2rem] border ${creator.isSuspended ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-slate-100 dark:border-slate-700'} flex flex-col sm:flex-row items-center justify-between gap-4`}>
                                                         <div className="flex items-center gap-4 cursor-pointer" onClick={() => openPublicProfile(creator.id)}>
-                                                            <img src={creator.photoURL} className="w-12 h-12 rounded-2xl object-cover border border-slate-200 dark:border-slate-600" />
-                                                            <div><p className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1">{creator.name} {getAuthorBadges(creator.id)}</p><p className="text-[10px] font-bold text-slate-500">{creator.followersCount || 0} Followers</p></div>
+                                                            <img src={creator.photoURL} className={`w-12 h-12 rounded-2xl object-cover border ${creator.isSuspended ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'}`} />
+                                                            <div>
+                                                                <p className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1">{creator.name} {getAuthorBadges(creator.id)} {creator.isSuspended && <span className="text-[9px] bg-red-600 text-white px-2 py-0.5 rounded-md ml-2 uppercase">Suspended</span>}</p>
+                                                                <p className="text-[10px] font-bold text-slate-500">{creator.followersCount || 0} Followers</p>
+                                                            </div>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <button onClick={() => toggleAdminUserStatus(creator.id, 'isVerified')} className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ${creator.isVerified ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200 dark:border-slate-600'}`}><Icon name="checkcircle" className="w-4 h-4 inline mr-1"/> Verify</button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {adminTab === 'reports' && (
+                                            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                                {allReports.length === 0 ? <p className="text-center text-slate-400 font-bold uppercase tracking-widest py-10">No Pending Reports. All Good! 🛡️</p> : allReports.map(report => (
+                                                    <div key={report.id} className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-[2rem] border border-red-100 dark:border-red-900/30">
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <div>
+                                                                <span className="bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">{report.reason.replace('_', ' ')}</span>
+                                                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 font-bold">Reported Post ID: <span className="text-blue-500 cursor-pointer hover:underline" onClick={() => { const p = posts.find(x => x.id === report.postId); if(p) setCommentModal({ open: true, post: p, text: '', replyingTo: null }); }}>{report.postId}</span></p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-2 mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">
+                                                            <button onClick={() => resolveReport(report.id, report.postId, report.postOwnerId, 'dismiss')} className="flex-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 py-2.5 rounded-xl font-black text-[10px] uppercase hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Dismiss Report</button>
+                                                            <button onClick={() => resolveReport(report.id, report.postId, report.postOwnerId, 'delete_post')} className="flex-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 py-2.5 rounded-xl font-black text-[10px] uppercase hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors">Delete Post</button>
+                                                            <button onClick={() => resolveReport(report.id, report.postId, report.postOwnerId, 'ban_user')} className="flex-1 bg-red-600 text-white py-2.5 rounded-xl font-black text-[10px] uppercase hover:bg-red-700 shadow-md transition-colors">Delete Post & Suspend User</button>
                                                         </div>
                                                     </div>
                                                 ))}
