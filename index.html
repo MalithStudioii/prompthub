@@ -336,6 +336,7 @@
             const [postOptionsMenuOpen, setPostOptionsMenuOpen] = useState(null); // null or postId
             const [editPostModal, setEditPostModal] = useState({ open: false, post: null, newPrompt: '' });
             const [reportModal, setReportModal] = useState({ open: false, post: null, reason: '' });
+            const [storeModal, setStoreModal] = useState(false);
 
             const [notifications, setNotifications] = useState([]);
             const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
@@ -1275,7 +1276,10 @@
                                 ) : (
                                     <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
                                         <div className="flex flex-col items-end justify-center mr-1 md:mr-2">
-                                            <div className="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg md:mb-1 flex items-center gap-1 border border-yellow-200 dark:border-yellow-800 shadow-sm whitespace-nowrap"><Icon name="database" className="w-3 h-3" /> {profileData.coins ?? 100} <span className="hidden md:inline">Coins</span></div>
+                                            <div onClick={() => setStoreModal(true)} className="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg md:mb-1 flex items-center gap-1 border border-yellow-200 dark:border-yellow-800 shadow-sm whitespace-nowrap cursor-pointer hover:scale-105 transition-transform" title="Buy More Coins">
+    <Icon name="database" className="w-3 h-3" /> {profileData.coins ?? 100} <span className="hidden md:inline">Coins</span>
+    <Icon name="plus" className="w-3 h-3 ml-1 bg-yellow-200 dark:bg-yellow-700 rounded-full p-0.5" />
+</div>
                                             <p className="hidden md:block text-sm font-bold text-slate-900 dark:text-white leading-none mt-1">{profileData.name || user.displayName}</p>
                                         </div>
                                         <button onClick={() => { navigate('profile'); setSelectedUser(null); }} className={`w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-2xl overflow-hidden border-2 shadow-sm active:scale-90 transition-transform bg-white dark:bg-slate-800 p-0.5 flex-shrink-0 ${isAdmin ? 'border-red-500' : 'border-blue-500'}`}>
@@ -2138,7 +2142,63 @@
                             </div>
                         </div>
                     )}
+                    {/* Nexia Coin Store Modal */}
+                    {storeModal && (
+                        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xl">
+                            <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[3rem] p-6 md:p-10 shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                                {/* Top Glow Effect */}
+                                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-yellow-400/20 to-transparent"></div>
+                                
+                                <div className="flex justify-between items-start mb-8 relative z-10">
+                                    <div>
+                                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase flex items-center gap-3 font-outfit">
+                                            <div className="w-12 h-12 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-white shadow-lg"><Icon name="database" className="w-6 h-6" /></div>
+                                            Nexia Bank
+                                        </h2>
+                                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 tracking-widest uppercase">Boost Your Creations. Rank Higher.</p>
+                                    </div>
+                                    <button onClick={() => setStoreModal(false)} className="bg-slate-50 dark:bg-slate-900 p-3 rounded-full text-slate-400 hover:text-red-500 transition-colors shadow-sm"><Icon name="x" /></button>
+                                </div>
 
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                                    {/* Package 1 */}
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-700 text-center hover:border-blue-500 transition-all hover:scale-105 group relative overflow-hidden">
+                                        <div className="text-yellow-500 mb-2"><Icon name="database" className="w-8 h-8 mx-auto" /></div>
+                                        <h3 className="font-black text-lg text-slate-900 dark:text-white mb-1">Starter</h3>
+                                        <p className="text-blue-600 font-black text-2xl mb-4">100 <span className="text-[10px] uppercase tracking-widest text-slate-400">Coins</span></p>
+                                        <div className="space-y-2">
+                                            <button onClick={() => alert("PayHere Integration Pending (Backend Required)")} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md">Pay Rs. 300</button>
+                                            <button onClick={() => alert("Stripe Integration Pending (Backend Required)")} className="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-md">Pay $1.00</button>
+                                        </div>
+                                    </div>
+
+                                    {/* Package 2 */}
+                                    <div className="bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-[2rem] p-6 border-2 border-blue-500 text-center hover:scale-105 transition-all relative overflow-hidden shadow-xl">
+                                        <div className="absolute top-0 left-0 w-full bg-blue-600 text-white text-[8px] font-black uppercase tracking-widest py-1">Most Popular</div>
+                                        <div className="text-yellow-500 mb-2 mt-4"><Icon name="database" className="w-10 h-10 mx-auto" /></div>
+                                        <h3 className="font-black text-lg text-slate-900 dark:text-white mb-1">Creator Pro</h3>
+                                        <p className="text-blue-600 font-black text-2xl mb-4">500 <span className="text-[10px] uppercase tracking-widest text-slate-400">Coins</span></p>
+                                        <div className="space-y-2">
+                                            <button onClick={() => alert("PayHere Integration Pending (Backend Required)")} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md">Pay Rs. 1200</button>
+                                            <button onClick={() => alert("Stripe Integration Pending (Backend Required)")} className="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-md">Pay $4.00</button>
+                                        </div>
+                                    </div>
+
+                                    {/* Package 3 */}
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-700 text-center hover:border-purple-500 transition-all hover:scale-105 group relative overflow-hidden">
+                                        <div className="text-yellow-500 mb-2"><Icon name="flame" className="w-8 h-8 mx-auto text-purple-500" /></div>
+                                        <h3 className="font-black text-lg text-slate-900 dark:text-white mb-1">Elite VIP</h3>
+                                        <p className="text-purple-600 font-black text-2xl mb-4">2000 <span className="text-[10px] uppercase tracking-widest text-slate-400">Coins</span></p>
+                                        <div className="space-y-2">
+                                            <button onClick={() => alert("PayHere Integration Pending (Backend Required)")} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md">Pay Rs. 4000</button>
+                                            <button onClick={() => alert("Stripe Integration Pending (Backend Required)")} className="w-full bg-purple-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-purple-700 transition-colors shadow-md">Pay $12.00</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="text-center text-[10px] font-bold text-slate-400 mt-6 uppercase tracking-widest">Payments are secured by Stripe & PayHere (LKR).</p>
+                            </div>
+                        </div>
+                    )}
                     {/* Report Post Modal */}
                     {reportModal.open && reportModal.post && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
