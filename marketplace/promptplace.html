@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promptplace - Premium AI Prompts & Digital Assets</title>
+    <meta name="description" content="Discover and buy the best AI prompts, digital art, audio stems, and web UI snippets on Promptplace.">
+    <meta name="keywords" content="AI Prompts, Buy Prompts, Digital Assets, Leonardo AI, Midjourney, Audio Stems, Web UI, Promptplace">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <nav class="bg-white shadow-sm p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-extrabold text-blue-600 tracking-tight">Prompt<span class="text-gray-800">place</span> 🚀</h1>
+            <div>
+                <span id="coin-balance" class="bg-yellow-100 text-yellow-800 font-bold py-2 px-4 rounded-full border border-yellow-300 shadow-sm">
+                    🪙 My Coins: 150
+                </span>
+                <a href="upload-prompt.html" class="ml-4 bg-gray-800 text-white px-4 py-2 rounded font-semibold hover:bg-gray-700 transition">Sell Item</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-12 text-center">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Explore Premium Digital Assets</h2>
+        <p class="text-lg text-gray-600 mb-8">From secret AI prompts to high-quality audio stems and UI components.</p>
+        
+        <div class="max-w-2xl mx-auto flex gap-2">
+            <input type="text" placeholder="Search for prompts, art, audio..." class="w-full border-2 border-gray-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+            <button class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Search</button>
+        </div>
+        
+        <div class="flex justify-center gap-4 mt-6 flex-wrap">
+            <span class="px-4 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold cursor-pointer border border-blue-200">All Items</span>
+            <span class="px-4 py-1 bg-white text-gray-600 border rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-100">🎨 Prompts</span>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 pb-20">
+        <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        </div>
+    </div>
+
+    <div id="success-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-8 transform transition-all">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto bg-green-100 rounded-full mb-6 shadow-inner">
+                <span class="text-3xl">🎉</span>
+            </div>
+            
+            <h3 class="text-2xl font-extrabold text-center text-gray-800 mb-2">Item Unlocked!</h3>
+            <p class="text-center text-gray-500 mb-6 font-medium">Here is your secret prompt. Copy and paste it into your AI generator.</p>
+            
+            <div class="relative bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6 shadow-inner">
+                <p id="secret-prompt-text" class="text-gray-800 font-mono text-sm whitespace-pre-wrap break-words"></p>
+            </div>
+            
+            <div class="flex gap-4">
+                <button onclick="copyPrompt()" id="copy-btn" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                    📋 Copy Prompt
+                </button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition-all duration-200 border border-gray-200">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // 🔴 අනිවාර්යයි: ඔයාගේ Firebase Config එක මෙතනට දාන්න
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
+            authDomain: "prompthub-e69f8.firebaseapp.com",
+            projectId: "prompthub-e69f8",
+            storageBucket: "prompthub-e69f8.firebasestorage.app",
+            messagingSenderId: "876000777567",
+            appId: "1:876000777567:web:1927dd9d1bd037678792ea"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const itemsGrid = document.getElementById('items-grid');
+        
+        // අපේ Coins ගාණ
+        let myCoins = 150;
+
+        // Database එකෙන් Prompts ටික අදින ෆන්ක්ෂන් එක
+        async function loadItems() {
+            try {
+                const snapshot = await db.collection("prompts").get();
+                
+                if (snapshot.empty) {
+                    itemsGrid.innerHTML = '<p class="text-gray-500 text-center col-span-3">තාම කිසිම Item එකක් Upload කරලා නෑ!</p>';
+                    return;
+                }
+
+                itemsGrid.innerHTML = ''; 
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const cardHTML = `
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+                            <img src="${data.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop'}" alt="${data.title}" class="w-full h-48 object-cover">
+                            <div class="p-5">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded">${data.platform}</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-1">${data.title}</h3>
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-2">${data.description}</p>
+                                <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                                    <span class="text-xl font-extrabold text-yellow-500">🪙 ${data.price}</span>
+                                    <button onclick="unlockItem('${doc.id}', ${data.price})" class="bg-blue-50 text-blue-600 font-bold py-2 px-4 rounded hover:bg-blue-600 hover:text-white transition">Unlock</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    itemsGrid.innerHTML += cardHTML;
+                });
+
+            } catch (error) {
+                console.error("Error loading items:", error);
+            }
+        }
+
+        // Unlock කරන ෆන්ක්ෂන් එක
+        async function unlockItem(itemId, itemPrice) {
+            if (myCoins >= itemPrice) {
+                myCoins = myCoins - itemPrice;
+                document.getElementById('coin-balance').innerText = `🪙 My Coins: ${myCoins}`;
+
+                try {
+                    const docRef = await db.collection("prompts").doc(itemId).get();
+                    
+                    if (docRef.exists) {
+                        const secretData = docRef.data().promptText;
+                        
+                        // Modal එකට ඩේටා දාලා, Hidden කියන Class එක අයින් කරලා පෙන්වනවා
+                        document.getElementById('secret-prompt-text').innerText = secretData;
+                        document.getElementById('success-modal').classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                    alert("❌ Error!\n\nFailed to load the prompt. Please try again later.");
+                }
+
+            } else {
+                alert("⚠️ Insufficient Coins!\n\nYou don't have enough coins to unlock this item. Please top-up your balance.");
+            }
+        }
+
+        // Modal එක වහන ෆන්ක්ෂන් එක
+        function closeModal() {
+            // ආපහු Hidden class එක දාලා Modal එක හංගනවා
+            document.getElementById('success-modal').classList.add('hidden');
+            
+            // Copy බටන් එක ආපහු පරණ විදිහටම (නිල් පාටට) හදනවා
+            document.getElementById('copy-btn').innerHTML = '📋 Copy Prompt';
+            document.getElementById('copy-btn').classList.replace('bg-green-600', 'bg-blue-600');
+        }
+
+        // Prompt එක Copy කරන ෆන්ක්ෂන් එක
+        function copyPrompt() {
+            const textToCopy = document.getElementById('secret-prompt-text').innerText;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const copyBtn = document.getElementById('copy-btn');
+                
+                // Copy කරාම බටන් එක කොළ පාට වෙනවා
+                copyBtn.innerHTML = '✅ Copied!';
+                copyBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                
+                // තත්පර 2කින් ආපහු පරණ විදිහට එනවා
+                setTimeout(() => {
+                    copyBtn.innerHTML = '📋 Copy Prompt';
+                    copyBtn.classList.replace('bg-green-600', 'bg-blue-600');
+                }, 2000);
+                
+            }).catch(err => {
+                console.error('Copy failed: ', err);
+                alert("Failed to copy text!");
+            });
+        }
+
+        // පිටුව ලෝඩ් වෙද්දිම Items ටික ගන්නවා
+        loadItems();
+    </script>
+</body>
+</html>

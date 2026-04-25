@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Prompt - Nexia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-10">
+
+    <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800"> Upload New Prompt</h2>
+        
+        <form id="uploadForm" class="space-y-4">
+            
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Prompt Title</label>
+                <input type="text" id="title" required class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="E.g., Cinematic Cyberpunk Cityscape">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Description</label>
+                <textarea id="description" required rows="2" class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Short description about the prompt..."></textarea>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">AI Platform</label>
+                <select id="platform" class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="Leonardo AI">Leonardo AI</option>
+                    <option value="Grok AI">Grok AI</option>
+                    <option value="Midjourney">Midjourney</option>
+                    <option value="ChatGPT">ChatGPT (DALL-E 3)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">The Secret Prompt 🤫</label>
+                <textarea id="promptText" required rows="4" class="w-full border p-2 rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter the exact prompt here. This will be hidden until someone buys it."></textarea>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Preview Image URL</label>
+                <input type="url" id="imageUrl" required class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://link-to-your-generated-image.jpg">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Price (in Coins 🪙)</label>
+                <input type="number" id="price" required min="10" value="50" class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition duration-300">
+                Publish Prompt
+            </button>
+
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // 2. ඔයාගේ Firebase Config එක මෙතනට දාන්න 
+        // (Firebase Console එකෙන් අරන් මේක අනිවාර්යයෙන්ම මාරු කරන්න)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
+            authDomain: "prompthub-e69f8.firebaseapp.com",
+            projectId: "prompthub-e69f8",
+            storageBucket: "prompthub-e69f8.firebasestorage.app",
+            messagingSenderId: "876000777567",
+            appId: "1:876000777567:web:1927dd9d1bd037678792ea"
+        };
+
+        // Firebase Start කිරීම
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 3. බටන් එක එබුවම ඩේටාබේස් එකට යවන කෑල්ල
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // පේජ් එක රීලෝඩ් වෙන එක නවත්තනවා
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerText = "Publishing... ⏳";
+            submitBtn.disabled = true;
+
+            // ෆෝම් එකේ ටයිප් කරපු ටික එකතු කරගන්නවා
+            const promptData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                platform: document.getElementById('platform').value,
+                promptText: document.getElementById('promptText').value,
+                imageUrl: document.getElementById('imageUrl').value,
+                price: parseInt(document.getElementById('price').value),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp() // අප්ලෝඩ් කරපු වෙලාව
+            };
+
+            try {
+                // "prompts" කියන Collection එකට ඩේටා ටික සේව් කරනවා
+                await db.collection("prompts").add(promptData);
+                
+                alert("🎉 සුපිරි ලොක්කා! Prompt එක සාර්ථකව Database එකට Upload වුණා!");
+                e.target.reset(); // වැඩේ ඉවර වුණාම ෆෝම් එක හිස් කරනවා
+                
+            } catch (error) {
+                console.error("අවුලක් ගියා: ", error);
+                alert("අප්ලෝඩ් කරන්න බැරි වුණා. Error: " + error.message);
+            } finally {
+                submitBtn.innerText = "Publish Prompt";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+</body>
+</html>
