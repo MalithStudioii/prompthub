@@ -1034,7 +1034,7 @@
             const handleCreatePost = async (e) => {
                 e.preventDefault();
                 if (!user || user.isAnonymous) return setAuthModal({ ...authModal, open: true, mode: 'login', error: 'Sign in required' });
-                if (!postModal.imageFile && !postModal.imageUrl) return alert("Please select an image or paste a URL.");
+                if (!postModal.imageFile && !postModal.imageUrl && !postModal.youtubeUrl) return alert("Please add an image or a YouTube link.");
                 setUploading(true);
                 const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
                 try {
