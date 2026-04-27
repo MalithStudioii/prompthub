@@ -663,14 +663,14 @@
                     const fetchedPosts = [];
                     for (const postDoc of snapshotDocs) {
                         const postData = postDoc.data();
-                        const userId = postData.userId;
+                        const authorIdToFetch = postData.isRepost ? postData.originalAuthorId : postData.userId;
                         
-                        if (userId === 'nexia_official_system') {
+                        if (authorIdToFetch === 'nexia_official_system') {
                             fetchedPosts.push({ id: postDoc.id, ...postData });
                             continue;
                         }
 
-                        const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'info');
+                        const userDocRef = doc(db, 'artifacts', appId, 'users', authorIdToFetch, 'profile', 'info');
                         try {
                             const userDocSnap = await getDoc(userDocRef);
                             let userData = { userName: "Unknown Creator", userPhoto: "default_avatar.png" };
