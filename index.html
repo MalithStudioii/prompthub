@@ -317,7 +317,7 @@
             const [loading, setLoading] = useState(true);
             const [authModal, setAuthModal] = useState({ open: false, mode: 'login', email: '', password: '', name: '', error: '' });
             
-            const [postModal, setPostModal] = useState({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' });
+            const [postModal, setPostModal] = useState({ prompt: '', imageUrl: '', imageFile: null, youtubeUrl: '', model: 'Midjourney v6.1 Pro' });
             
             const [editProfileData, setEditProfileData] = useState({ 
                 name: '', bio: '', photoURL: '', coverURL: '', imageFile: null, coverFile: null, 
@@ -1044,9 +1044,9 @@
                         if (!finalImageUrl) throw new Error("Upload failed");
                     }
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
-                        userId: user.uid, prompt: postModal.prompt, imageUrl: finalImageUrl, model: postModal.model, createdAt: serverTimestamp(), likes: [], comments: []
+                        userId: user.uid, prompt: postModal.prompt, imageUrl: finalImageUrl, youtubeUrl: postModal.youtubeUrl, model: postModal.model, createdAt: serverTimestamp(), likes: [], comments: []
                     });
-                    setPostModal({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' }); navigate('home');
+                    setPostModal({ prompt: '', imageUrl: '', imageFile: null, youtubeUrl: '', model: 'Midjourney v6.1 Pro' }); navigate('home');
                 } catch (err) { 
                     // සැබෑ දෝෂය කුමක්දැයි හඳුනා ගැනීමට err.message එක alert කරන්න
                     alert("⚠️ ERROR DURING UPLOAD: " + err.message); 
@@ -1272,7 +1272,15 @@
                 </div>
             );
 
-            const renderPostCard = (post) => (
+            const renderPostCard = (post) => {
+                const getYouTubeId = (url) => {
+                    if(!url) return null;
+                    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+                    return (match && match[2].length === 11) ? match[2] : null;
+                };
+                const ytId = getYouTubeId(post.youtubeUrl);
+
+                return (
                 <div key={post.id} className={`rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-8 md:mb-14 p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
                     
                     {/* 🚀 Reposted Header */}
@@ -1337,6 +1345,19 @@
                             )}
                         </div>
                     </div>
+                    {ytId && (
+                        <div className="px-2 md:px-4 mb-4 relative z-10">
+                            <div className="relative w-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-md bg-black" style={{ paddingTop: '56.25%' }}>
+                                <iframe 
+                                    className="absolute top-0 left-0 w-full h-full" 
+                                    src={`https://www.youtube.com/embed/${ytId}`} 
+                                    frameBorder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowFullScreen>
+                                </iframe>
+                            </div>
+                        </div>
+                    )}
                     <div className="secure-img-wrapper px-2 md:px-4 relative group">
                         <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
                         
@@ -1390,6 +1411,7 @@
                     </div>
                 </div>
             );
+            };
 
             const userPosts = posts.filter(p => p.userId === user?.uid);
             const targetUserPosts = selectedUser ? posts.filter(p => p.userId === selectedUser.id) : [];
@@ -1618,6 +1640,10 @@
                                                 </div>
                                             </div>
                                             <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Creative Formula</label><textarea placeholder="Specify the magic... Use #tags!" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-[2.8rem] p-6 min-h-[160px] font-mono text-sm outline-none focus:ring-4 focus:ring-blue-500/10" required value={postModal.prompt} onChange={e => setPostModal({...postModal, prompt: e.target.value})}></textarea></div>
+                                            <div className="space-y-3">
+    <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">YouTube Video Link (Optional)</label>
+    <input type="url" placeholder="https://www.youtube.com/watch?v=..." className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-[2rem] py-4 px-6 outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-sm text-slate-900 dark:text-white" value={postModal.youtubeUrl} onChange={e => setPostModal({...postModal, youtubeUrl: e.target.value})} />
+</div>
                                             <div className="space-y-3"><label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-3">Model</label><select className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-[2.2rem] py-5 px-6 font-black text-xs outline-none cursor-pointer focus:ring-4 focus:ring-blue-500/10" value={postModal.model} onChange={e => setPostModal({...postModal, model: e.target.value})}><option>Midjourney v6.1 Pro</option><option>DALL-E 3 Nexia</option><option>Stable Diffusion XL Turbo</option><option>Flux.1 Dev</option></select></div>
                                             <button disabled={uploading} className="w-full btn-nexus-main text-white py-6 rounded-[3rem] font-black text-xs tracking-[0.3em] uppercase disabled:opacity-50">{uploading ? 'TRANSMITTING...' : 'TRANSMIT TO NEXIA'}</button>
                                         </form>
