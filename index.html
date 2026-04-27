@@ -657,8 +657,43 @@
 
             useEffect(() => {
                 if (!isReady || !user) return; 
-                const { db, appId, collection, onSnapshot } = window.fb;
-                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), (snap) => setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() }))), (err) => console.warn(err));
+                const { db, appId, collection, doc, getDoc, onSnapshot } = window.fb;
+                
+                const fetchUserJoinedPosts = async (snapshotDocs) => {
+                    const fetchedPosts = [];
+                    for (const postDoc of snapshotDocs) {
+                        const postData = postDoc.data();
+                        const userId = postData.userId;
+                        
+                        if (userId === 'nexia_official_system') {
+                            fetchedPosts.push({ id: postDoc.id, ...postData });
+                            continue;
+                        }
+
+                        const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'info');
+                        try {
+                            const userDocSnap = await getDoc(userDocRef);
+                            let userData = { userName: "Unknown Creator", userPhoto: "default_avatar.png" };
+                            
+                            if (userDocSnap.exists()) {
+                                userData = {
+                                    userName: userDocSnap.data().name,
+                                    userPhoto: userDocSnap.data().photoURL
+                                };
+                            }
+                            fetchedPosts.push({ id: postDoc.id, ...postData, ...userData });
+                        } catch (error) {
+                            fetchedPosts.push({ id: postDoc.id, ...postData, userName: "Unknown Creator", userPhoto: "default_avatar.png" });
+                        }
+                    }
+                    setPosts(fetchedPosts);
+                };
+
+                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), 
+                    (snap) => fetchUserJoinedPosts(snap.docs), 
+                    (err) => console.warn(err)
+                );
+
                 return () => unsubPosts();
             }, [isReady, user]);
 
@@ -840,21 +875,6 @@
                     }, { merge: true });
                     await updateProfile(auth.currentUser, { displayName: editProfileData.name, photoURL: finalPhotoURL });
 
-                    // 🚀 මෙන්න පරණ Posts වල නම සහ ෆොටෝ එක අප්ඩේට් කරන අලුත් කෑල්ල!
-                    const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
-                    const q = query(postsRef, where("userId", "==", user.uid));
-                    const querySnapshot = await getDocs(q);
-                    
-                    const updatePromises = [];
-                    querySnapshot.forEach((documentSnapshot) => {
-                        const postDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', documentSnapshot.id);
-                        updatePromises.push(updateDoc(postDocRef, {
-                            userName: editProfileData.name,
-                            userPhoto: finalPhotoURL
-                        }));
-                    });
-                    await Promise.all(updatePromises); // ඔක්කොම පරණ පෝස්ට්ස් අප්ඩේට් වෙනකම් ඉන්නවා
-
                     navigate('profile');
                 } catch (e) { alert("Error updating profile."); }
                 setUploading(false);
@@ -1024,7 +1044,7 @@
                         if (!finalImageUrl) throw new Error("Upload failed");
                     }
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
-                        userId: user.uid, userName: profileData.name || user.displayName, userPhoto: profileData.photoURL || user.photoURL, prompt: postModal.prompt, imageUrl: finalImageUrl, model: postModal.model, createdAt: serverTimestamp(), likes: [], comments: []
+                        userId: user.uid, prompt: postModal.prompt, imageUrl: finalImageUrl, model: postModal.model, createdAt: serverTimestamp(), likes: [], comments: []
                     });
                     setPostModal({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' }); navigate('home');
                 } catch (err) { 
