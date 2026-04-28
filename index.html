@@ -2412,7 +2412,7 @@
                                                                                 </div>
 
                                                                                 {/* Three Dots (Only for sender) */}
-                                                                                {isMe && (
+                                                                                {isMe && !msg.imageUrl && ( // Image එකක් නම් Edit කරන්න බෑනේ
                                                                                     <div className="relative">
                                                                                         <button onClick={() => { setActiveMsgOptions(activeMsgOptions === msg.id ? null : msg.id); setActiveReactMsg(null); }} className="text-slate-400 hover:text-blue-500 p-1.5 transition-colors bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">
                                                                                             <Icon name="morehorizontal" className="w-4 h-4" />
@@ -2443,7 +2443,28 @@
                                                                             ) : (
                                                                                 <div className={`p-3.5 rounded-2xl text-[13px] font-medium leading-relaxed ${isMe ? 'bg-blue-600 text-white rounded-br-none shadow-md' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-bl-none shadow-sm'} ${msg.imageUrl ? 'p-1.5' : ''}`}>
                                                                                     {msg.imageUrl ? (
-                                                                                        <img src={msg.imageUrl} className="max-w-[200px] md:max-w-[250px] rounded-xl cursor-pointer hover:opacity-90 transition-opacity no-drag" onClick={() => setImageViewModal({ open: true, url: msg.imageUrl })} alt="Sent Image" />
+                                                                                        <div className="relative inline-block group/img">
+                                                                                            <img src={msg.imageUrl} className="max-w-[200px] md:max-w-[250px] rounded-xl cursor-pointer hover:opacity-90 transition-opacity no-drag" onClick={() => setImageViewModal({ open: true, url: msg.imageUrl })} alt="Sent Image" />
+                                                                                            
+                                                                                            {/* 🚀 Direct Download Button on Image */}
+                                                                                            <button onClick={async (e) => {
+                                                                                                e.stopPropagation();
+                                                                                                try {
+                                                                                                    const res = await fetch(msg.imageUrl);
+                                                                                                    const blob = await res.blob();
+                                                                                                    const link = document.createElement('a');
+                                                                                                    link.href = window.URL.createObjectURL(blob);
+                                                                                                    link.download = `Nexia_Chat_${Date.now()}.jpg`;
+                                                                                                    document.body.appendChild(link);
+                                                                                                    link.click();
+                                                                                                    document.body.removeChild(link);
+                                                                                                } catch(err) {
+                                                                                                    window.open(msg.imageUrl, '_blank');
+                                                                                                }
+                                                                                            }} className="absolute bottom-2 right-2 bg-black/50 hover:bg-blue-600 text-white p-2 rounded-full backdrop-blur-sm transition-all z-10 shadow-lg hover:scale-110 active:scale-95" title="Download Image">
+                                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                                                            </button>
+                                                                                        </div>
                                                                                     ) : (
                                                                                         <p>{msg.text}</p>
                                                                                     )}
@@ -2467,7 +2488,7 @@
                                                                     {/* Meta Info (Time, Pin, Edited Tag) */}
                                                                     {editingMsg !== msg.id && (
                                                                         <div className={`flex items-center gap-1.5 mt-2 ${isMe ? 'pr-1' : 'pl-1'}`}>
-                                                                            {msg.isEdited && <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic mr-1">Edited</span>}
+                                                                            {msg.isEdited && !msg.imageUrl && <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic mr-1">Edited</span>}
                                                                             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
                                                                                 {timeStr}
                                                                             </span>
