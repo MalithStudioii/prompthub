@@ -1770,6 +1770,34 @@
                                                     <div className="border-l border-slate-100 dark:border-slate-700 pl-8"><p className="text-2xl font-black text-slate-900 dark:text-white">{targetData.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('following')}</p></div>
                                                 </div>
 
+                                                {/* 🚀 Creator Analytics Dashboard */}
+                                                {(() => {
+                                                    const userAllPosts = posts.filter(p => p.userId === (targetData.id || user?.uid));
+                                                    const totalViews = userAllPosts.reduce((acc, p) => acc + (p.views || 0), 0);
+                                                    const totalLikes = userAllPosts.reduce((acc, p) => acc + (typeof p.likes === 'number' ? p.likes : (p.likes?.length || 0)), 0);
+                                                    const totalCopies = userAllPosts.reduce((acc, p) => acc + (p.copiesCount || 0), 0);
+
+                                                    return (
+                                                        <div className="w-full max-w-md bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-[2rem] p-5 mb-8 grid grid-cols-3 gap-2 shadow-inner transition-colors hover:border-blue-200 dark:hover:border-slate-600">
+                                                            <div className="flex flex-col items-center justify-center border-r border-slate-200 dark:border-slate-700">
+                                                                <svg className="w-5 h-5 text-blue-500 mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.127.412-.267.82-.416 1.218C19.828 17.585 16.326 20 12 20c-4.478 0-8.268-2.943-9.542-7z" /></svg>
+                                                                <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{totalViews}</span>
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Total Views</span>
+                                                            </div>
+                                                            <div className="flex flex-col items-center justify-center border-r border-slate-200 dark:border-slate-700">
+                                                                <Icon name="thumbsup" className="w-5 h-5 text-red-500 mb-1.5" />
+                                                                <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{totalLikes}</span>
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Total Likes</span>
+                                                            </div>
+                                                            <div className="flex flex-col items-center justify-center">
+                                                                <Icon name="clipboard" className="w-5 h-5 text-green-500 mb-1.5" />
+                                                                <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{totalCopies}</span>
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Total Copies</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })()}
+
                                                 {!isOwnProfile && !isFollowing && (
                                                     <button onClick={toggleFollow} className="w-full max-w-[240px] py-4 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-all mb-8 bg-blue-600 text-white hover:bg-blue-700 shadow-xl"><Icon name="userplus" className="w-4 h-4" /> Follow Creator</button>
                                                 )}
