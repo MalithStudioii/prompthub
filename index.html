@@ -1275,8 +1275,8 @@
             const renderPostCard = (post) => {
                 const getYouTubeId = (url) => {
                     if(!url) return null;
-                    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
-                    return (match && match[2].length === 11) ? match[2] : null;
+                    const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                    return match ? match[1] : null;
                 };
                 const ytId = getYouTubeId(post.youtubeUrl);
 
@@ -1358,18 +1358,36 @@
                             </div>
                         </div>
                     )}
-                    <div className="secure-img-wrapper px-2 md:px-4 relative group">
-                        <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
-                        
-                        <div className="bg-slate-100 dark:bg-slate-950 rounded-[2rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[350px] sm:h-[450px] md:h-[550px] shadow-sm">
-                            <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
-                            <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
+                    {/* 🚀 YouTube Video Player (YouTube Link එකක් තිබ්බොත් විතරක් පෙන්වයි) */}
+                    {ytId && (
+                        <div className="px-2 md:px-4 mb-4 relative z-10">
+                            <div className="relative w-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-md bg-black" style={{ paddingTop: '56.25%' }}>
+                                <iframe 
+                                    className="absolute top-0 left-0 w-full h-full" 
+                                    src={`https://www.youtube.com/embed/${ytId}`} 
+                                    frameBorder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowFullScreen>
+                                </iframe>
+                            </div>
                         </div>
+                    )}
 
-                        <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
-                            {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
-                        </button>
-                    </div>
+                    {/* 🚀 Image Wrapper (Image එකක් Upload කරලා තිබ්බොත් විතරක් පෙන්වයි) */}
+                    {post.imageUrl && (
+                        <div className="secure-img-wrapper px-2 md:px-4 relative group">
+                            <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
+                            
+                            <div className="bg-slate-100 dark:bg-slate-950 rounded-[2rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[350px] sm:h-[450px] md:h-[550px] shadow-sm">
+                                <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
+                                <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
+                            </div>
+
+                            <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                                {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
+                            </button>
+                        </div>
+                    )}
                     <div className="px-5 pb-5 pt-5 md:px-8 md:pb-6 md:pt-6">
                         <div className="bg-slate-50/70 dark:bg-slate-900/50 p-5 md:p-7 rounded-[2rem] md:rounded-[2.8rem] border border-slate-100 dark:border-slate-700 italic relative mb-4">
                             
