@@ -563,6 +563,7 @@
             // 🚀 Smart Update System Logic
             const LOCAL_APP_VERSION = 1.0; 
             const [systemUpdateAvailable, setSystemUpdateAvailable] = useState(false);
+            const [hideBanner, setHideBanner] = useState(false);
 
             useEffect(() => {
                 if (!isReady) return;
@@ -1697,10 +1698,13 @@
                 <div className={`min-h-screen pb-28 md:pb-0 transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`}>
                     
                     {/* 🚀 System Update Banner */}
-                    {systemUpdateAvailable && (
+                    {systemUpdateAvailable && !hideBanner && (
                         <div className="fixed top-0 left-0 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-3 z-[99999] flex flex-col md:flex-row items-center justify-center gap-4 shadow-2xl animate-in slide-in-from-top-full duration-500 text-center border-b border-white/20">
                             <span className="font-bold text-sm flex items-center gap-2 drop-shadow-md"><Icon name="zap" className="w-5 h-5 animate-pulse text-yellow-300"/> A new Nexus Core Update is available!</span>
-                            <button onClick={() => window.location.reload(true)} className="bg-white text-blue-600 px-6 py-2 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.4)]">Update Now</button>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => window.location.reload(true)} className="bg-white text-blue-600 px-6 py-2 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.4)]">Update Now</button>
+                                <button onClick={() => setHideBanner(true)} className="text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors" title="Dismiss"><Icon name="x" className="w-5 h-5"/></button>
+                            </div>
                         </div>
                     )}
 
