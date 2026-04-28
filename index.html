@@ -333,6 +333,45 @@
             // 🚀 මැකිලා ගිය Repost State එක
             const [repostModal, setRepostModal] = useState({ open: false, post: null });
 
+            // 🚀 Chat System States & Logic
+            const [chatMessage, setChatMessage] = useState('');
+            const [chatHistory, setChatHistory] = useState([]);
+            const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+
+            useEffect(() => {
+                if (view === 'messages' && selectedUser && user && !user.isAnonymous) {
+                    const { db, appId, collection, onSnapshot } = window.fb;
+                    // User ID දෙක පාවිච්චි කරලා අද්විතීය Chat ID එකක් හදනවා
+                    const chatId = [user.uid, selectedUser.id].sort().join('_'); 
+                    
+                    const unsub = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages'), (snap) => {
+                        const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+                        setChatHistory(msgs);
+                    });
+                    return () => unsub();
+                }
+            }, [view, selectedUser, user]);
+
+            const sendMessage = async (e) => {
+                e.preventDefault();
+                if (!chatMessage.trim() || !selectedUser || !user) return;
+                const { db, appId, collection, addDoc, serverTimestamp, setDoc, doc } = window.fb;
+                const chatId = [user.uid, selectedUser.id].sort().join('_');
+                
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages'), {
+                        senderId: user.uid, text: chatMessage, timestamp: serverTimestamp()
+                    });
+                    setChatMessage(''); // Text box එක හිස් කරනවා
+                    
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId), {
+                        lastMessage: chatMessage, lastMessageTime: serverTimestamp(), users: [user.uid, selectedUser.id]
+                    }, { merge: true });
+
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: selectedUser.id, type: 'message', fromUserId: user.uid, fromUserName: profileData.name || user.displayName, fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
+                } catch (err) { console.error(err); }
+            };
+
             // 🚀 මැකිලා ගිය External Share Function එක
             const handleShare = async (post) => {
                 if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
@@ -719,9 +758,28 @@
 
             const displayPosts = useMemo(() => {
                 let sorted = [...posts];
+                
+                // Tag filtering remains same
                 if (activeFilter !== 'All') sorted = sorted.filter(p => activeFilter.startsWith('#') ? p.prompt?.toLowerCase().includes(activeFilter.toLowerCase()) : p.model === activeFilter);
-                if (feedAlgorithm === 'latest') sorted.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                
+                // --- Top Filters Sorting Logic ---
+                if (feedAlgorithm === 'latest') {
+                    sorted.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                } 
+                else if (feedAlgorithm === 'most_viewed') {
+                    sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+                }
+                else if (feedAlgorithm === 'most_liked') {
+                    sorted.sort((a, b) => {
+                        const getCount = (p) => typeof p.likes === 'number' ? p.likes : (p.likes?.length || 0);
+                        return getCount(b) - getCount(a);
+                    });
+                }
+                else if (feedAlgorithm === 'most_copied') {
+                    sorted.sort((a, b) => (b.copiesCount || 0) - (a.copiesCount || 0));
+                }
                 else if (feedAlgorithm === 'trending') {
+                    
                     sorted.sort((a, b) => {
                         const getScore = (p) => {
                             const cInfo = allCreators.find(c => c.id === p.userId);
@@ -1665,9 +1723,28 @@
 
                                     <div className="sticky top-[60px] md:top-[80px] z-30 bg-[#F8FAFC] dark:bg-[#020617] pt-2 pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                                         <div className="flex flex-col gap-4">
-                                            <div className="flex justify-center md:justify-start gap-4">
-                                                <button onClick={() => setFeedAlgorithm('trending')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'trending' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="flame" className="w-4 h-4" /> {t('trending')}</button>
-                                                <button onClick={() => setFeedAlgorithm('latest')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'latest' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="clock" className="w-4 h-4" /> {t('latest')}</button>
+                                            <div className="flex justify-center md:justify-start gap-3 flex-wrap">
+                                                <button onClick={() => setFeedAlgorithm('trending')} className={`px-5 py-2.5 rounded-full font-bold text-[9px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-1.5 ${feedAlgorithm === 'trending' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="flame" className="w-4 h-4" /> {t('trending')}</button>
+                                                
+                                                {/* Views Filter */}
+                                                <button onClick={() => setFeedAlgorithm('most_viewed')} className={`px-5 py-2.5 rounded-full font-bold text-[9px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-1.5 ${feedAlgorithm === 'most_viewed' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.127.412-.267.82-.416 1.218C19.828 17.585 16.326 20 12 20c-4.478 0-8.268-2.943-9.542-7z" /></svg>
+                                                    Views
+                                                </button>
+
+                                                {/* Likes Filter */}
+                                                <button onClick={() => setFeedAlgorithm('most_liked')} className={`px-5 py-2.5 rounded-full font-bold text-[9px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-1.5 ${feedAlgorithm === 'most_liked' ? 'bg-red-500 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+                                                    <Icon name="thumbsup" className="w-4 h-4" />
+                                                    Likes
+                                                </button>
+
+                                                {/* Copies Filter */}
+                                                <button onClick={() => setFeedAlgorithm('most_copied')} className={`px-5 py-2.5 rounded-full font-bold text-[9px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-1.5 ${feedAlgorithm === 'most_copied' ? 'bg-green-500 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+                                                    <Icon name="clipboard" className="w-4 h-4" />
+                                                    Copies
+                                                </button>
+
+                                                <button onClick={() => setFeedAlgorithm('latest')} className={`px-5 py-2.5 rounded-full font-bold text-[9px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-1.5 ${feedAlgorithm === 'latest' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="clock" className="w-4 h-4" /> {t('latest')}</button>
                                             </div>
                                             <div className="flex overflow-x-auto gap-2 no-scrollbar pb-2 pt-1">
                                                 {availableFilters.map(filter => (
@@ -1798,11 +1875,21 @@
                                                     );
                                                 })()}
 
-                                                {!isOwnProfile && !isFollowing && (
-                                                    <button onClick={toggleFollow} className="w-full max-w-[240px] py-4 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-all mb-8 bg-blue-600 text-white hover:bg-blue-700 shadow-xl"><Icon name="userplus" className="w-4 h-4" /> Follow Creator</button>
-                                                )}
-                                                {!isOwnProfile && isFollowing && (
-                                                    <button onClick={toggleFollow} className="w-full max-w-[240px] py-4 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-all mb-8 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"><Icon name="usercheck" className="w-4 h-4" /> Following</button>
+                                                {!isOwnProfile && (
+                                                    <div className="flex items-center justify-center gap-3 w-full max-w-[320px] mb-8">
+                                                        <button onClick={toggleFollow} className={`flex-1 py-4 rounded-2xl font-black text-[11px] md:text-xs uppercase flex items-center justify-center gap-2 transition-all shadow-md ${isFollowing ? 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
+                                                            <Icon name={isFollowing ? "usercheck" : "userplus"} className="w-4 h-4" /> {isFollowing ? 'Following' : 'Follow'}
+                                                        </button>
+                                                        
+                                                        {/* 🚀 New Message Button */}
+                                                        <button onClick={() => { 
+                                                            if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); 
+                                                            setSelectedUser(targetData);
+                                                            navigate('messages'); 
+                                                        }} className="flex-1 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-4 rounded-2xl font-black text-[11px] md:text-xs uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-105 active:scale-95">
+                                                            <Icon name="message" className="w-4 h-4" /> Message
+                                                        </button>
+                                                    </div>
                                                 )}
 
                                                 {isTotallyLocked ? (
@@ -2093,6 +2180,83 @@
                                                 {user?.providerData?.[0]?.providerId !== 'google.com' && <input type="password" placeholder="Enter Password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 text-center font-bold dark:text-white outline-none focus:border-red-500" />}
                                                 <button onClick={handleDeleteAccount} className="w-full bg-red-600 text-white py-5 rounded-full font-black text-sm shadow-xl hover:bg-red-700 uppercase">Confirm Delete</button>
                                             </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {/* 🚀 Messages / Inbox View */}
+                            {view === 'messages' && (
+                                <div className="animate-in fade-in duration-700 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden flex h-[75vh] min-h-[500px] mb-10">
+                                    
+                                    {/* Left Pane: Contacts List (Mobile එකේ Chat එක ඕපන් නම් හැංගෙනවා) */}
+                                    <div className={`w-full md:w-1/3 border-r border-slate-100 dark:border-slate-700 flex flex-col ${selectedUser && isMobileChatOpen ? 'hidden md:flex' : 'flex'}`}>
+                                        <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                                            <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Direct Messages</h2>
+                                            <button onClick={() => navigate('home')} className="md:hidden text-slate-400 hover:text-red-500"><Icon name="x" /></button>
+                                        </div>
+                                        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest p-3">Your Network</p>
+                                            {displayedNetworkCreators.map(contact => (
+                                                <div key={contact.id} onClick={() => { setSelectedUser(contact); setIsMobileChatOpen(true); }} className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-colors ${selectedUser?.id === contact.id ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+                                                    <img src={contact.photoURL} className="w-10 h-10 rounded-[0.8rem] object-cover border border-slate-200 dark:border-slate-600 no-drag" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-extrabold text-sm text-slate-900 dark:text-white truncate">{contact.name}</p>
+                                                        <p className="text-[10px] text-slate-500 font-bold truncate">Tap to chat...</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {displayedNetworkCreators.length === 0 && <p className="text-center text-xs font-bold text-slate-400 p-4 mt-10">Follow someone to chat!</p>}
+                                        </div>
+                                    </div>
+
+                                    {/* Right Pane: Active Chat Area */}
+                                    <div className={`w-full md:w-2/3 flex flex-col bg-slate-50/30 dark:bg-slate-900/30 ${!selectedUser || (!isMobileChatOpen && window.innerWidth < 768) ? 'hidden md:flex' : 'flex'}`}>
+                                        {!selectedUser ? (
+                                            <div className="flex-1 flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+                                                <Icon name="message" className="w-16 h-16 mb-4 opacity-50" />
+                                                <p className="font-bold text-xs uppercase tracking-widest">Select a connection to start</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Chat Header */}
+                                                <div className="p-4 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3 shadow-sm z-10">
+                                                    <button onClick={() => setIsMobileChatOpen(false)} className="md:hidden text-slate-400 hover:text-blue-500 p-2"><Icon name="arrowleft" /></button>
+                                                    <img src={selectedUser.photoURL} className="w-10 h-10 rounded-xl object-cover cursor-pointer shadow-sm no-drag" onClick={() => { navigate('public_profile'); }} />
+                                                    <div>
+                                                        <p className="font-extrabold text-sm text-slate-900 dark:text-white cursor-pointer hover:underline" onClick={() => { navigate('public_profile'); }}>{selectedUser.name}</p>
+                                                        <p className="text-[9px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Online</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Chat History */}
+                                                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar flex flex-col">
+                                                    {chatHistory.length === 0 ? (
+                                                        <div className="m-auto text-center">
+                                                            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-3"><Icon name="sparkles" className="w-8 h-8" /></div>
+                                                            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Say hello to {selectedUser.name}!</p>
+                                                        </div>
+                                                    ) : (
+                                                        chatHistory.map((msg, idx) => {
+                                                            const isMe = msg.senderId === user.uid;
+                                                            return (
+                                                                <div key={msg.id || idx} className={`flex max-w-[75%] ${isMe ? 'self-end' : 'self-start'}`}>
+                                                                    <div className={`p-3.5 rounded-2xl text-[13px] font-medium leading-relaxed ${isMe ? 'bg-blue-600 text-white rounded-br-none shadow-md' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-bl-none shadow-sm'}`}>
+                                                                        <p>{msg.text}</p>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+
+                                                {/* Chat Input Area */}
+                                                <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                                                    <form onSubmit={sendMessage} className="flex gap-2 items-center">
+                                                        <input type="text" placeholder="Type your message..." className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full py-3.5 px-5 outline-none focus:ring-2 focus:ring-blue-500/50 font-bold text-sm text-slate-900 dark:text-white transition-all" value={chatMessage} onChange={e => setChatMessage(e.target.value)} />
+                                                        <button type="submit" disabled={!chatMessage.trim()} className="bg-blue-600 text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-blue-700 disabled:opacity-50 transition-all flex-shrink-0 shadow-[0_4px_14px_rgba(37,99,235,0.39)] hover:-translate-y-0.5"><Icon name="send" className="w-5 h-5 ml-1" /></button>
+                                                    </form>
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                 </div>
