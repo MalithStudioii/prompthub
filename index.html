@@ -2243,25 +2243,37 @@
                                                         </div>
                                                     ) : (
                                                         chatHistory.map((msg, idx) => {
-                                                            const isMe = msg.senderId === user.uid;
-                                                            
-                                                            // 🚀 Status Color Logic
+                                                            const isMe = msg.senderId === user?.uid;
                                                             const isOtherUserOnline = selectedUser?.lastActive && (Date.now() - selectedUser.lastActive < 300000);
-                                                            let statusColor = 'text-red-400'; // Default Sent (Red)
-                                                            if (msg.status === 'read') statusColor = 'text-green-400'; // Read (Green)
-                                                            else if (isOtherUserOnline) statusColor = 'text-yellow-400'; // Delivered/Online (Yellow)
+                                                            
+                                                            let statusColor = 'text-red-500';
+                                                            if (msg.status === 'read') statusColor = 'text-green-500';
+                                                            else if (isOtherUserOnline) statusColor = 'text-yellow-500';
+
+                                                            // 🚀 Safe Time Logic: Crash වීම වළක්වා ඇත
+                                                            let timeStr = 'Just now';
+                                                            try {
+                                                                if (msg.timestamp && typeof msg.timestamp.toDate === 'function') {
+                                                                    timeStr = msg.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                                                }
+                                                            } catch (e) {
+                                                                console.warn("Time sync skipped");
+                                                            }
 
                                                             return (
                                                                 <div key={msg.id || idx} className={`flex flex-col max-w-[75%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}>
                                                                     <div className={`p-3.5 rounded-2xl text-[13px] font-medium leading-relaxed ${isMe ? 'bg-blue-600 text-white rounded-br-none shadow-md' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-bl-none shadow-sm'}`}>
                                                                         <p>{msg.text}</p>
                                                                     </div>
-                                                                    {/* Pin Icon for sender */}
-                                                                    {isMe && (
-                                                                        <div className="flex items-center gap-1 mt-1 pr-1">
-                                                                            <span className={`text-[11px] drop-shadow-sm transition-colors duration-300 ${statusColor}`}>📌</span>
-                                                                        </div>
-                                                                    )}
+                                                                    
+                                                                    <div className={`flex items-center gap-1.5 mt-1.5 ${isMe ? 'pr-1' : 'pl-1'}`}>
+                                                                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                                                                            {timeStr}
+                                                                        </span>
+                                                                        {isMe && (
+                                                                            <svg className={`w-3.5 h-3.5 drop-shadow-sm transition-colors duration-300 ${statusColor}`} fill="currentColor" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             );
                                                         })
