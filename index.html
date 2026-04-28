@@ -340,13 +340,19 @@
 
             useEffect(() => {
                 if (view === 'messages' && selectedUser && user && !user.isAnonymous) {
-                    const { db, appId, collection, onSnapshot } = window.fb;
-                    // User ID දෙක පාවිච්චි කරලා අද්විතීය Chat ID එකක් හදනවා
+                    const { db, appId, collection, onSnapshot, doc, updateDoc } = window.fb;
                     const chatId = [user.uid, selectedUser.id].sort().join('_'); 
                     
                     const unsub = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages'), (snap) => {
                         const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
                         setChatHistory(msgs);
+
+                        // 🚀 Auto-Read Magic: අනිත් කෙනාගේ මැසේජ් ආවම ඒවා 'read' කරනවා
+                        msgs.forEach(msg => {
+                            if (msg.senderId !== user.uid && msg.status !== 'read') {
+                                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages', msg.id), { status: 'read' }).catch(()=>{});
+                            }
+                        });
                     });
                     return () => unsub();
                 }
@@ -360,7 +366,7 @@
                 
                 try {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages'), {
-                        senderId: user.uid, text: chatMessage, timestamp: serverTimestamp()
+                        senderId: user.uid, text: chatMessage, timestamp: serverTimestamp(), status: 'sent' // 🚀 මෙතන status එක දැම්මා
                     });
                     setChatMessage(''); // Text box එක හිස් කරනවා
                     
@@ -2238,11 +2244,24 @@
                                                     ) : (
                                                         chatHistory.map((msg, idx) => {
                                                             const isMe = msg.senderId === user.uid;
+                                                            
+                                                            // 🚀 Status Color Logic
+                                                            const isOtherUserOnline = selectedUser?.lastActive && (Date.now() - selectedUser.lastActive < 300000);
+                                                            let statusColor = 'text-red-400'; // Default Sent (Red)
+                                                            if (msg.status === 'read') statusColor = 'text-green-400'; // Read (Green)
+                                                            else if (isOtherUserOnline) statusColor = 'text-yellow-400'; // Delivered/Online (Yellow)
+
                                                             return (
-                                                                <div key={msg.id || idx} className={`flex max-w-[75%] ${isMe ? 'self-end' : 'self-start'}`}>
+                                                                <div key={msg.id || idx} className={`flex flex-col max-w-[75%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}>
                                                                     <div className={`p-3.5 rounded-2xl text-[13px] font-medium leading-relaxed ${isMe ? 'bg-blue-600 text-white rounded-br-none shadow-md' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-bl-none shadow-sm'}`}>
                                                                         <p>{msg.text}</p>
                                                                     </div>
+                                                                    {/* Pin Icon for sender */}
+                                                                    {isMe && (
+                                                                        <div className="flex items-center gap-1 mt-1 pr-1">
+                                                                            <span className={`text-[11px] drop-shadow-sm transition-colors duration-300 ${statusColor}`}>📌</span>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             );
                                                         })
