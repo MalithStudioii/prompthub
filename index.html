@@ -1046,7 +1046,32 @@
                 } catch (err) { setDeleteError(err.code === 'auth/wrong-password' ? t('wrongPassword') : "Error: " + err.message); }
                 setIsDeleting(false);
             };
+            const handleCopyPrompt = async (post, e) => {
+                e.stopPropagation(); // වෙන තැන් Click වෙන එක නවත්තනවා
+                
+                // Copy to Clipboard Logic
+                const ta = document.createElement("textarea");
+                ta.value = post.prompt;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                
+                // UI එකේ "Copied!" කියලා පෙන්වනවා
+                setCopiedId(post.id);
+                setTimeout(() => setCopiedId(null), 2000);
 
+                // Database එකේ Copies ගාණ 1කින් වැඩි කරනවා
+                const { db, appId, doc, updateDoc, increment } = window.fb;
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', post.id), {
+                        copiesCount: increment(1)
+                    });
+                } catch (err) {
+                    console.error("Copy count update failed", err);
+                }
+            };
+            
             const handleCreatePost = async (e) => {
                 e.preventDefault();
                 if (!user || user.isAnonymous) return setAuthModal({ ...authModal, open: true, mode: 'login', error: 'Sign in required' });
@@ -1329,6 +1354,8 @@
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.127.412-.267.82-.416 1.218C19.828 17.585 16.326 20 12 20c-4.478 0-8.268-2.943-9.542-7z" /></svg>
         {post.views || 0} Views
     </span>
+    <span className="text-slate-300 dark:text-slate-600">•</span>
+    <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1"><Icon name="clipboard" className="w-3" />{post.copiesCount || 0} Copies</span>
 </span>
                             </div>
                         </div>
@@ -1396,7 +1423,7 @@
                                 <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
                             </div>
 
-                            <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                            <button onClick={(e) => handleCopyPrompt(post, e)} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
                                 {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
                             </button>
                         </div>
