@@ -520,8 +520,10 @@
             };
 
             const [notifications, setNotifications] = useState([]);
-            const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+            const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
+            const [unreadMsgCount, setUnreadMsgCount] = useState(0);
             const [liveAlert, setLiveAlert] = useState(null);
+            const hasUnreadNotifications = unreadAlertsCount > 0 || unreadMsgCount > 0;
             
             const [allCreators, setAllCreators] = useState([]);
             const [allFollows, setAllFollows] = useState([]); 
