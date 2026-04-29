@@ -339,6 +339,26 @@
             const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
             // 🚀 අලුතින් එකතු කරන Active Chats State එක
             const [activeChats, setActiveChats] = useState([]);
+            // 🚀 Typing Status Update Logic (Optimized)
+            const [isCurrentlyTyping, setIsCurrentlyTyping] = useState(false);
+
+            useEffect(() => {
+                if (!selectedUser || !user || user.isAnonymous) return;
+                
+                // Text box එකේ අකුරු තියෙනවද කියලා බලනවා
+                const typingNow = chatMessage.trim().length > 0;
+                
+                // Typing status එක වෙනස් වුණොත් විතරක් DB එකට යවනවා (To save read/writes)
+                if (isCurrentlyTyping !== typingNow) {
+                    setIsCurrentlyTyping(typingNow);
+                    const { db, appId, doc, setDoc } = window.fb;
+                    const chatId = [user.uid, selectedUser.id].sort().join('_');
+                    
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId), {
+                        typing: { [user.uid]: typingNow }
+                    }, { merge: true }).catch(() => {});
+                }
+            }, [chatMessage, selectedUser, user, isCurrentlyTyping]);
 
             // 🚀 Active Chats Database එකෙන් ගන්න Logic එක (කලින් Miss වුණු කෑල්ල)
             useEffect(() => {
@@ -2476,7 +2496,19 @@
                                                     <img src={selectedUser.photoURL} className="w-10 h-10 rounded-xl object-cover cursor-pointer shadow-sm no-drag" onClick={() => { navigate('public_profile'); }} />
                                                     <div>
                                                         <p className="font-extrabold text-sm text-slate-900 dark:text-white cursor-pointer hover:underline" onClick={() => { navigate('public_profile'); }}>{selectedUser.name}</p>
-                                                        <p className="text-[9px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Online</p>
+                                                        
+                                                        {/* 🚀 Typing & Online Status Logic */}
+                                                        {(() => {
+                                                            const activeChatId = [user.uid, selectedUser.id].sort().join('_');
+                                                            const currentActiveChatDoc = activeChats.find(c => c.id === activeChatId);
+                                                            const isOtherUserTyping = currentActiveChatDoc?.typing?.[selectedUser.id];
+                                                            
+                                                            if (isOtherUserTyping) {
+                                                                return <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-1 animate-pulse">Typing...</p>;
+                                                            } else {
+                                                                return <p className="text-[9px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Online</p>;
+                                                            }
+                                                        })()}
                                                     </div>
                                                 </div>
                                                 
