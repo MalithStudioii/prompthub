@@ -337,6 +337,25 @@
             const [chatMessage, setChatMessage] = useState('');
             const [chatHistory, setChatHistory] = useState([]);
             const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+            // 🚀 අලුතින් එකතු කරන Active Chats State එක
+            const [activeChats, setActiveChats] = useState([]);
+
+            // 🚀 Active Chats Database එකෙන් ගන්න Logic එක (කලින් Miss වුණු කෑල්ල)
+            useEffect(() => {
+                if (!isReady || !user || user.isAnonymous) return;
+                const { db, appId, collection, query, where, onSnapshot } = window.fb;
+                const chatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
+                
+                // තමන් ඉන්න Chats විතරක් Filter කරලා ගන්නවා
+                const q = query(chatsRef, where('users', 'array-contains', user.uid));
+                
+                const unsubChats = onSnapshot(q, (snap) => {
+                    const fetchedChats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                                            .sort((a, b) => (b.lastMessageTime?.seconds || 0) - (a.lastMessageTime?.seconds || 0));
+                    setActiveChats(fetchedChats);
+                });
+                return () => unsubChats();
+            }, [isReady, user]);
 
             // 🚀 Advanced Chat States
             const [editingMsg, setEditingMsg] = useState(null);
@@ -441,7 +460,7 @@
                 });
             };
 
-            // 🚀 Chat Image Upload Function
+            // // 🚀 Chat Image Upload Function
             const handleChatImageUpload = async (e) => {
                 const file = e.target.files[0];
                 if (!file || !selectedUser || !user) return;
@@ -463,10 +482,11 @@
                             status: 'sent'
                         });
                         
+                        // 🚀 ප්‍රධාන Chat Document එක Update කරනවා (Inbox එකට)
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId), {
                             lastMessage: '📷 Sent an image', 
                             lastMessageTime: serverTimestamp(), 
-                            users: [user.uid, selectedUser.id]
+                            users: [user.uid, selectedUser.id] // මෙන්න මේකෙන් තමයි යාළුවට පේන්නේ
                         }, { merge: true });
                     }
                 } catch (err) {
@@ -476,24 +496,35 @@
                 setUploading(false);
             };
 
+            // 🚀 Text Message Function
             const sendMessage = async (e) => {
                 e.preventDefault();
-                if (!chatMessage.trim() || !selectedUser || !user) return;
-                const { db, appId, collection, addDoc, serverTimestamp, setDoc, doc } = window.fb;
-                const chatId = [user.uid, selectedUser.id].sort().join('_');
+                if (!chatMessage.trim()) return; // 👈 මෙතන newMsg වෙනුවට chatMessage දැම්මා
+                
+                const messageText = chatMessage; // 👈 මෙතනත් හැදුවා
+                setChatMessage(''); // 👈 මැසේජ් එක යවන්න කලින් Input Box එක හිස් කරනවා
                 
                 try {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages'), {
-                        senderId: user.uid, text: chatMessage, timestamp: serverTimestamp(), status: 'sent' // 🚀 මෙතන status එක දැම්මා
-                    });
-                    setChatMessage(''); // Text box එක හිස් කරනවා
+                    const { db, appId, collection, addDoc, serverTimestamp, setDoc, doc } = window.fb;
+                    const chatId = [user.uid, selectedUser.id].sort().join('_');
                     
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages'), {
+                        senderId: user.uid, 
+                        text: messageText, 
+                        timestamp: serverTimestamp(), 
+                        status: 'sent'
+                    });
+                    
+                    // 🚀 ප්‍රධාන Chat Document එක Update කරනවා (මේක තමයි අඩු වෙලා තිබ්බේ!)
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId), {
-                        lastMessage: chatMessage, lastMessageTime: serverTimestamp(), users: [user.uid, selectedUser.id]
+                        lastMessage: messageText, 
+                        lastMessageTime: serverTimestamp(), 
+                        users: [user.uid, selectedUser.id] // යාළුවගේ ලිස්ට් එකට යවන්න!
                     }, { merge: true });
-
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: selectedUser.id, type: 'message', fromUserId: user.uid, fromUserName: profileData.name || user.displayName, fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
-                } catch (err) { console.error(err); }
+                    
+                } catch (err) {
+                    console.error("Message send failed", err);
+                }
             };
 
             // 🚀 මැකිලා ගිය External Share Function එක
@@ -605,11 +636,6 @@
                     if (officialPost.imageFile) {
                         finalImageUrl = await uploadToImgBB(officialPost.imageFile);
                     }
-                    // 🚀 ප්‍රධාන Chat Document එක Update කරනවා (මේකෙන් තමයි Inbox එකට පෙන්නන්නේ)
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId), {
-                        users: [user.uid, selectedUser.id],
-                        lastUpdated: serverTimestamp()
-                    }, { merge: true });
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
                         userId: 'nexia_official_system',
                         userName: 'NEXIA - OFFICIAL',
@@ -2389,17 +2415,27 @@
                                             <button onClick={() => navigate('home')} className="md:hidden text-slate-400 hover:text-red-500"><Icon name="x" /></button>
                                         </div>
                                         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest p-3">Your Network</p>
-                                            {displayedNetworkCreators.map(contact => (
-                                                <div key={contact.id} onClick={() => { setSelectedUser(contact); setIsMobileChatOpen(true); }} className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-colors ${selectedUser?.id === contact.id ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
-                                                    <img src={contact.photoURL} className="w-10 h-10 rounded-[0.8rem] object-cover border border-slate-200 dark:border-slate-600 no-drag" />
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-extrabold text-sm text-slate-900 dark:text-white truncate">{contact.name}</p>
-                                                        <p className="text-[10px] text-slate-500 font-bold truncate">Tap to chat...</p>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest p-3">Recent Chats</p>
+                                            {activeChats.map(chat => {
+                                                // අනිත් කෙනාගේ ID එක හොයාගෙන එයාගේ විස්තර ගන්නවා
+                                                const otherUserId = chat.users?.find(id => id !== user.uid);
+                                                const contact = allCreators.find(c => c.id === otherUserId);
+                                                if (!contact) return null;
+
+                                                return (
+                                                    <div key={chat.id} onClick={() => { setSelectedUser(contact); setIsMobileChatOpen(true); }} className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-colors ${selectedUser?.id === contact.id ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+                                                        <div className="relative flex-shrink-0">
+                                                            <img src={contact.photoURL} className="w-10 h-10 rounded-[0.8rem] object-cover border border-slate-200 dark:border-slate-600 no-drag" />
+                                                            {contact.lastActive && (Date.now() - contact.lastActive < 300000) && <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-green-500 border-[1.5px] border-white dark:border-slate-800 rounded-full"></span>}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-extrabold text-[13px] md:text-sm text-slate-900 dark:text-white truncate">{contact.name}</p>
+                                                            <p className="text-[10px] text-slate-500 font-bold truncate">{chat.lastMessage || 'Tap to chat...'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                            {displayedNetworkCreators.length === 0 && <p className="text-center text-xs font-bold text-slate-400 p-4 mt-10">Follow someone to chat!</p>}
+                                                );
+                                            })}
+                                            {activeChats.length === 0 && <p className="text-center text-[10px] font-bold text-slate-400 p-4 mt-10 uppercase tracking-widest">No active chats yet.<br/>Go to a profile to start!</p>}
                                         </div>
                                     </div>
 
