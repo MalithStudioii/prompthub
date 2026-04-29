@@ -599,12 +599,17 @@
                 e.preventDefault();
                 if (!officialPost.imageFile && !officialPost.prompt) return alert("Please add an image or text.");
                 setUploading(true);
-                const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
+                const { db, appId, collection, addDoc, doc, setDoc, serverTimestamp } = window.fb;
                 try {
                     let finalImageUrl = '';
                     if (officialPost.imageFile) {
                         finalImageUrl = await uploadToImgBB(officialPost.imageFile);
                     }
+                    // 🚀 ප්‍රධාන Chat Document එක Update කරනවා (මේකෙන් තමයි Inbox එකට පෙන්නන්නේ)
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId), {
+                        users: [user.uid, selectedUser.id],
+                        lastUpdated: serverTimestamp()
+                    }, { merge: true });
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
                         userId: 'nexia_official_system',
                         userName: 'NEXIA - OFFICIAL',
