@@ -102,7 +102,7 @@
             signInWithCustomToken, GithubAuthProvider, TwitterAuthProvider, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
-            getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove 
+            getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -123,7 +123,7 @@
         const twitterProvider = new TwitterAuthProvider();
 
         window.fb = { 
-            auth, db, appId, collection, addDoc, query, onSnapshot, 
+            auth, db, appId, collection, addDoc, query, where, onSnapshot, 
             serverTimestamp, doc, setDoc, getDoc, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove,
             signInWithEmailAndPassword, createUserWithEmailAndPassword, 
             signOut, onAuthStateChanged, signInAnonymously, updateProfile, 
@@ -1547,9 +1547,9 @@
                     )}
 
                     <div className="p-4 md:p-6 flex items-center justify-between relative">
-                        <div className="flex items-center gap-3 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
-                            <div className="p-0.5 rounded-xl md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={post.userPhoto} className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
-                            <div className="flex flex-col">
+                                        <div className="flex items-center gap-3 md:gap-4 cursor-pointer group min-w-0" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
+                                            <div className="p-0.5 rounded-xl md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform flex-shrink-0"><img src={post.userPhoto} className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
+                                            <div className="flex flex-col min-w-0">
                                 <span className="font-extrabold text-[14px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1 flex-wrap">
                                     {post.userName} 
                                     {post.isOfficial ? (
