@@ -1733,9 +1733,17 @@
                                     {isAdmin && <button onClick={() => navigate('admin_panel')} className={`transition-colors hover:scale-110 ${view === 'admin_panel' ? 'text-red-500' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}><Icon name="sliders" /></button>}
                                     <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'leaderboard' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /></button>
                                     <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /></button>
-                                    <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
+                                    
+                                    {/* 🚀 Top Nav Message Icon */}
+                                    <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('messages'); }} className={`transition-colors relative hover:scale-110 ${view === 'messages' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
+                                        <Icon name="message" />
+                                        {unreadMsgCount > 0 && <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm">{unreadMsgCount > 9 ? '9+' : unreadMsgCount}</span>}
+                                    </button>
+
+                                    {/* 🚀 Top Nav Bell Icon */}
+                                    <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
                                         <Icon name="bell" />
-                                        {hasUnreadNotifications && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}
+                                        {unreadAlertsCount > 0 && <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm">{unreadAlertsCount > 9 ? '9+' : unreadAlertsCount}</span>}
                                     </button>
                                 </div>
 
@@ -2722,7 +2730,18 @@
                             <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full border-2 border-white dark:border-slate-900"></span>
                         </a>
 
-                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="bell" className="w-6 h-6" />{hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}</button>
+                        {/* 🚀 Mobile Message Icon */}
+                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('messages'); }} className={`p-2 transition-transform active:scale-90 relative ${view==='messages'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}>
+                            <Icon name="message" className="w-6 h-6" />
+                            {unreadMsgCount > 0 && <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm">{unreadMsgCount > 9 ? '9+' : unreadMsgCount}</span>}
+                        </button>
+
+                        {/* 🚀 Mobile Bell Icon */}
+                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}>
+                            <Icon name="bell" className="w-6 h-6" />
+                            {unreadAlertsCount > 0 && <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm">{unreadAlertsCount > 9 ? '9+' : unreadAlertsCount}</span>}
+                        </button>
+                        
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="user" className="w-6 h-6" /></button>
                     </div>
 
