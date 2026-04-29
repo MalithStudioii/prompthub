@@ -4,17 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nexia - PromptHub | Global AI Creator Network</title>
+    <!-- 🚀 Prevent Browser Caching (අලුත් Updates හැමෝටම එවලෙම පෙන්වන්න) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <!-- 🚀 Preconnects (Network Connections කලින්ම හදාගන්නවා) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    
+    <!-- 🚀 Preload Scripts (බ්‍රවුසරේ ලෝඩ් වෙන්නත් කලින් අදාල Scripts ටික අදිනවා) -->
+    <link rel="preload" href="https://unpkg.com/react@18/umd/react.production.min.js" as="script">
+    <link rel="preload" href="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" as="script">
+    <link rel="preload" href="https://unpkg.com/@babel/standalone/babel.min.js" as="script">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Scripts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class'
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
+    <script defer src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script defer src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
+        /* ඔයාගේ පරණ CSS Styles ටික මෙතනින් පල්ලෙහාට ඒ විදිහටම තියෙන්න දෙන්න... */
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: #F8FAFC; overflow-x: hidden; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease; }
@@ -635,24 +655,40 @@
                 return () => unsubReports();
             }, [isReady, user, isAdmin]);
             
-            // 🚀 Smart Update System Logic
+            // 🚀 Smart Update System Logic (Pro Version with Dismiss)
             const LOCAL_APP_VERSION = 1.0; 
             const [systemUpdateAvailable, setSystemUpdateAvailable] = useState(false);
             const [hideBanner, setHideBanner] = useState(false);
+            const [currentServerVersion, setCurrentServerVersion] = useState(LOCAL_APP_VERSION);
 
             useEffect(() => {
                 if (!isReady) return;
                 const { db, appId, doc, onSnapshot } = window.fb;
+                
                 const unsubVersion = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'systemVersion'), (snap) => {
                     if (snap.exists()) {
-                        const serverVersion = snap.data().latestVersion || 1.0;
-                        if (serverVersion > LOCAL_APP_VERSION) {
-                            setSystemUpdateAvailable(true); // අලුත් Update එකක් ඇවිත්!
+                        const serverVersion = snap.data().latestVersion || LOCAL_APP_VERSION;
+                        setCurrentServerVersion(serverVersion); // Admin ට ලේසි වෙන්න State එකේ තියාගන්නවා
+                        
+                        // User කලින් Dismiss කරපු Version එක Local Storage එකෙන් ගන්නවා
+                        const dismissedVersion = parseFloat(localStorage.getItem('nexia_dismissed_update_version')) || 0;
+
+                        // සර්වර් එකේ Version එක ලොකුයි නම් සහ, User තාම ඒක Dismiss කරලා නැත්නම් විතරක් පෙන්වනවා
+                        if (serverVersion > LOCAL_APP_VERSION && serverVersion > dismissedVersion) {
+                            setSystemUpdateAvailable(true); 
+                            setHideBanner(false); // අලුත් Update එකක් ආවම පරණ Hide එක අයින් කරනවා
                         }
                     }
                 });
                 return () => unsubVersion();
             }, [isReady]);
+
+            // User බැනර් එකේ 'X' එබුවම වෙන දේ
+            const handleDismissUpdate = () => {
+                setHideBanner(true);
+                // අලුත්ම Version එක මම දැක්කා කියලා Save කරනවා
+                localStorage.setItem('nexia_dismissed_update_version', currentServerVersion.toString());
+            };
 
             const triggerSystemUpdate = async () => {
                 if (!isAdmin) return;
@@ -660,8 +696,10 @@
                 setUploading(true);
                 try {
                     const { db, appId, doc, setDoc } = window.fb;
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'systemVersion'), { latestVersion: LOCAL_APP_VERSION + 0.1 }, { merge: true });
-                    alert("🚀 System Update Signal Broadcasted Globally!");
+                    // අලුත් Version එක = දැනට තියෙන එකට + 0.1 ක් එකතු කරනවා
+                    const newVersion = currentServerVersion + 0.1;
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appSettings', 'systemVersion'), { latestVersion: newVersion }, { merge: true });
+                    alert(`🚀 System Update Signal (v${newVersion.toFixed(1)}) Broadcasted Globally!`);
                 } catch (e) { alert("Error triggering update"); }
                 setUploading(false);
             };
@@ -1778,7 +1816,7 @@
                             <span className="font-bold text-sm flex items-center gap-2 drop-shadow-md"><Icon name="zap" className="w-5 h-5 animate-pulse text-yellow-300"/> A new Nexus Core Update is available!</span>
                             <div className="flex items-center gap-3">
                                 <button onClick={() => window.location.reload(true)} className="bg-white text-blue-600 px-6 py-2 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.4)]">Update Now</button>
-                                <button onClick={() => setHideBanner(true)} className="text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors" title="Dismiss"><Icon name="x" className="w-5 h-5"/></button>
+                                <button onClick={handleDismissUpdate} className="text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors" title="Dismiss"><Icon name="x" className="w-5 h-5"/></button>
                             </div>
                         </div>
                     )}
