@@ -460,7 +460,7 @@
                 });
             };
 
-            // // 🚀 Chat Image Upload Function
+            // 🚀 Chat Image Upload Function
             const handleChatImageUpload = async (e) => {
                 const file = e.target.files[0];
                 if (!file || !selectedUser || !user) return;
@@ -488,6 +488,17 @@
                             lastMessageTime: serverTimestamp(), 
                             users: [user.uid, selectedUser.id] // මෙන්න මේකෙන් තමයි යාළුවට පේන්නේ
                         }, { merge: true });
+
+                        // 🚀 අලුත් කෑල්ල: Image එකට Notification එකක් යවනවා
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), {
+                            targetUserId: selectedUser.id,
+                            type: 'message',
+                            fromUserId: user.uid,
+                            fromUserName: profileData?.name || user?.displayName || 'Nexia User',
+                            fromUserPhoto: profileData?.photoURL || user?.photoURL,
+                            timestamp: serverTimestamp(),
+                            read: false
+                        });
                     }
                 } catch (err) {
                     console.error("Image upload failed", err);
@@ -521,6 +532,17 @@
                         lastMessageTime: serverTimestamp(), 
                         users: [user.uid, selectedUser.id] // යාළුවගේ ලිස්ට් එකට යවන්න!
                     }, { merge: true });
+
+                    // 🚀 අලුත් කෑල්ල: Message එකට Notification එකක් යවනවා (Badge එකේ අංක පෙන්නන්න)
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), {
+                        targetUserId: selectedUser.id,
+                        type: 'message',
+                        fromUserId: user.uid,
+                        fromUserName: profileData?.name || user?.displayName || 'Nexia User',
+                        fromUserPhoto: profileData?.photoURL || user?.photoURL,
+                        timestamp: serverTimestamp(),
+                        read: false
+                    });
                     
                 } catch (err) {
                     console.error("Message send failed", err);
@@ -2636,7 +2658,7 @@
                                 <div className="animate-in fade-in duration-700 max-w-xl mx-auto">
                                     <div className="flex items-center gap-4 mb-8 px-4"><div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center text-blue-600 dark:text-blue-400"><Icon name="bell" className="w-7 h-7" /></div><h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">{t('alerts')}</h2></div>
                                     <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 p-4 space-y-2">
-                                        {notifications.length === 0 ? <div className="text-center py-16"><Icon name="belloff" className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-4" /><p className="text-slate-400 font-bold text-xs uppercase">No new alerts.</p></div> : notifications.map(notif => (
+                                        {notifications.filter(n => n.type !== 'message').length === 0 ? <div className="text-center py-16"><Icon name="belloff" className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-4" /><p className="text-slate-400 font-bold text-xs uppercase">No new alerts.</p></div> : notifications.filter(n => n.type !== 'message').map(notif => (
                                             <div key={notif.id} onClick={() => { 
                                                 if(notif.type === 'follow') {
                                                     openPublicProfile(notif.fromUserId); 
