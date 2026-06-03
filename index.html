@@ -1046,19 +1046,39 @@
 
             const toggleLike = async (post) => {
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
+                
                 const { db, appId, doc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp } = window.fb;
                 const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', post.id);
-                const hasLiked = typeof post.likes !== 'number' && post.likes?.includes?.(user.uid);
+                
+                // Likes array එකක්ද කියලා ෂුවර් කරගන්නවා
+                const likesArray = Array.isArray(post.likes) ? post.likes : [];
+                const hasLiked = likesArray.includes(user.uid);
+                
                 try {
-                    if (typeof post.likes === 'number') { await updateDoc(postRef, { likes: [user.uid] }); } 
-                    else if (hasLiked) { await updateDoc(postRef, { likes: arrayRemove(user.uid) }); } 
-                    else { 
+                    if (hasLiked) { 
+                        // දැනටමත් ලයික් කරලා නම්, ලයික් එක අයින් කරනවා
+                        await updateDoc(postRef, { likes: arrayRemove(user.uid) }); 
+                    } else { 
+                        // ලයික් කරලා නැත්නම්, අලුතින් ලයික් එකක් එකතු කරනවා
                         await updateDoc(postRef, { likes: arrayUnion(user.uid) }); 
+                        
+                        // පෝස්ට් එකේ අයිතිකාරයාට Notification එකක් යවනවා (තමන්ගේම ඒවට නැතුව)
                         if (post.userId !== user.uid) {
-                            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: post.userId, type: 'like', postId: post.id, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexia User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
+                            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { 
+                                targetUserId: post.userId, 
+                                type: 'like', 
+                                postId: post.id, 
+                                fromUserId: user.uid, 
+                                fromUserName: profileData.name || user.displayName || 'Nexia User', 
+                                fromUserPhoto: profileData.photoURL || user.photoURL, 
+                                timestamp: serverTimestamp(), 
+                                read: false 
+                            });
                         }
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.error("Like toggle error:", e);
+                }
             };
 
             const toggleSave = async (post) => {
