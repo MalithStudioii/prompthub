@@ -281,7 +281,8 @@
                 twitter: <><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></>,
                 zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>,
                 morehorizontal: <><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></>,
-                flag: <><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></>
+                flag: <><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></>,
+                repeat: <><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></>
             };
 
             return (
@@ -319,6 +320,17 @@
             const [isFollowing, setIsFollowing] = useState(false);
             const [commentModal, setCommentModal] = useState({ open: false, post: null, text: '' });
             const [shareModal, setShareModal] = useState({ open: false, post: null });
+            // 🚀 මැකිලා ගිය Repost State එක
+            const [repostModal, setRepostModal] = useState({ open: false, post: null });
+
+            // 🚀 මැකිලා ගිය External Share Function එක
+            const handleShare = async (post) => {
+                if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+                    try { await navigator.share({ title: 'Nexia AI', text: `Check out this AI Prompt by ${post.userName}: "${post.prompt}"`, url: window.location.href }); } catch (err) {}
+                } else {
+                    setShareModal({ open: true, post: post });
+                }
+            };
 
             const [profilePicModal, setProfilePicModal] = useState({ open: false, url: '', userId: '', likes: [] });
             const [imageViewModal, setImageViewModal] = useState({ open: false, url: '' });
@@ -327,6 +339,12 @@
             const [editPostModal, setEditPostModal] = useState({ open: false, post: null, newPrompt: '' });
             const [reportModal, setReportModal] = useState({ open: false, post: null, reason: '' });
             const [storeModal, setStoreModal] = useState(false);
+            // Long Prompts වල See More පාලනය කරන්න
+            const [expandedPrompts, setExpandedPrompts] = useState({});
+            const togglePrompt = (postId, e) => { 
+                e.stopPropagation(); 
+                setExpandedPrompts(prev => ({...prev, [postId]: !prev[postId]})); 
+            };
 
             const [notifications, setNotifications] = useState([]);
             const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
@@ -436,38 +454,19 @@
                 }
             };
 
-           // 🚀 Advanced Router Logic for Back/Forward Buttons
             useEffect(() => {
                 const handlePopState = (event) => {
-                    if (event.state && event.state.view) {
-                        setView(event.state.view);
-                    } else {
-                        // ජෙනුයින්ම Hash එක චෙක් කරලා View එක ගන්න ක්‍රමය
-                        const hashView = window.location.hash.replace('#', '');
-                        if (hashView) {
-                            setView(hashView);
-                        } else {
-                            setView('home');
-                        }
-                    }
+                    if (event.state && event.state.view) setView(event.state.view);
+                    else setView('home');
                 };
-
                 try {
                     window.addEventListener('popstate', handlePopState);
-                    
-                    // මුලින්ම සයිට් එකට එද්දී URL එක Handle කරන විදිහ
-                    const currentHash = window.location.hash.replace('#', '');
-                    if (!currentHash) {
-                        window.history.replaceState({ view: 'home' }, '', '#home');
-                        setView('home');
-                    } else {
-                        window.history.replaceState({ view: currentHash }, '', `#${currentHash}`);
-                        setView(currentHash);
+                    if (!window.location.hash) { window.history.replaceState({ view: 'home' }, '', '#home'); } 
+                    else {
+                        const hashView = window.location.hash.replace('#', '');
+                        if (['home', 'profile', 'settings', 'leaderboard', 'notifications', 'create_post', 'admin_panel', 'public_profile', 'edit_profile'].includes(hashView)) setView(hashView);
                     }
-                } catch (e) {
-                    console.error("Routing error:", e);
-                }
-
+                } catch (e) {}
                 return () => window.removeEventListener('popstate', handlePopState);
             }, []);
 
@@ -648,8 +647,43 @@
 
             useEffect(() => {
                 if (!isReady || !user) return; 
-                const { db, appId, collection, onSnapshot } = window.fb;
-                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), (snap) => setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() }))), (err) => console.warn(err));
+                const { db, appId, collection, doc, getDoc, onSnapshot } = window.fb;
+                
+                const fetchUserJoinedPosts = async (snapshotDocs) => {
+                    const fetchedPosts = [];
+                    for (const postDoc of snapshotDocs) {
+                        const postData = postDoc.data();
+                        const authorIdToFetch = postData.isRepost ? postData.originalAuthorId : postData.userId;
+                        
+                        if (authorIdToFetch === 'nexia_official_system') {
+                            fetchedPosts.push({ id: postDoc.id, ...postData });
+                            continue;
+                        }
+
+                        const userDocRef = doc(db, 'artifacts', appId, 'users', authorIdToFetch, 'profile', 'info');
+                        try {
+                            const userDocSnap = await getDoc(userDocRef);
+                            let userData = { userName: "Unknown Creator", userPhoto: "default_avatar.png" };
+                            
+                            if (userDocSnap.exists()) {
+                                userData = {
+                                    userName: userDocSnap.data().name,
+                                    userPhoto: userDocSnap.data().photoURL
+                                };
+                            }
+                            fetchedPosts.push({ id: postDoc.id, ...postData, ...userData });
+                        } catch (error) {
+                            fetchedPosts.push({ id: postDoc.id, ...postData, userName: "Unknown Creator", userPhoto: "default_avatar.png" });
+                        }
+                    }
+                    setPosts(fetchedPosts);
+                };
+
+                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), 
+                    (snap) => fetchUserJoinedPosts(snap.docs), 
+                    (err) => console.warn(err)
+                );
+
                 return () => unsubPosts();
             }, [isReady, user]);
 
@@ -810,7 +844,8 @@
 
             const saveProfileUpdates = async (e) => {
                 e.preventDefault();
-                const { db, appId, doc, updateDoc, setDoc, auth, updateProfile } = window.fb;
+                // 🚀 මම මෙතනට අලුතින් collection, query, where, getDocs කියන දේවලුත් එකතු කළා
+                const { db, appId, doc, updateDoc, setDoc, auth, updateProfile, collection, query, where, getDocs } = window.fb;
                 try {
                     setUploading(true);
                     let finalPhotoURL = editProfileData.photoURL;
@@ -829,6 +864,7 @@
                         contactNo: editProfileData.contactNo, privacyLevel: editProfileData.privacyLevel, birthday: editProfileData.birthday, hobbies: editProfileData.hobbies 
                     }, { merge: true });
                     await updateProfile(auth.currentUser, { displayName: editProfileData.name, photoURL: finalPhotoURL });
+
                     navigate('profile');
                 } catch (e) { alert("Error updating profile."); }
                 setUploading(false);
@@ -989,42 +1025,21 @@
                 e.preventDefault();
                 if (!user || user.isAnonymous) return setAuthModal({ ...authModal, open: true, mode: 'login', error: 'Sign in required' });
                 if (!postModal.imageFile && !postModal.imageUrl) return alert("Please select an image or paste a URL.");
-                
                 setUploading(true);
                 const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
-                
                 try {
                     let finalImageUrl = postModal.imageUrl;
-                    
                     if (postModal.imageFile) {
-                        const uploadedUrl = await uploadToImgBB(postModal.imageFile);
-                        if (!uploadedUrl) {
-                            throw new Error("ImgBB Cloud Storage refused the image. Please try again.");
-                        }
-                        finalImageUrl = uploadedUrl;
+                        finalImageUrl = await uploadToImgBB(postModal.imageFile);
+                        if (!finalImageUrl) throw new Error("Upload failed");
                     }
-                    
-                    if (!finalImageUrl) {
-                        throw new Error("Image URL missing. Processing aborted.");
-                    }
-
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
-                        userId: user.uid, 
-                        userName: profileData.name || user.displayName || 'Nexia Creator', 
-                        userPhoto: profileData.photoURL || user.photoURL, 
-                        prompt: postModal.prompt, 
-                        imageUrl: finalImageUrl, 
-                        model: postModal.model, 
-                        createdAt: serverTimestamp(), 
-                        likes: [], 
-                        comments: []
+                        userId: user.uid, prompt: postModal.prompt, imageUrl: finalImageUrl, model: postModal.model, createdAt: serverTimestamp(), likes: [], comments: []
                     });
-                    
-                    setPostModal({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' }); 
-                    navigate('home');
-                    alert("✨ Creation Transmitted Successfully to Nexia Global Feed!");
+                    setPostModal({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' }); navigate('home');
                 } catch (err) { 
-                    alert("⚠️ NEXIA UPLINK ERROR: " + err.message); 
+                    // සැබෑ දෝෂය කුමක්දැයි හඳුනා ගැනීමට err.message එක alert කරන්න
+                    alert("⚠️ ERROR DURING UPLOAD: " + err.message); 
                 }
                 setUploading(false);
             };
@@ -1142,10 +1157,51 @@
                 } catch (e) {}
             };
 
-            const handleShare = async (post) => {
-                if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
-                    try { await navigator.share({ title: 'Nexia AI', text: `Check out this AI Prompt by ${post.userName}: "${post.prompt}"`, url: window.location.href }); } catch (err) {}
-                } else setShareModal({ open: true, post: post });
+            // 🚀 Internal Share (Repost) Logic (With Debug Logs)
+            const handleRepostClick = (post) => {
+                console.log("🚀 Repost බටන් එක එබුවා! Post ID:", post.id);
+                
+                if (!user || user.isAnonymous) {
+                    console.log("⛔ යූසර් ලොග් වෙලා නෑ.");
+                    return setAuthModal({...authModal, open: true, mode: 'login'});
+                }
+                
+                if (post.originalAuthorId === user.uid || (!post.originalAuthorId && post.userId === user.uid)) {
+                    console.log("⛔ තමන්ගේ පෝස්ට් එකක් Share කරන්න හැදුවේ!");
+                    return alert("You cannot share your own creations!");
+                }
+                
+                console.log("✅ Modal එක ඕපන් වෙනවා...");
+                setRepostModal({ open: true, post: post });
+            };
+
+            const confirmRepost = async () => {
+                setUploading(true);
+                const post = repostModal.post;
+                const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
+                        userId: user.uid,
+                        repostedBy: profileData.name || user.displayName,
+                        isRepost: true,
+                        originalAuthorId: post.originalAuthorId || post.userId,
+                        userName: post.userName,
+                        userPhoto: post.userPhoto,
+                        prompt: post.prompt,
+                        imageUrl: post.imageUrl,
+                        model: post.model,
+                        createdAt: serverTimestamp(),
+                        likes: [],
+                        comments: []
+                    });
+                    alert("✨ Successfully shared to your Global Stream!");
+                    setRepostModal({ open: false, post: null });
+                    navigate('profile'); 
+                } catch (err) {
+                    console.error("Repost Error:", err);
+                    alert("Failed to share post.");
+                }
+                setUploading(false);
             };
 
             const saveAdminConfig = async () => {
@@ -1157,6 +1213,42 @@
             const toggleAdminUserStatus = async (targetId, field) => {
                 if (!isAdmin) return;
                 try { await window.fb.setDoc(window.fb.doc(window.fb.db, 'artifacts', window.fb.appId, 'public', 'data', 'stats', targetId), { [field]: !(allCreators.find(c => c.id === targetId)[field] || false) }, { merge: true }); } catch (e) {}
+            };
+			const handleStripePayment = async (amount, packageId) => {
+                // User ලොග් වෙලා නැත්නම් මුලින්ම ලොග් වෙන්න කියනවා
+                if (!user || user.isAnonymous) {
+                    setStoreModal(false);
+                    return setAuthModal({...authModal, open: true, mode: 'login', error: 'Please login to buy coins.'});
+                }
+
+                try {
+                    console.log(`${packageId} Payment එකට ලෑස්ති වෙනවා...`);
+                    
+                    // අපේ Backend සර්වර් එකට සිග්නල් එක යවනවා (දැනට localhost 5000)
+                    const response = await fetch('http://localhost:5000/create-stripe-checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            amount: amount,                 
+                            currency: 'usd',            
+                            userId: user.uid, // දැන් මේකෙන් ඇත්තම ලොග් වෙලා ඉන්න කෙනාගේ ID එක යනවා
+                            packageId: packageId  
+                        }),
+                    });
+
+                    const data = await response.json();
+                    
+                    // සර්වර් එකෙන් ලින්ක් එක ආවොත්, කෙළින්ම Stripe Checkout පිටුවට යවනවා!
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        alert("අවුලක් වුණා ලොක්කා! සර්වර් එකෙන් ලින්ක් එක ආවේ නෑ.");
+                    }
+
+                } catch (error) {
+                    console.error('Payment Error එකක් ආවා:', error);
+                    alert("සර්වර් එකට කනෙක්ට් වෙන්න බැරි වුණා!");
+                }
             };
 
             const SearchResultsDropdown = () => (
@@ -1172,8 +1264,17 @@
 
             const renderPostCard = (post) => (
                 <div key={post.id} className={`rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-8 md:mb-14 p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
+                    
+                    {/* 🚀 Reposted Header */}
+                    {post.isRepost && (
+                        <div className="px-6 pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
+                            <Icon name="repeat" className="w-4 h-4 text-blue-500" />
+                            <span><span className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); openPublicProfile(post.userId); }}>{post.repostedBy}</span> shared this</span>
+                        </div>
+                    )}
+
                     <div className="p-4 md:p-6 flex items-center justify-between relative">
-                        <div className="flex items-center gap-3 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.userId)}>
+                        <div className="flex items-center gap-3 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
                             <div className="p-0.5 rounded-xl md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={post.userPhoto} className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
                             <div className="flex flex-col">
                                 <span className="font-extrabold text-[14px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1 flex-wrap">
@@ -1181,7 +1282,7 @@
                                     {post.isOfficial ? (
                                         <span className="bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="shieldcheck" className="w-3 h-3" /> OFFICIAL</span>
                                     ) : (
-                                        getAuthorBadges(post.userId)
+                                        getAuthorBadges(post.originalAuthorId || post.userId)
                                     )}
                                     {post.boostedAt && ((Date.now() / 1000) - post.boostedAt.seconds < 86400) && !post.isOfficial && <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="flame" className="w-2.5 h-2.5" /> Boosted</span>}
                                 </span>
@@ -1189,6 +1290,7 @@
                             </div>
                         </div>
 
+                        {/* Three Dots Menu Button */}
                         <div className="relative">
                             <button 
                                 onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(postOptionsMenuOpen === post.id ? null : post.id); }} 
@@ -1197,10 +1299,12 @@
                                 <Icon name="morehorizontal" className="w-5 h-5" />
                             </button>
 
+                            {/* Dropdown Options */}
                             {postOptionsMenuOpen === post.id && (
                                 <>
                                     <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); }}></div>
                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-in zoom-in-95 duration-200 p-1">
+                                        
                                         {(post.userId === user?.uid || isAdmin) ? (
                                             <>
                                                 <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); setEditPostModal({ open: true, post: post, newPrompt: post.prompt }); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-xl text-slate-700 dark:text-slate-200">
@@ -1225,32 +1329,53 @@
                     </div>
                     <div className="secure-img-wrapper px-2 md:px-4 relative group">
                         <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
+                        
                         <div className="bg-slate-100 dark:bg-slate-950 rounded-[2rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[350px] sm:h-[450px] md:h-[550px] shadow-sm">
                             <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
                             <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
                         </div>
 
-                        {/* Copy Button සමඟ Counter එක Live අප්ඩේට් වෙන තැන */}
-                        <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white px-4 py-3 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center gap-2 z-20">
-                            {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-4 h-4 md:w-5 md:h-5" /> : <Icon name="clipboard" className="w-4 h-4 md:w-5 md:h-5" />}
-                            <span className="text-[10px] font-black">{copiedId === post.id ? "COPIED" : "COPY PROMPT"}</span>
+                        <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                            {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
                         </button>
                     </div>
                     <div className="px-5 pb-5 pt-5 md:px-8 md:pb-6 md:pt-6">
                         <div className="bg-slate-50/70 dark:bg-slate-900/50 p-5 md:p-7 rounded-[2rem] md:rounded-[2.8rem] border border-slate-100 dark:border-slate-700 italic relative mb-4">
-                            <p className="text-[13px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap no-select">{formatPrompt(post.prompt)}</p>
+                            
+                            {/* 🚀 See More / See Less Logic */}
+                            {(() => {
+                                const isExpanded = expandedPrompts[post.id];
+                                const isLongPrompt = post.prompt && post.prompt.length > 150;
+                                const displayPromptText = (!isLongPrompt || isExpanded) ? post.prompt : post.prompt.substring(0, 150) + '...';
+                                
+                                return (
+                                    <p className="text-[13px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap no-select">
+                                        {formatPrompt(displayPromptText)}
+                                        {isLongPrompt && (
+                                            <button onClick={(e) => togglePrompt(post.id, e)} className="text-blue-600 dark:text-blue-400 font-extrabold ml-2 hover:underline focus:outline-none">
+                                                {isExpanded ? 'See less' : 'See more'}
+                                            </button>
+                                        )}
+                                    </p>
+                                );
+                            })()}
+
                             <div className="absolute -top-3 -left-1 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-3 h-3 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
                         </div>
-                        {post.userId === user?.uid && (!post.boostedAt || ((Date.now() / 1000) - post.boostedAt.seconds < 86400)) && (
+                        {post.userId === user?.uid && (!post.boostedAt || ((Date.now() / 1000) - post.boostedAt.seconds > 86400)) && (
                             <button onClick={(e) => { e.stopPropagation(); handleBoostPost(post.id); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-[11px] uppercase tracking-widest py-2.5 rounded-xl shadow-md hover:scale-[1.02] active:scale-95 transition-all mb-4"><Icon name="flame" className="w-4 h-4" /> Boost Post (50 Coins)</button>
                         )}
-                        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4 px-2">
-                            <button onClick={() => toggleLike(post)} className={`flex items-center gap-1.5 md:gap-2 font-black text-[11px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-4 h-4 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
-                            <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-black text-[11px] md:text-xs transition-colors"><Icon name="message" className="w-4 h-4 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
-                            <button onClick={() => handleShare(post)} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-black text-[11px] md:text-xs transition-colors"><Icon name="share" className="w-4 h-4 md:w-5 md:h-5" /></button>
+                        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4 px-2 mt-4">
+                            <button onClick={() => toggleLike(post)} className={`flex items-center gap-1.5 md:gap-2 font-bold text-[11px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-4 h-4 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
+                            <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors"><Icon name="message" className="w-4 h-4 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
                             
-                            {/* Saves Count එක Live පෙන්වන අලුත් ලොජික් එක */}
-                            <button onClick={() => toggleSave(post)} className={`flex items-center gap-1.5 md:gap-2 font-black text-[11px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-4 h-4 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> {post.savesCount || 0} {profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</button>
+                            {/* 🚀 Repost Button */}
+                            <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors" title="Share on Nexia">
+                                <Icon name="repeat" className="w-4 h-4 md:w-5 md:h-5" />
+                            </button>
+
+                            <button onClick={() => handleShare(post)} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors"><Icon name="share" className="w-4 h-4 md:w-5 md:h-5" /></button>
+                            <button onClick={() => toggleSave(post)} className={`flex items-center gap-1.5 md:gap-2 font-bold text-[11px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-4 h-4 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> <span className="hidden sm:inline">{profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</span></button>
                         </div>
                     </div>
                 </div>
@@ -1322,6 +1447,15 @@
                             {isAdmin && <button onClick={() => navigate('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}><Icon name="sliders" /> {t('commandCenter')}</button>}
                             <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /> {t('globalStream')}</button>
                             <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'leaderboard' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /> {t('leaderboard')}</button>
+                            
+                            {/* 🚀 Promptplace Market Button (PC Sidebar - Resized & Matched) */}
+                            <a href="marketplace/index.html" className="flex items-center gap-4 p-4 rounded-2xl font-bold transition-all text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-slate-800/80 hover:bg-blue-100 dark:hover:bg-slate-700 relative group">
+                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                </svg>
+                                Promptplace Market
+                                <span className="absolute right-4 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                            </a>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="bell" /> {t('alerts')}{hasUnreadNotifications && <span className="absolute top-4 left-7 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}</button>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'profile' || view === 'public_profile' || view === 'edit_profile' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="user" /> {t('elitePortfolio')}</button>
                             <button onClick={() => { navigate('settings'); setSettingsSection('menu'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'settings' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="settings" /> {t('settings')}</button>
@@ -1988,6 +2122,15 @@
                     <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar py-4 flex justify-around items-center md:hidden z-50 pb-safe">
                         <button onClick={() => navigate('home')} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="home" className="w-6 h-6" /></button>
                         <button onClick={() => navigate('leaderboard')} className={`p-2 transition-transform active:scale-90 ${view==='leaderboard'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="trophy" className="w-6 h-6" /></button>
+                        
+                        {/* අලුත් Marketplace Button එක (Mobile) */}
+                        <a href="marketplace/index.html" className="p-2 transition-transform active:scale-90 relative text-slate-400 dark:text-slate-500 hover:text-blue-600">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full border-2 border-white dark:border-slate-900"></span>
+                        </a>
+
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="bell" className="w-6 h-6" />{hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}</button>
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="user" className="w-6 h-6" /></button>
                     </div>
@@ -2177,100 +2320,84 @@
                             </div>
                         </div>
                     )}
-                    {/* Nexia Coin Store Modal */}
-                    {storeModal && (
-                        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xl">
-                            <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[3rem] p-6 md:p-10 shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-700 relative overflow-hidden">
-                                {/* Top Glow Effect */}
-                                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-yellow-400/20 to-transparent"></div>
+                    {/* 🚀 Repost (Internal Share) Modal */}
+                    {repostModal.open && repostModal.post && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
+                            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-700 text-center">
+                                <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100 dark:border-blue-900/50">
+                                    <Icon name="repeat" className="w-8 h-8" />
+                                </div>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase mb-2">Share Post</h2>
+                                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-6 px-4">Share this prompt with your followers on Nexia?</p>
                                 
-                                <div className="flex justify-between items-start mb-8 relative z-10">
-                                    <div>
-                                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase flex items-center gap-3 font-outfit">
-                                            <div className="w-12 h-12 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-white shadow-lg"><Icon name="database" className="w-6 h-6" /></div>
-                                            Nexia Bank
-                                        </h2>
-                                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 tracking-widest uppercase">Boost Your Creations. Rank Higher.</p>
-                                    </div>
-                                    <button onClick={() => setStoreModal(false)} className="bg-slate-50 dark:bg-slate-900 p-3 rounded-full text-slate-400 hover:text-red-500 transition-colors shadow-sm"><Icon name="x" /></button>
+                                <div className="flex gap-3 pt-2">
+                                    <button onClick={() => setRepostModal({ open: false, post: null })} className="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+                                    <button disabled={uploading} onClick={confirmRepost} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-700 disabled:opacity-50 transition-all shadow-lg">{uploading ? 'Sharing...' : 'Yes, Share'}</button>
                                 </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-                                    {/* Package 1 */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-700 text-center hover:border-blue-500 transition-all hover:scale-105 group relative overflow-hidden">
-                                        <div className="text-yellow-500 mb-2"><Icon name="database" className="w-8 h-8 mx-auto" /></div>
-                                        <h3 className="font-black text-lg text-slate-900 dark:text-white mb-1">Starter</h3>
-                                        <p className="text-blue-600 font-black text-2xl mb-4">100 <span className="text-[10px] uppercase tracking-widest text-slate-400">Coins</span></p>
-                                        <div className="space-y-2">
-                                            <button onClick={() => alert("PayHere Integration Pending (Backend Required)")} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md">Pay Rs. 300</button>
-                                            <button onClick={() => alert("Stripe Integration Pending (Backend Required)")} className="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-md">Pay $1.00</button>
-                                        </div>
-                                    </div>
-
-                                    {/* Package 2 */}
-                                    <div className="bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-[2rem] p-6 border-2 border-blue-500 text-center hover:scale-105 transition-all relative overflow-hidden shadow-xl">
-                                        <div className="absolute top-0 left-0 w-full bg-blue-600 text-white text-[8px] font-black uppercase tracking-widest py-1">Most Popular</div>
-                                        <div className="text-yellow-500 mb-2 mt-4"><Icon name="database" className="w-10 h-10 mx-auto" /></div>
-                                        <h3 className="font-black text-lg text-slate-900 dark:text-white mb-1">Creator Pro</h3>
-                                        <p className="text-blue-600 font-black text-2xl mb-4">500 <span className="text-[10px] uppercase tracking-widest text-slate-400">Coins</span></p>
-                                        <div className="space-y-2">
-                                            <button onClick={() => alert("PayHere Integration Pending (Backend Required)")} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md">Pay Rs. 1200</button>
-                                            <button onClick={() => alert("Stripe Integration Pending (Backend Required)")} className="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-md">Pay $4.00</button>
-                                        </div>
-                                    </div>
-
-                                    {/* Package 3 */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-700 text-center hover:border-purple-500 transition-all hover:scale-105 group relative overflow-hidden">
-                                        <div className="text-yellow-500 mb-2"><Icon name="flame" className="w-8 h-8 mx-auto text-purple-500" /></div>
-                                        <h3 className="font-black text-lg text-slate-900 dark:text-white mb-1">Elite VIP</h3>
-                                        <p className="text-purple-600 font-black text-2xl mb-4">2000 <span className="text-[10px] uppercase tracking-widest text-slate-400">Coins</span></p>
-                                        <div className="space-y-2">
-                                            <button onClick={() => alert("PayHere Integration Pending (Backend Required)")} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md">Pay Rs. 4000</button>
-                                            <button onClick={() => alert("Stripe Integration Pending (Backend Required)")} className="w-full bg-purple-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-purple-700 transition-colors shadow-md">Pay $12.00</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className="text-center text-[10px] font-bold text-slate-400 mt-6 uppercase tracking-widest">Payments are secured by Stripe & PayHere (LKR).</p>
                             </div>
                         </div>
                     )}
-                    {/* Report Post Modal */}
-                    {reportModal.open && reportModal.post && (
+                    {/* 🚀 External Share Modal (Updated with Socials & Bug Fix) */}
+                    {shareModal.open && shareModal.post && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
-                            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-700 text-center">
-                                <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-900/50">
-                                    <Icon name="flag" className="w-8 h-8" />
-                                </div>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase mb-2">Report Post</h2>
-                                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-6 px-4">Help us keep Nexia safe. Why are you reporting this post?</p>
+                            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-700 text-center relative">
                                 
-                                <form onSubmit={submitReport} className="space-y-4">
-                                    <select 
-                                        className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-xl py-3 px-4 outline-none font-bold text-sm text-slate-800 dark:text-slate-200 cursor-pointer"
-                                        value={reportModal.reason}
-                                        onChange={e => setReportModal({...reportModal, reason: e.target.value})}
-                                        required
-                                    >
-                                        <option value="" disabled>Select a reason...</option>
-                                        <option value="spam">It's spam</option>
-                                        <option value="inappropriate">Inappropriate content</option>
-                                        <option value="stolen_art">Stolen artwork / prompt</option>
-                                        <option value="hate_speech">Hate speech or harassment</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                    <div className="flex gap-3 pt-2">
-                                        <button type="button" onClick={() => setReportModal({ open: false, post: null, reason: '' })} className="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Cancel</button>
-                                        <button disabled={uploading || !reportModal.reason} type="submit" className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-red-700 disabled:opacity-50 transition-all shadow-lg">Submit</button>
-                                    </div>
-                                </form>
+                                {/* Close Button (Top Right) */}
+                                <button onClick={() => setShareModal({ open: false, post: null })} className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 bg-slate-50 dark:bg-slate-700 rounded-full transition-colors">
+                                    <Icon name="x" className="w-4 h-4" />
+                                </button>
+
+                                <div className="w-16 h-16 bg-green-50 dark:bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-100 dark:border-green-900/50">
+                                    <Icon name="share" className="w-8 h-8" />
+                                </div>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase mb-2">Share With The World</h2>
+                                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-6 px-4">Show off this amazing AI prompt to your friends!</p>
+                                
+                                {/* 🚀 Social Media Sharing Buttons */}
+                                <div className="flex justify-center gap-4 mb-6">
+                                    {/* WhatsApp */}
+                                    <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Check out this awesome AI prompt on Nexia PromptHub! https://nexus.vercel.app")}`} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-[#25D366] text-white rounded-full flex items-center justify-center hover:scale-110 shadow-lg transition-transform" title="Share on WhatsApp">
+                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                                    </a>
+                                    
+                                    {/* Facebook */}
+                                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://nexus.vercel.app")}`} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-[#1877F2] text-white rounded-full flex items-center justify-center hover:scale-110 shadow-lg transition-transform" title="Share on Facebook">
+                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                    </a>
+
+                                    {/* Twitter / X */}
+                                    <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out this awesome AI prompt on Nexia PromptHub!")}&url=${encodeURIComponent("https://nexus.vercel.app")}`} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 shadow-lg transition-transform" title="Share on X">
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    </a>
+                                </div>
+                                
+                                {/* 🚀 Non-blocking Copy Link Section */}
+                                <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-2 flex items-center justify-between mb-4">
+                                    <span className="text-xs font-mono text-slate-500 truncate w-48 text-left pl-2">https://nexus.vercel.app</span>
+                                    <button onClick={(e) => { 
+                                        navigator.clipboard.writeText("https://nexus.vercel.app"); 
+                                        const btn = e.target; 
+                                        const originalText = btn.innerText; 
+                                        btn.innerText = "COPIED!"; 
+                                        btn.classList.add("bg-green-500", "scale-105");
+                                        setTimeout(() => { 
+                                            btn.innerText = originalText; 
+                                            btn.classList.remove("bg-green-500", "scale-105"); 
+                                        }, 2000); 
+                                    }} className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-sm min-w-[80px]">Copy</button>
+                                </div>
+
+                                <button onClick={() => setShareModal({ open: false, post: null })} className="w-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Done</button>
                             </div>
                         </div>
                     )}
                 </div>
             );
         };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+    
 </body>
 </html>
