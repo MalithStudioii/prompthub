@@ -1998,11 +1998,34 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </div>
                     )}
 
-                    <div className="fixed bottom-0 left-0 w-full mobile-bottom-bar py-4 flex justify-around items-center md:hidden z-50 pb-safe">
-                        <button onClick={() => navigate('home')} className={`p-2 transition-transform active:scale-90 ${view==='home'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="home" className="w-6 h-6" /></button>
-                        <button onClick={() => navigate('leaderboard')} className={`p-2 transition-transform active:scale-90 ${view==='leaderboard'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="trophy" className="w-6 h-6" /></button>
-                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-2 transition-transform active:scale-90 relative ${view==='notifications'?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="bell" className="w-6 h-6" />{hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}</button>
-                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-2 transition-transform active:scale-90 ${(view==='profile' || view==='public_profile' || view==='settings' || view==='edit_profile')?'text-blue-600':'text-slate-400 dark:text-slate-500'}`}><Icon name="user" className="w-6 h-6" /></button>
+                    {/* 📱 Premium Mobile Floating Bottom Navigation Bar */}
+                    <div className="fixed bottom-0 left-0 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-100 dark:border-slate-800 py-2 flex justify-around items-center md:hidden z-[100] pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                        <button onClick={() => navigate('home')} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${view === 'home' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <Icon name="home" className="w-5 h-5" />
+                        </button>
+                        
+                        <button onClick={() => navigate('leaderboard')} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${view === 'leaderboard' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <Icon name="trophy" className="w-5 h-5" />
+                        </button>
+
+                        {/* 🚀 Center Floating Action Button (+) */}
+                        <div className="relative -mt-6">
+                            <button 
+                                onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('create_post'); }} 
+                                className="w-13 h-13 bg-gradient-to-tr from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white flex items-center justify-center rounded-full shadow-[0_8px_20px_rgba(37,99,235,0.4)] hover:scale-105 active:scale-90 transition-all border-4 border-white dark:border-slate-900"
+                            >
+                                <Icon name="plus" className="w-6 h-6 stroke-[3]" />
+                            </button>
+                        </div>
+
+                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'notifications' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <Icon name="bell" className="w-5 h-5" />
+                            {hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>}
+                        </button>
+                        
+                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${(view === 'profile' || view === 'public_profile' || view === 'settings' || view === 'edit_profile') ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <Icon name="user" className="w-5 h-5" />
+                        </button>
                     </div>
 
                     {authModal.open && (
