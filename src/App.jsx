@@ -1152,19 +1152,15 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 const reposterName = reposter?.name || post.repostedBy;
 
                 return (
-                    /* 📱 FIXED: Mobile වලදී rounded එක rounded-[1.8rem] කරලා, mb-5 වලින් කාඩ් අතර පරතරය අඩු කළා */
                     <div key={post.id} className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-5 md:mb-14 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
                         
-                        {/* 🚀 Reposted Header */}
                         {post.isRepost && (
-                            /* 📱 FIXED: Mobile padding අඩු කළා (px-4) */
                             <div className="px-4 md:px-6 pt-3 md:pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
                                 <Icon name="repeat" className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" />
                                 <span><span className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); openPublicProfile(post.userId); }}>{reposterName}</span> shared this</span>
                             </div>
                         )}
 
-                        /* 📱 FIXED: Header padding එක mobile වලදී p-3 කරලා compact කළා */
                         <div className="p-3 md:p-6 flex items-center justify-between relative">
                             <div className="flex items-center gap-2.5 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
                                 <div className="p-0.5 rounded-lg md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={displayPhoto} className="w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
@@ -1190,7 +1186,6 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     <Icon name="morehorizontal" className="w-4 h-4 md:w-5 md:h-5" />
                                 </button>
 
-                                {/* Dropdown Options */}
                                 {postOptionsMenuOpen === post.id && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); }}></div>
@@ -1218,7 +1213,6 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             </div>
                         </div>
 
-                        /* 📱 FIXED: Image Container එක mobile වලදී උස අඩු කරලා, rounded වෙනස හැදුවා */
                         <div className="secure-img-wrapper px-1.5 md:px-4 relative group">
                             <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
                             
@@ -1232,7 +1226,6 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             </button>
                         </div>
 
-                        /* 📱 FIXED: Action Bar සහ Prompt Area එකේ mobile padding අඩු කළා */
                         <div className="px-3 pb-3 pt-3 md:px-8 md:pb-6 md:pt-6">
                             <div className="bg-slate-50/70 dark:bg-slate-900/50 p-3.5 md:p-7 rounded-[1.4rem] md:rounded-[2.8rem] border border-slate-100 dark:border-slate-700 italic relative mb-3">
                                 {(() => {
