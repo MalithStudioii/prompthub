@@ -11,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <script>
-      // 🔴  FIREBASE CONFIG එක 
       const firebaseConfig = {
         apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
         authDomain: "prompthub-e69f8.firebaseapp.com",
@@ -21,15 +20,16 @@
         appId: "1:876000777567:web:1927dd9d1bd037678792ea"
       };
 
+      // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
       const auth = firebase.auth();
 
-      // 🔥 FIXED: exists() Error එක හදපු අලුත් Bridge එක
+      // Core Bridge Implementation
       window.fb = {
         auth, 
         db, 
-        appId: firebaseConfig.appId,
+        appId: "prompthub-e69f8", // Legacy App ID configured for continuous data access
         googleProvider: new firebase.auth.GoogleAuthProvider(),
         githubProvider: new firebase.auth.GithubAuthProvider(),
         twitterProvider: new firebase.auth.TwitterAuthProvider(),
@@ -59,7 +59,7 @@
         arrayRemove: firebase.firestore.FieldValue.arrayRemove,
         increment: firebase.firestore.FieldValue.increment,
 
-        // 🚀 අලුතින් හදපු 'exists()' Wrappers
+        // Extended wrappers to prevent exists() type errors
         getDoc: (ref) => ref.get().then(snap => ({
             exists: () => snap.exists,
             data: () => snap.data(),
@@ -80,6 +80,7 @@
         }, onError)
       };
 
+      // Dispatch load completion event
       const event = new Event('firebase-ready');
       window.dispatchEvent(event);
     </script>
