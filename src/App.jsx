@@ -886,12 +886,20 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         finalImageUrl = await uploadToImgBB(postModal.imageFile);
                         if (!finalImageUrl) throw new Error("Upload failed");
                     }
+                    // 🚀 FIXED: නමයි Profile Pic එකයි ඩේටාබේස් එකට යවනවා!
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
-                        userId: user.uid, prompt: postModal.prompt, imageUrl: finalImageUrl, model: postModal.model, createdAt: serverTimestamp(), likes: [], comments: []
+                        userId: user.uid, 
+                        userName: profileData.name || user.displayName || 'Nexia Creator',
+                        userPhoto: profileData.photoURL || user.photoURL,
+                        prompt: postModal.prompt, 
+                        imageUrl: finalImageUrl, 
+                        model: postModal.model, 
+                        createdAt: serverTimestamp(), 
+                        likes: [], 
+                        comments: []
                     });
                     setPostModal({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' }); navigate('home');
                 } catch (err) { 
-                    // සැබෑ දෝෂය කුමක්දැයි හඳුනා ගැනීමට err.message එක alert කරන්න
                     alert("⚠️ ERROR DURING UPLOAD: " + err.message); 
                 }
                 setUploading(false);
