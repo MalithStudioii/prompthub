@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <script>
+      // 🔴  FIREBASE CONFIG එක 
       const firebaseConfig = {
         apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
         authDomain: "prompthub-e69f8.firebaseapp.com",
@@ -24,7 +25,7 @@
       const db = firebase.firestore();
       const auth = firebase.auth();
 
-      // 🔥 FIXED: Modular SDK Wrappers (App.jsx එකත් එක්ක 100% ක් ගැලපෙන්න හැදුවා)
+      // 🔥 FIXED: exists() Error එක හදපු අලුත් Bridge එක
       window.fb = {
         auth, 
         db, 
@@ -50,15 +51,33 @@
         doc: (d, ...paths) => d.doc(paths.join('/')),
         collection: (d, ...paths) => d.collection(paths.join('/')),
         setDoc: (ref, data, options) => ref.set(data, options),
-        getDoc: (ref) => ref.get(),
         updateDoc: (ref, data) => ref.update(data),
         deleteDoc: (ref) => ref.delete(),
         addDoc: (ref, data) => ref.add(data),
-        onSnapshot: (ref, onNext, onError) => ref.onSnapshot(onNext, onError),
         serverTimestamp: firebase.firestore.FieldValue.serverTimestamp,
         arrayUnion: firebase.firestore.FieldValue.arrayUnion,
         arrayRemove: firebase.firestore.FieldValue.arrayRemove,
-        increment: firebase.firestore.FieldValue.increment
+        increment: firebase.firestore.FieldValue.increment,
+
+        // 🚀 අලුතින් හදපු 'exists()' Wrappers
+        getDoc: (ref) => ref.get().then(snap => ({
+            exists: () => snap.exists,
+            data: () => snap.data(),
+            id: snap.id,
+            ref: snap.ref
+        })),
+        onSnapshot: (ref, onNext, onError) => ref.onSnapshot(snap => {
+            if (snap.docs) {
+                onNext(snap);
+            } else {
+                onNext({
+                    exists: () => snap.exists,
+                    data: () => snap.data(),
+                    id: snap.id,
+                    ref: snap.ref
+                });
+            }
+        }, onError)
       };
 
       const event = new Event('firebase-ready');
