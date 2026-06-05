@@ -1143,124 +1143,134 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 </div>
             );
 
-            const renderPostCard = (post) => (
-                <div key={post.id} className={`rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-8 md:mb-14 p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
-                    
-                    {/* 🚀 Reposted Header */}
-                    {post.isRepost && (
-                        <div className="px-6 pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
-                            <Icon name="repeat" className="w-4 h-4 text-blue-500" />
-                            <span><span className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); openPublicProfile(post.userId); }}>{post.repostedBy}</span> shared this</span>
-                        </div>
-                    )}
+            const renderPostCard = (post) => {
+                // 🚀 FIXED: පරණ පෝස්ට් වලටත් අලුත්ම Profile Pic එකයි නමයි Real-time අදිනවා
+                const postOwner = allCreators.find(c => c.id === (post.originalAuthorId || post.userId));
+                const displayPhoto = postOwner?.photoURL || post.userPhoto;
+                const displayName = postOwner?.name || post.userName;
+                
+                const reposter = post.isRepost ? allCreators.find(c => c.id === post.userId) : null;
+                const reposterName = reposter?.name || post.repostedBy;
 
-                    <div className="p-4 md:p-6 flex items-center justify-between relative">
-                        <div className="flex items-center gap-3 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
-                            <div className="p-0.5 rounded-xl md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={post.userPhoto} className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
-                            <div className="flex flex-col">
-                                <span className="font-extrabold text-[14px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1 flex-wrap">
-                                    {post.userName} 
-                                    {post.isOfficial ? (
-                                        <span className="bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="shieldcheck" className="w-3 h-3" /> OFFICIAL</span>
-                                    ) : (
-                                        getAuthorBadges(post.originalAuthorId || post.userId)
-                                    )}
-                                    {post.boostedAt && ((Date.now() / 1000) - post.boostedAt.seconds < 86400) && !post.isOfficial && <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="flame" className="w-2.5 h-2.5" /> Boosted</span>}
-                                </span>
-                                <span className="text-[9px] md:text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80 mt-1.5"><Icon name={post.isOfficial ? 'globe' : 'cpu'} className="w-3 mr-1" />{post.model}</span>
+                return (
+                    <div key={post.id} className={`rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-8 md:mb-14 p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
+                        
+                        {/* 🚀 Reposted Header */}
+                        {post.isRepost && (
+                            <div className="px-6 pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
+                                <Icon name="repeat" className="w-4 h-4 text-blue-500" />
+                                <span><span className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); openPublicProfile(post.userId); }}>{reposterName}</span> shared this</span>
+                            </div>
+                        )}
+
+                        <div className="p-4 md:p-6 flex items-center justify-between relative">
+                            <div className="flex items-center gap-3 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
+                                <div className="p-0.5 rounded-xl md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={displayPhoto} className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
+                                <div className="flex flex-col">
+                                    <span className="font-extrabold text-[14px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1 flex-wrap">
+                                        {displayName} 
+                                        {post.isOfficial ? (
+                                            <span className="bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="shieldcheck" className="w-3 h-3" /> OFFICIAL</span>
+                                        ) : (
+                                            getAuthorBadges(post.originalAuthorId || post.userId)
+                                        )}
+                                        {post.boostedAt && ((Date.now() / 1000) - post.boostedAt.seconds < 86400) && !post.isOfficial && <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="flame" className="w-2.5 h-2.5" /> Boosted</span>}
+                                    </span>
+                                    <span className="text-[9px] md:text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80 mt-1.5"><Icon name={post.isOfficial ? 'globe' : 'cpu'} className="w-3 mr-1" />{post.model}</span>
+                                </div>
+                            </div>
+
+                            {/* Three Dots Menu Button */}
+                            <div className="relative">
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(postOptionsMenuOpen === post.id ? null : post.id); }} 
+                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                    <Icon name="morehorizontal" className="w-5 h-5" />
+                                </button>
+
+                                {/* Dropdown Options */}
+                                {postOptionsMenuOpen === post.id && (
+                                    <>
+                                        <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); }}></div>
+                                        <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-in zoom-in-95 duration-200 p-1">
+                                            
+                                            {(post.userId === user?.uid || isAdmin) ? (
+                                                <>
+                                                    <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); setEditPostModal({ open: true, post: post, newPrompt: post.prompt }); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-xl text-slate-700 dark:text-slate-200">
+                                                        <Icon name="edit" className="w-4 h-4 text-slate-500" />
+                                                        <span className="font-bold text-xs">Edit Prompt</span>
+                                                    </button>
+                                                    <button onClick={(e) => { e.stopPropagation(); deletePost(post.id); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
+                                                        <Icon name="trash" className="w-4 h-4 text-red-500" />
+                                                        <span className="font-bold text-xs">Delete Post</span>
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setReportModal({ open: true, post: post, reason: '' }); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
+                                                    <Icon name="flag" className="w-4 h-4 text-red-500" />
+                                                    <span className="font-bold text-xs">Report Post</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
-
-                        {/* Three Dots Menu Button */}
-                        <div className="relative">
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(postOptionsMenuOpen === post.id ? null : post.id); }} 
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                            >
-                                <Icon name="morehorizontal" className="w-5 h-5" />
-                            </button>
-
-                            {/* Dropdown Options */}
-                            {postOptionsMenuOpen === post.id && (
-                                <>
-                                    <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); }}></div>
-                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-in zoom-in-95 duration-200 p-1">
-                                        
-                                        {(post.userId === user?.uid || isAdmin) ? (
-                                            <>
-                                                <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); setEditPostModal({ open: true, post: post, newPrompt: post.prompt }); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-xl text-slate-700 dark:text-slate-200">
-                                                    <Icon name="edit" className="w-4 h-4 text-slate-500" />
-                                                    <span className="font-bold text-xs">Edit Prompt</span>
-                                                </button>
-                                                <button onClick={(e) => { e.stopPropagation(); deletePost(post.id); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
-                                                    <Icon name="trash" className="w-4 h-4 text-red-500" />
-                                                    <span className="font-bold text-xs">Delete Post</span>
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setReportModal({ open: true, post: post, reason: '' }); }} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
-                                                <Icon name="flag" className="w-4 h-4 text-red-500" />
-                                                <span className="font-bold text-xs">Report Post</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                    <div className="secure-img-wrapper px-2 md:px-4 relative group">
-                        <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
-                        
-                        <div className="bg-slate-100 dark:bg-slate-950 rounded-[2rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[350px] sm:h-[450px] md:h-[550px] shadow-sm">
-                            <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
-                            <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
-                        </div>
-
-                        <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
-                            {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
-                        </button>
-                    </div>
-                    <div className="px-5 pb-5 pt-5 md:px-8 md:pb-6 md:pt-6">
-                        <div className="bg-slate-50/70 dark:bg-slate-900/50 p-5 md:p-7 rounded-[2rem] md:rounded-[2.8rem] border border-slate-100 dark:border-slate-700 italic relative mb-4">
+                        <div className="secure-img-wrapper px-2 md:px-4 relative group">
+                            <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
                             
-                            {/* 🚀 See More / See Less Logic */}
-                            {(() => {
-                                const isExpanded = expandedPrompts[post.id];
-                                const isLongPrompt = post.prompt && post.prompt.length > 150;
-                                const displayPromptText = (!isLongPrompt || isExpanded) ? post.prompt : post.prompt.substring(0, 150) + '...';
+                            <div className="bg-slate-100 dark:bg-slate-950 rounded-[2rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[350px] sm:h-[450px] md:h-[550px] shadow-sm">
+                                <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
+                                <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
+                            </div>
+
+                            <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                                {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
+                            </button>
+                        </div>
+                        <div className="px-5 pb-5 pt-5 md:px-8 md:pb-6 md:pt-6">
+                            <div className="bg-slate-50/70 dark:bg-slate-900/50 p-5 md:p-7 rounded-[2rem] md:rounded-[2.8rem] border border-slate-100 dark:border-slate-700 italic relative mb-4">
                                 
-                                return (
-                                    <p className="text-[13px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap no-select">
-                                        {formatPrompt(displayPromptText)}
-                                        {isLongPrompt && (
-                                            <button onClick={(e) => togglePrompt(post.id, e)} className="text-blue-600 dark:text-blue-400 font-extrabold ml-2 hover:underline focus:outline-none">
-                                                {isExpanded ? 'See less' : 'See more'}
-                                            </button>
-                                        )}
-                                    </p>
-                                );
-                            })()}
+                                {/* 🚀 See More / See Less Logic */}
+                                {(() => {
+                                    const isExpanded = expandedPrompts[post.id];
+                                    const isLongPrompt = post.prompt && post.prompt.length > 150;
+                                    const displayPromptText = (!isLongPrompt || isExpanded) ? post.prompt : post.prompt.substring(0, 150) + '...';
+                                    
+                                    return (
+                                        <p className="text-[13px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap no-select">
+                                            {formatPrompt(displayPromptText)}
+                                            {isLongPrompt && (
+                                                <button onClick={(e) => togglePrompt(post.id, e)} className="text-blue-600 dark:text-blue-400 font-extrabold ml-2 hover:underline focus:outline-none">
+                                                    {isExpanded ? 'See less' : 'See more'}
+                                                </button>
+                                            )}
+                                        </p>
+                                    );
+                                })()}
 
-                            <div className="absolute -top-3 -left-1 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-3 h-3 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
-                        </div>
-                        {post.userId === user?.uid && (!post.boostedAt || ((Date.now() / 1000) - post.boostedAt.seconds > 86400)) && (
-                            <button onClick={(e) => { e.stopPropagation(); handleBoostPost(post.id); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-[11px] uppercase tracking-widest py-2.5 rounded-xl shadow-md hover:scale-[1.02] active:scale-95 transition-all mb-4"><Icon name="flame" className="w-4 h-4" /> Boost Post (50 Coins)</button>
-                        )}
-                        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4 px-2 mt-4">
-                            <button onClick={() => toggleLike(post)} className={`flex items-center gap-1.5 md:gap-2 font-bold text-[11px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-4 h-4 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
-                            <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors"><Icon name="message" className="w-4 h-4 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
-                            
-                            {/* 🚀 Repost Button */}
-                            <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors" title="Share on Nexia">
-                                <Icon name="repeat" className="w-4 h-4 md:w-5 md:h-5" />
-                            </button>
+                                <div className="absolute -top-3 -left-1 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-3 h-3 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
+                            </div>
+                            {post.userId === user?.uid && (!post.boostedAt || ((Date.now() / 1000) - post.boostedAt.seconds > 86400)) && (
+                                <button onClick={(e) => { e.stopPropagation(); handleBoostPost(post.id); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-[11px] uppercase tracking-widest py-2.5 rounded-xl shadow-md hover:scale-[1.02] active:scale-95 transition-all mb-4"><Icon name="flame" className="w-4 h-4" /> Boost Post (50 Coins)</button>
+                            )}
+                            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4 px-2 mt-4">
+                                <button onClick={() => toggleLike(post)} className={`flex items-center gap-1.5 md:gap-2 font-bold text-[11px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-4 h-4 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
+                                <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors"><Icon name="message" className="w-4 h-4 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
+                                
+                                {/* 🚀 Repost Button */}
+                                <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors" title="Share on Nexia">
+                                    <Icon name="repeat" className="w-4 h-4 md:w-5 md:h-5" />
+                                </button>
 
-                            <button onClick={() => handleShare(post)} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors"><Icon name="share" className="w-4 h-4 md:w-5 md:h-5" /></button>
-                            <button onClick={() => toggleSave(post)} className={`flex items-center gap-1.5 md:gap-2 font-bold text-[11px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-4 h-4 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> <span className="hidden sm:inline">{profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</span></button>
+                                <button onClick={() => handleShare(post)} className="flex items-center gap-1.5 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[11px] md:text-xs transition-colors"><Icon name="share" className="w-4 h-4 md:w-5 md:h-5" /></button>
+                                <button onClick={() => toggleSave(post)} className={`flex items-center gap-1.5 md:gap-2 font-bold text-[11px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-4 h-4 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> <span className="hidden sm:inline">{profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</span></button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            );
+                );
+            };
 
             const userPosts = posts.filter(p => p.userId === user?.uid);
             const targetUserPosts = selectedUser ? posts.filter(p => p.userId === selectedUser.id) : [];
