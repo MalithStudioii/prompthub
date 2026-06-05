@@ -11,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <script>
-      // 🔴 ඔයාගේ FIREBASE CONFIG එක මෙතන දාන්න (පරණ ෆයිල් එකෙන් කොපි කරලා)
       const firebaseConfig = {
         apiKey: "AIzaSyBNdUnvdffGt9bJgwZsJXcPulomN4M1Lbs",
         authDomain: "prompthub-e69f8.firebaseapp.com",
@@ -21,12 +20,11 @@
         appId: "1:876000777567:web:1927dd9d1bd037678792ea"
       };
 
-      // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
       const auth = firebase.auth();
 
-      // App.jsx එකට ලේසියෙන් ඩේටා ගන්න window.fb එක හදනවා (මේ ටික වෙනස් කරන්න එපා)
+      // 🔥 FIXED: Modular SDK Wrappers (App.jsx එකත් එක්ක 100% ක් ගැලපෙන්න හැදුවා)
       window.fb = {
         auth, 
         db, 
@@ -35,20 +33,22 @@
         githubProvider: new firebase.auth.GithubAuthProvider(),
         twitterProvider: new firebase.auth.TwitterAuthProvider(),
         EmailAuthProvider: firebase.auth.EmailAuthProvider,
-        signInWithPopup: firebase.auth().signInWithPopup.bind(auth),
-        signInWithEmailAndPassword: firebase.auth().signInWithEmailAndPassword.bind(auth),
-        createUserWithEmailAndPassword: firebase.auth().createUserWithEmailAndPassword.bind(auth),
+        
+        signInWithPopup: (a, provider) => a.signInWithPopup(provider),
+        signInWithEmailAndPassword: (a, email, password) => a.signInWithEmailAndPassword(email, password),
+        createUserWithEmailAndPassword: (a, email, password) => a.createUserWithEmailAndPassword(email, password),
         updateProfile: (user, data) => user.updateProfile(data),
-        onAuthStateChanged: firebase.auth().onAuthStateChanged.bind(auth),
-        signInAnonymously: firebase.auth().signInAnonymously.bind(auth),
-        isSignInWithEmailLink: firebase.auth().isSignInWithEmailLink.bind(auth),
-        signInWithEmailLink: firebase.auth().signInWithEmailLink.bind(auth),
-        signOut: firebase.auth().signOut.bind(auth),
+        onAuthStateChanged: (a, callback) => a.onAuthStateChanged(callback),
+        signInAnonymously: (a) => a.signInAnonymously(),
+        isSignInWithEmailLink: (a, link) => a.isSignInWithEmailLink(link),
+        signInWithEmailLink: (a, email, link) => a.signInWithEmailLink(email, link),
+        signOut: (a) => a.signOut(),
         deleteUser: (user) => user.delete(),
         reauthenticateWithCredential: (user, cred) => user.reauthenticateWithCredential(cred),
         reauthenticateWithPopup: (user, provider) => user.reauthenticateWithPopup(provider),
-        doc: (db, ...paths) => db.doc(paths.join('/')),
-        collection: (db, ...paths) => db.collection(paths.join('/')),
+        
+        doc: (d, ...paths) => d.doc(paths.join('/')),
+        collection: (d, ...paths) => d.collection(paths.join('/')),
         setDoc: (ref, data, options) => ref.set(data, options),
         getDoc: (ref) => ref.get(),
         updateDoc: (ref, data) => ref.update(data),
@@ -61,7 +61,6 @@
         increment: firebase.firestore.FieldValue.increment
       };
 
-      // Firebase ලෝඩ් වුණා කියලා React එකට Signal එක දෙනවා
       const event = new Event('firebase-ready');
       window.dispatchEvent(event);
     </script>
