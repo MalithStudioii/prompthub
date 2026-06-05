@@ -360,14 +360,65 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             }, [isDarkMode]);
 
             const uploadToImgBB = async (file) => {
-                const formData = new FormData();
-                formData.append('image', file);
+                const compressImage = (imgFile) => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(imgFile);
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.src = event.target.result;
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                
+                                const MAX_WIDTH = 1200;
+                                const MAX_HEIGHT = 1200;
+                                
+                                if (width > height) {
+                                    if (width > MAX_WIDTH) {
+                                        height *= MAX_WIDTH / width;
+                                        width = MAX_WIDTH;
+                                    }
+                                } else {
+                                    if (height > MAX_HEIGHT) {
+                                        width *= MAX_HEIGHT / height;
+                                        height = MAX_HEIGHT;
+                                    }
+                                }
+                                
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                canvas.toBlob((blob) => {
+                                    resolve(new File([blob], imgFile.name, {
+                                        type: 'image/jpeg',
+                                        lastModified: Date.now()
+                                    }));
+                                }, 'image/jpeg', 0.75);
+                            };
+                        };
+                    });
+                };
+
                 try {
-                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
-                    const data = await response.json();
-                    if (data.success) return data.data.url;
-                    throw new Error(data.error.message);
-                } catch (error) { return null; }
+                    const optimizedFile = file.size > 500000 ? await compressImage(file) : file;
+                    
+                    const formData = new FormData();
+                    formData.append('image', optimizedFile);
+                    
+                    const response = await fetch('https://api.imgbb.com/1/upload?key=f048c857d1c61df16a650b4b65074368', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const resData = await response.json();
+                    return resData.data.url;
+                } catch (error) {
+                    console.error("Transmission error inside image deployment stream:", error);
+                    return null;
+                }
             };
 
             useEffect(() => {
