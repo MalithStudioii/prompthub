@@ -89,8 +89,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             );
 
             if (name === 'nexia_logo') return (
-                <img src="/logo.png" className={`${className} object-contain no-drag`} alt="Nexia Premium Logo" {...props} />>
-            );
+        <img src="/logo.png" className={`${className} object-contain no-drag`} alt="Nexia Premium Logo" {...props} />
+    );
 
             const paths = {
                 search: <><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>,
@@ -434,9 +434,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                 const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
                     if (u) {
-                        setUser(u);
-                        setLoading(false);
-                    } else {
+                    setUser(u);
+                    // Firebase යූසර් ඉන්නවා නම් ලෝඩින් ස්ක්‍රීන් එක අයින් කරනවා
+                    setTimeout(() => setLoading(false), 1500);
+                 } else {
                         try {
                             if (isSignInWithEmailLink(auth, window.location.href)) {
                                 let email = null;
@@ -464,13 +465,19 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     } catch (err) { alert("Magic link expired or invalid."); }
                                 }
                             } else {
-                                await signInAnonymously(auth);
-                            }
-                        } catch (e) {
-                            try { await signInAnonymously(auth); } catch (e2) {}
-                        }
+                        await signInAnonymously(auth);
+                        setTimeout(() => setLoading(false), 1500);
                     }
-                });
+                } catch (e) {
+                    try { 
+                        await signInAnonymously(auth); 
+                        setTimeout(() => setLoading(false), 1500);
+                    } catch (e2) {
+                        setTimeout(() => setLoading(false), 1500);
+                    }
+                }
+            }
+        });
                 
                 return () => unsubscribeAuth();
             }, [isReady]);
@@ -1326,8 +1333,11 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
             if (loading) {
                 return (
-                    <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[9999]">
-                        <img src="/logo.png" className="w-24 h-24 animate-pulse" alt="Nexia Logo" />
+                    <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[9999] animate-in fade-in duration-500">
+                        <div className="flex flex-col items-center justify-center gap-6">
+                            <img src="/logo.png" className="w-24 h-24 animate-bounce duration-1000" alt="Nexia Loading" />
+                            <p className="text-blue-500 font-mono text-xs uppercase tracking-[0.4em] animate-pulse">Syncing Nexia Data Stream...</p>
+                        </div>
                     </div>
                 );
             }
