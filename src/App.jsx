@@ -1354,8 +1354,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
                                 <Icon name="bell" />
                                 {hasUnreadNotifications && (
-                                    <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white dark:border-slate-900 shadow-md">
-                                        {hasUnreadNotifications}
+                                    <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white ring-2 ring-white dark:ring-slate-900 shadow-md">
+                                        {hasUnreadNotifications > 9 ? '9+' : hasUnreadNotifications}
                                     </span>
                                 )}
                             </button>
@@ -2075,11 +2075,14 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             </button>
                         </div>
 
-                        <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'notifications' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
+                        <button 
+                    onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} 
+                    className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'notifications' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}
+                >
                     <Icon name="bell" className="w-5 h-5" />
                     {hasUnreadNotifications && (
-                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md animate-bounce">
-                            {hasUnreadNotifications}
+                        <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white ring-2 ring-white dark:ring-slate-900 animate-bounce">
+                            {hasUnreadNotifications > 9 ? '9+' : hasUnreadNotifications}
                         </span>
                     )}
                 </button>
