@@ -1324,7 +1324,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const followerIds = allFollows.filter(f => f.followingId === activeProfileId).map(f => f.followerId);
             const displayedNetworkCreators = sidebarNetworkTab === 'following' ? allCreators.filter(c => followingIds.includes(c.id)) : allCreators.filter(c => followerIds.includes(c.id));
 
-            if (loading && !isReady) return null;
+            if (loading) {
+                return (
+                    <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[9999]">
+                        <img src="/logo.png" className="w-24 h-24 animate-pulse" alt="Nexia Logo" />
+                    </div>
+                );
+            }
 
             return (
                 <div className={`min-h-screen pb-28 md:pb-0 transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`}>
@@ -1354,7 +1360,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
                                 <Icon name="bell" />
                                 {hasUnreadNotifications && (
-                                    <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white ring-2 ring-white dark:ring-slate-900 shadow-md">
+                                    <span className="absolute top-3 left-7 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md">
                                         {hasUnreadNotifications > 9 ? '9+' : hasUnreadNotifications}
                                     </span>
                                 )}
