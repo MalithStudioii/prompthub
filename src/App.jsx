@@ -359,6 +359,21 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 } catch(e){}
             }, [isDarkMode]);
 
+            useEffect(() => {
+                const container = document.getElementById('tags-scroll-container');
+                if (!container) return;
+
+                const handleWheelScroll = (e) => {
+                    if (e.deltaY !== 0) {
+                        e.preventDefault(); // මේක දැන් මුළු පේජ් එකම උඩ පල්ලෙහා යන එක 100% නවත්වනවා
+                        container.scrollLeft += e.deltaY;
+                    }
+                };
+
+                container.addEventListener('wheel', handleWheelScroll, { passive: false });
+                return () => container.removeEventListener('wheel', handleWheelScroll);
+            }, [posts]); // Posts වෙනස් වෙද්දී container එක Live update වෙන්න
+
             const uploadToImgBB = async (file) => {
                 const compressImage = (imgFile) => {
                     return new Promise((resolve) => {
@@ -1532,13 +1547,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 <button onClick={() => setFeedAlgorithm('latest')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'latest' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="clock" className="w-4 h-4" /> {t('latest')}</button>
                                             </div>
                                             <div 
+                                                id="tags-scroll-container"
                                                 className="flex items-center gap-2 overflow-x-auto max-w-full no-scrollbar pb-2 pt-1 touch-pan-x select-none"
-                                                onWheel={(e) => {
-                                                    if (e.deltaY !== 0) {
-                                                        e.preventDefault();
-                                                        e.currentTarget.scrollLeft += e.deltaY;
-                                                    }
-                                                }}
                                             >
                                                 {availableFilters.map(filter => (
                                                     <button key={filter} onClick={() => setActiveFilter(filter)} className={`px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs whitespace-nowrap transition-all border shadow-sm flex-shrink-0 ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>{filter === 'All' ? t('all') : filter}</button>
