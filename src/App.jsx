@@ -531,7 +531,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                     
                     setNotifications(fetched); 
-                    setHasUnreadNotifications(fetched.some(n => !n.read));
+                    
+                    // 🚀 FIXED: Real-time Count & Instant Read Filter
+                    const unreadCount = fetched.filter(n => !n.read).length;
+                    setHasUnreadNotifications(unreadCount > 0 ? unreadCount : false);
 
                     if (!isInitialLoad) {
                         snap.docChanges().forEach((change) => {
@@ -1349,9 +1352,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'leaderboard' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /></button>
                                     <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /></button>
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
-                                        <Icon name="bell" />
-                                        {hasUnreadNotifications && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}
-                                    </button>
+                                <Icon name="bell" />
+                                {hasUnreadNotifications && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md">
+                                        {hasUnreadNotifications}
+                                    </span>
+                                )}
+                            </button>
                                 </div>
 
                                 {!user || user.isAnonymous ? (
@@ -1377,7 +1384,15 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             {isAdmin && <button onClick={() => navigate('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}><Icon name="sliders" /> {t('commandCenter')}</button>}
                             <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /> {t('globalStream')}</button>
                             <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'leaderboard' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /> {t('leaderboard')}</button>
-                            <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="bell" /> {t('alerts')}{hasUnreadNotifications && <span className="absolute top-4 left-7 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}</button>
+                            <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}>
+                        <Icon name="bell" /> 
+                        <span>{t('alerts')}</span>
+                        {hasUnreadNotifications && (
+                            <span className="absolute top-3 left-6 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md">
+                                {hasUnreadNotifications}
+                            </span>
+                        )}
+                    </button>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'profile' || view === 'public_profile' || view === 'edit_profile' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="user" /> {t('elitePortfolio')}</button>
                             <button onClick={() => { navigate('settings'); setSettingsSection('menu'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'settings' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="settings" /> {t('settings')}</button>
                             <div className="pt-6"><button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else navigate('create_post'); }} className="w-full btn-nexus-main text-white py-4 rounded-[1.5rem] font-black text-xs tracking-widest shadow-xl active:scale-95 transition-all uppercase flex items-center justify-center gap-2"><Icon name="plus" /> {t('transmitInsight')}</button></div>
@@ -2061,9 +2076,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </div>
 
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'notifications' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
-                            <Icon name="bell" className="w-5 h-5" />
-                            {hasUnreadNotifications && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>}
-                        </button>
+                    <Icon name="bell" className="w-5 h-5" />
+                    {hasUnreadNotifications && (
+                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md animate-bounce">
+                            {hasUnreadNotifications}
+                        </span>
+                    )}
+                </button>
                         
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${(view === 'profile' || view === 'public_profile' || view === 'settings' || view === 'edit_profile') ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
                             <Icon name="user" className="w-5 h-5" />
