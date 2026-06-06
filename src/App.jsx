@@ -360,19 +360,32 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             }, [isDarkMode]);
 
             useEffect(() => {
-                const container = document.getElementById('tags-scroll-container');
-                if (!container) return;
+                // DOM එක render වෙලා ඉවර වෙනකම් මිලිසෙකන්ඩ් 100ක් ඉමු
+                const timer = setTimeout(() => {
+                    const container = document.getElementById('tags-scroll-container');
+                    if (!container) return;
 
-                const handleWheelScroll = (e) => {
-                    if (e.deltaY !== 0) {
-                        e.preventDefault(); // මේක දැන් මුළු පේජ් එකම උඩ පල්ලෙහා යන එක 100% නවත්වනවා
-                        container.scrollLeft += e.deltaY;
+                    const handleWheelScroll = (e) => {
+                        if (e.deltaY !== 0) {
+                            e.preventDefault();
+                            container.scrollLeft += e.deltaY;
+                        }
+                    };
+
+                    container.addEventListener('wheel', handleWheelScroll, { passive: false });
+                    
+                    // Cleanup function එක ඇතුළේ listener එක අයින් කරමු
+                    container._wheelHandler = handleWheelScroll;
+                }, 100);
+
+                return () => {
+                    clearTimeout(timer);
+                    const container = document.getElementById('tags-scroll-container');
+                    if (container && container._wheelHandler) {
+                        container.removeEventListener('wheel', container._wheelHandler);
                     }
                 };
-
-                container.addEventListener('wheel', handleWheelScroll, { passive: false });
-                return () => container.removeEventListener('wheel', handleWheelScroll);
-            }, [posts]); // Posts වෙනස් වෙද්දී container එක Live update වෙන්න
+            }, [view, posts]); // View එක හෝ Posts මාරු වෙද්දී අනිවාර්යයෙන්ම listener එක බඳිනවා
 
             const uploadToImgBB = async (file) => {
                 const compressImage = (imgFile) => {
