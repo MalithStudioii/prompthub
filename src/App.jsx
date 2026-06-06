@@ -1331,10 +1331,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     <nav className="sticky top-0 z-50 nexus-nav px-4 md:px-6 py-3 md:py-4">
                         <div className="max-w-7xl mx-auto flex items-center justify-between">
                             <div className="flex items-center gap-2 cursor-pointer group min-w-0" onClick={() => { navigate('home'); setSelectedUser(null); }}>
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-[0.8rem] md:rounded-2xl flex items-center justify-center text-white flex-shrink-0">
-                                    <Icon name="nexia_logo" className="w-10 md:w-12 group-hover:scale-110 transition-transform" />
+                                <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center flex-shrink-0">
+                                    <img src="/logo.png" className="w-full h-full object-contain" alt="Nexia Logo" />
                                 </div>
-                                <h1 className="text-[17px] xs:text-xl md:text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase whitespace-nowrap overflow-hidden text-ellipsis font-outfit">NEXIA<span className="text-blue-600 dark:text-blue-400 ml-1 text-sm md:text-lg">- PROMPTHUB</span></h1>
+                                <h1 className="text-[17px] xs:text-xl md:text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase whitespace-nowrap font-outfit">NEXIA<span className="text-blue-600 dark:text-blue-400 ml-1 text-sm md:text-lg">- PROMPTHUB</span></h1>
                             </div>
                             
                             <div className="hidden md:block flex-1 max-w-md mx-8 relative">
