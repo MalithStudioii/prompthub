@@ -1354,7 +1354,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
                                 <Icon name="bell" />
                                 {hasUnreadNotifications && (
-                                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md">
+                                    <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white dark:border-slate-900 shadow-md">
                                         {hasUnreadNotifications}
                                     </span>
                                 )}
