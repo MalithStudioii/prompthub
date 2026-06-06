@@ -89,7 +89,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             );
 
             if (name === 'nexia_logo') return (
-                <img src="logo.png" className={`${className} object-contain no-drag`} alt="Nexia Premium Logo" {...props} />
+                <img src="/logo.png" className={`${className} object-contain no-drag`} alt="Nexia Premium Logo" {...props} />>
             );
 
             const paths = {
