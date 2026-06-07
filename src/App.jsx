@@ -184,6 +184,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const [shareModal, setShareModal] = useState({ open: false, post: null });
             // 🚀 මැකිලා ගිය Repost State එක
             const [repostModal, setRepostModal] = useState({ open: false, post: null });
+            // 🚀 Evolution Tree Modal State
+            const [treeModal, setTreeModal] = useState({ open: false, rootPost: null, relatedPosts: [] });
 
             // 🚀 මැකිලා ගිය External Share Function එක
             const handleShare = async (post) => {
@@ -371,7 +373,21 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             };
 
             const navigateToTree = (parentId) => {
-                alert("🚀 Tree View Coming Soon! Parent ID: " + parentId);
+                // 1. මුලින්ම මුල්ම (Parent) පෝස්ට් එක හොයාගන්නවා
+                const root = posts.find(p => p.id === parentId);
+                
+                // 2. ඒ මුල් පෝස්ට් එකෙන් බිහිවුණු අනිත් පෝස්ට් (Children) ටික හොයාගන්නවා
+                const descendants = posts.filter(p => p.parentId === parentId);
+                
+                if (root) {
+                    setTreeModal({
+                        open: true,
+                        rootPost: root,
+                        relatedPosts: descendants
+                    });
+                } else {
+                    alert("Original intelligence stream has been deleted or archived.");
+                }
             };
 
             useEffect(() => {
@@ -2442,6 +2458,82 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             <img src={imageViewModal.url} className="max-w-full max-h-[85vh] object-contain no-drag select-none drop-shadow-2xl relative z-10" onContextMenu={e=>e.preventDefault()} />
                         </div>
                     )}
+
+                    {/* 🌳 PROMPT EVOLUTION TREE MODAL (The Masterpiece) */}
+                    {treeModal.open && treeModal.rootPost && (
+                        <div className="fixed inset-0 z-[250] flex items-center justify-center p-0 md:p-4 bg-slate-950/95 backdrop-blur-2xl overflow-y-auto">
+                            <div className="bg-white dark:bg-slate-900 w-full h-full md:h-auto md:max-h-[90vh] md:max-w-2xl md:rounded-[3rem] shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col p-6 md:p-10 relative animate-in zoom-in-95 duration-300 overflow-y-auto custom-scrollbar">
+                                
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-8 sticky top-0 bg-white dark:bg-slate-900 z-20 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                    <div>
+                                        <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase font-outfit">Intelligence Evolution</h2>
+                                        <p className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] mt-1">Ancestry of this Prompt</p>
+                                    </div>
+                                    <button onClick={() => setTreeModal({ open: false, rootPost: null, relatedPosts: [] })} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl text-slate-400 hover:text-red-500 transition-all active:scale-90">
+                                        <Icon name="x" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-0 relative">
+                                    {/* The Connecting Line */}
+                                    <div className="absolute left-[23px] md:left-[27px] top-10 bottom-10 w-0.5 bg-gradient-to-b from-blue-600 via-indigo-500 to-slate-200 dark:to-slate-800 z-0"></div>
+
+                                    {/* 👑 THE ROOT (Original Post) */}
+                                    <div className="relative z-10 flex items-start gap-5 mb-12">
+                                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)] border-4 border-white dark:border-slate-900 flex-shrink-0">
+                                            <Icon name="trophy" className="w-6 h-6 md:w-7 md:h-7" />
+                                        </div>
+                                        <div className="flex-1 bg-slate-50 dark:bg-slate-800/80 p-4 md:p-6 rounded-[2rem] border border-blue-100 dark:border-blue-900/30 shadow-sm">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <img src={treeModal.rootPost.userPhoto} className="w-8 h-8 rounded-lg object-cover" />
+                                                <span className="font-black text-xs text-slate-900 dark:text-white uppercase">{treeModal.rootPost.userName} <span className="text-blue-500 ml-1">ORIGINATOR</span></span>
+                                            </div>
+                                            <div className="relative">
+                                                <img src={treeModal.rootPost.imageUrl} className="w-full h-32 md:h-44 object-cover rounded-2xl mb-3 border border-slate-200 dark:border-slate-700 no-drag" />
+                                                <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-md text-white text-[8px] font-black px-2 py-1 rounded-md uppercase">Original Vision</div>
+                                            </div>
+                                            <p className="text-[11px] md:text-xs font-mono text-slate-500 dark:text-slate-400 italic line-clamp-2">"{treeModal.rootPost.prompt}"</p>
+                                        </div>
+                                    </div>
+
+                                    {/* 🌿 THE DESCENDANTS (Remixed Posts) */}
+                                    <div className="space-y-8">
+                                        {treeModal.relatedPosts.length === 0 ? (
+                                            <div className="ml-16 py-4 text-slate-400 font-bold text-[10px] uppercase tracking-widest">No remixes found yet.</div>
+                                        ) : treeModal.relatedPosts.map((child, idx) => (
+                                            <div key={child.id} className="relative z-10 flex items-start gap-5 group">
+                                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-400 flex items-center justify-center shadow-sm group-hover:border-blue-500 group-hover:text-blue-500 transition-all flex-shrink-0">
+                                                    <span className="font-black text-sm">#{idx + 1}</span>
+                                                </div>
+                                                <div className="flex-1 bg-white dark:bg-slate-800/40 p-4 md:p-5 rounded-[2rem] border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-900/50 transition-all cursor-pointer" onClick={() => { setTreeModal({open: false, rootPost: null, relatedPosts: []}); setCommentModal({open: true, post: child, text: ''}); }}>
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <img src={child.userPhoto} className="w-6 h-6 rounded-md object-cover" />
+                                                            <span className="font-bold text-[11px] text-slate-700 dark:text-slate-300">{child.userName}</span>
+                                                        </div>
+                                                        <span className="text-[9px] font-black text-slate-400 uppercase">{formatTimeAgo(child.createdAt)}</span>
+                                                    </div>
+                                                    <div className="flex gap-4">
+                                                        <img src={child.imageUrl} className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl border border-slate-100 dark:border-slate-700" />
+                                                        <div className="flex-1 flex flex-col justify-center">
+                                                            <p className="text-[10px] md:text-[11px] font-mono text-slate-500 dark:text-slate-400 line-clamp-3">"{child.prompt}"</p>
+                                                            <div className="flex items-center gap-3 mt-2 text-blue-500 font-black text-[9px] uppercase tracking-tighter hover:underline">View Intelligence <Icon name="chevronright" className="w-3 h-3"/></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em]">Nexia Evolution Mapping Protocol v1.0</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Edit Post Modal */}
                     {editPostModal.open && editPostModal.post && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
