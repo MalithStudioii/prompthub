@@ -345,6 +345,31 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 return Math.abs(age_dt.getUTCFullYear() - 1970);
             };
 
+            const formatTimeAgo = (timestamp) => {
+                if (!timestamp) return 'Just now';
+                
+                // Firebase timestamp එකක්ද නැත්නම් සාමාන්‍ය Date එකක්ද කියලා බලනවා
+                const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+                const seconds = Math.floor((new Date() - date) / 1000);
+                
+                let interval = seconds / 31536000;
+                if (interval > 1) return Math.floor(interval) + 'y ago';
+                
+                interval = seconds / 2592000;
+                if (interval > 1) return Math.floor(interval) + 'mo ago';
+                
+                interval = seconds / 86400;
+                if (interval > 1) return Math.floor(interval) + 'd ago';
+                
+                interval = seconds / 3600;
+                if (interval > 1) return Math.floor(interval) + 'h ago';
+                
+                interval = seconds / 60;
+                if (interval > 1) return Math.floor(interval) + 'm ago';
+                
+                return seconds < 10 ? 'Just now' : Math.floor(seconds) + 's ago';
+            };
+
             useEffect(() => {
                 try {
                     const savedTheme = localStorage.getItem('nexus_theme');
@@ -1055,10 +1080,21 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 
                 setProfileData(prev => ({ ...prev, savedPosts: hasSaved ? (prev.savedPosts || []).filter(id => id !== post.id) : [...(prev.savedPosts || []), post.id] }));
                 try { 
-                    await updateDoc(profileRef, { savedPosts: hasSaved ? arrayRemove(post.id) : arrayUnion(post.id) }); 
-                    await updateDoc(postRef, { savesCount: increment(hasSaved ? -1 : 1) }); // Saves ගාණ Post එකටත් ලියනවා
-                } catch (e) {}
-            };
+                await updateDoc(profileRef, { savedPosts: hasSaved ? arrayRemove(post.id) : arrayUnion(post.id) }); 
+                await updateDoc(postRef, { savesCount: increment(hasSaved ? -1 : 1) }); // Saves ගාණ Post එකටත් ලියනවා
+            } catch (e) {}
+        };
+
+        const handlePostCopy = async (post) => {
+            const { db, appId, doc, updateDoc, increment } = window.fb;
+            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', post.id);
+            try {
+                // Database එකේ copiesCount එක 1 කින් වැඩි කරනවා
+                await updateDoc(postRef, { copiesCount: increment(1) });
+            } catch (e) {
+                console.error("Copy counter update error:", e);
+            }
+        };
 
             const handleBoostPost = async (postId) => {
                 if (!user || user.isAnonymous) return;
@@ -1278,7 +1314,11 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         )}
                                         {post.boostedAt && ((Date.now() / 1000) - post.boostedAt.seconds < 86400) && !post.isOfficial && <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="flame" className="w-2.5 h-2.5" /> Boosted</span>}
                                     </span>
-                                    <span className="text-[8px] md:text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1 opacity-80 mt-1 md:mt-1.5"><Icon name={post.isOfficial ? 'globe' : 'cpu'} className="w-2.5 md:w-3 mr-0.5 md:mr-1" />{post.model}</span>
+                                    <span className="text-[8px] md:text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1.5 opacity-80 mt-1 md:mt-1.5">
+                                        <span className="flex items-center gap-1"><Icon name={post.isOfficial ? 'globe' : 'cpu'} className="w-2.5 md:w-3 mr-0.5" />{post.model}</span>
+                                        <span className="text-slate-300 dark:text-slate-600 font-normal">•</span>
+                                        <span className="text-slate-400 dark:text-slate-500 lowercase flex items-center gap-1"><Icon name="clock" className="w-2.5 h-2.5" />{formatTimeAgo(post.createdAt)}</span>
+                                    </span>
                                 </div>
                             </div>
 
@@ -1325,7 +1365,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
                             </div>
 
-                            <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-2.5 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                            <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); handlePostCopy(post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-2.5 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
                                 {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-4 h-4 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-4 h-4 md:w-6 md:h-6" />}
                             </button>
                         </div>
@@ -1360,6 +1400,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
                                 <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors" title="Share on Nexia"><Icon name="repeat" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
                                 <button onClick={() => handleShare(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="share" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
+                                <div className="flex items-center gap-1 md:gap-2 text-slate-400 dark:text-slate-500 font-bold text-[10px] md:text-xs cursor-default" title="Total Copies">
+                                    <Icon name="checkcheck" className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" /> 
+                                    <span>{post.copiesCount || 0} copies</span>
+                                </div>
                                 <button onClick={() => toggleSave(post)} className={`flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-3.5 h-3.5 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> <span className="hidden sm:inline">{profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</span></button>
                             </div>
                         </div>
@@ -2209,7 +2253,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         <div className="absolute inset-0 bg-cover bg-center blur-3xl opacity-40 scale-125" style={{backgroundImage: `url(${commentModal.post.imageUrl})`}}></div>
                                         <img src={commentModal.post.imageUrl} className="w-full h-full object-contain md:rounded-2xl no-drag relative z-0" alt="Post" />
                                     </div>
-                                    <button onClick={() => { const ta = document.createElement("textarea"); ta.value = commentModal.post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(commentModal.post.id); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                                    <button onClick={() => { const ta = document.createElement("textarea"); ta.value = commentModal.post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(commentModal.post.id); handlePostCopy(commentModal.post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
                                         {copiedId === commentModal.post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
                                     </button>
                                 </div>
