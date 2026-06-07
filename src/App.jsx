@@ -1173,7 +1173,16 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: commentModal.replyingTo.userId, type: 'reply', postId: commentModal.post.id, commentText: commentModal.text, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexia User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
                     }
 
-                    setCommentModal({ ...commentModal, text: '', replyingTo: null }); // Input එක Reset කරනවා
+                    // 🚀 Optimistic UI: ඩේටාබේස් එකට යන ගමන්ම අපේ ස්ක්‍රීන් එකේ ලිස්ට් එකටත් අලුත් කමෙන්ට් එක එබුවා!
+                    setCommentModal(prev => ({ 
+                        ...prev, 
+                        post: {
+                            ...prev.post,
+                            comments: [...(prev.post.comments || []), newComment]
+                        },
+                        text: '', 
+                        replyingTo: null 
+                    }));
                 } catch (e) {}
             };
 
