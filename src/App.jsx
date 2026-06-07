@@ -2296,13 +2296,17 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                         const currentPhoto = commentAuthor?.photoURL || c.userPhoto;
                                                         const currentName = commentAuthor?.name || c.userName;
 
+                                                        // 🚀 Reply Live Sync: රිප්ලයි කරපු කෙනාගේ අලුත්ම නම ලයිව් ඇදලා ගන්නවා
+                                                        const replyTargetUser = c.replyToId ? allCreators.find(creator => creator.id === c.replyToId) : null;
+                                                        const currentReplyName = replyTargetUser?.name || c.replyToName;
+
                                                         return (
                                                             <div key={c.id} className={`flex items-start gap-3 group ${c.replyToId ? 'ml-10 md:ml-12 relative before:content-[""] before:absolute before:-left-6 before:top-4 before:w-4 before:h-px before:bg-slate-300 dark:before:bg-slate-700 before:border-l-2 before:border-slate-300 dark:before:border-slate-700' : ''}`}>
                                                                 <img src={currentPhoto} onClick={() => { setCommentModal({open: false, post: null, text: '', replyingTo: null}); openPublicProfile(c.userId); }} className="w-8 h-8 rounded-full object-cover bg-slate-100 dark:bg-slate-800 shadow-sm cursor-pointer no-drag z-10" />
                                                                 <div className="flex-1">
                                                                     <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700/50 shadow-sm inline-block max-w-full">
                                                                         <p onClick={() => { setCommentModal({open: false, post: null, text: '', replyingTo: null}); openPublicProfile(c.userId); }} className="font-extrabold text-[12px] text-slate-900 dark:text-white cursor-pointer hover:underline inline-block mr-2">{currentName}</p>
-                                                                        {c.replyToName && <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 mr-2 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-md">@{c.replyToName}</span>}
+                                                                        {currentReplyName && <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 mr-2 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-md">@{currentReplyName}</span>}
                                                                         <p className="text-[13px] text-slate-700 dark:text-slate-300 mt-0.5 whitespace-pre-wrap break-words">{c.text}</p>
                                                                     </div>
                                                                     
