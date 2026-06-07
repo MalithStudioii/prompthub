@@ -1173,13 +1173,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: commentModal.replyingTo.userId, type: 'reply', postId: commentModal.post.id, commentText: commentModal.text, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexia User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
                     }
 
-                    // 🚀 Optimistic UI: ඩේටාබේස් එකට යන ගමන්ම අපේ ස්ක්‍රීන් එකේ ලිස්ට් එකටත් අලුත් කමෙන්ට් එක එබුවා!
+                    // 🚀 Input Box එක විතරක් Reset කරමු. Firebase Live Listener එකෙන් Comment එක ඉබේම ක්ෂණිකව අප්ඩේට් වෙනවා!
                     setCommentModal(prev => ({ 
                         ...prev, 
-                        post: {
-                            ...prev.post,
-                            comments: [...(prev.post.comments || []), newComment]
-                        },
                         text: '', 
                         replyingTo: null 
                     }));
