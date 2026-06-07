@@ -708,9 +708,45 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 return sorted;
             }, [posts, feedAlgorithm, allCreators, activeFilter, adminConfig]);
 
-            const formatPrompt = (text) => {
+            // 🚀 Dynamic Prompt Fillers State & Logic
+            const [promptFillers, setPromptFillers] = useState({});
+
+            const handleFillerChange = (postId, varName, value) => {
+                setPromptFillers(prev => ({ ...prev, [postId]: { ...(prev[postId] || {}), [varName]: value } }));
+            };
+
+            const getFilledPrompt = (post) => {
+                if (!post.prompt) return '';
+                const fillers = promptFillers[post.id] || {};
+                // කොටු වරහන් ඇතුළේ තියෙන ඒවා හොයලා, ෆිල් කරලා තියෙනව නම් ඒක දානවා, නැත්නම් පරණ එකම තියනවා
+                return post.prompt.replace(/\[([^\]]+)\]/g, (match) => fillers[match] ? fillers[match] : match);
+            };
+
+            const renderDynamicPrompt = (text, postId) => {
                 if (!text) return text;
-                return text.split(/(#[a-zA-Z0-9_]+)/g).map((part, i) => part.startsWith('#') ? <span key={i} onClick={(e) => { e.stopPropagation(); setActiveFilter(part.toLowerCase()); }} className="text-blue-500 font-bold cursor-pointer hover:underline">{part}</span> : part);
+                // Tags සහ [Variables] දෙකම වෙන් කරන සුපිරි Regex එක
+                const parts = text.split(/(\[[^\]]+\]|#[a-zA-Z0-9_]+)/g);
+                return parts.map((part, i) => {
+                    if (part.startsWith('#')) {
+                        return <span key={i} onClick={(e) => { e.stopPropagation(); setActiveFilter(part.toLowerCase()); }} className="text-blue-500 font-bold cursor-pointer hover:underline">{part}</span>;
+                    } else if (part.startsWith('[') && part.endsWith(']')) {
+                        const val = promptFillers[postId]?.[part] || '';
+                        const cleanName = part.slice(1, -1); // කොටු වරහන් අයින් කරලා නම විතරක් ගන්නවා
+                        return (
+                            <input
+                                key={i}
+                                type="text"
+                                placeholder={cleanName}
+                                value={val}
+                                onChange={(e) => handleFillerChange(postId, part, e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="mx-1 px-2.5 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 placeholder-blue-400/60 dark:placeholder-blue-500/60 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 text-center font-bold inline-block shadow-inner transition-all no-drag"
+                                style={{ width: `${Math.max(cleanName.length, val.length) + 3}ch`, minWidth: '70px', maxWidth: '180px' }}
+                            />
+                        );
+                    }
+                    return <span key={i}>{part}</span>;
+                });
             };
 
             const handleSocialSignIn = async (providerType) => {
@@ -1382,14 +1418,14 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     const displayPromptText = (!isLongPrompt || isExpanded) ? post.prompt : post.prompt.substring(0, 150) + '...';
                                     
                                     return (
-                                        <p className="text-[12px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap no-select">
-                                            {formatPrompt(displayPromptText)}
+                                        <div className="text-[12px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-loose break-words whitespace-pre-wrap no-select">
+                                            {renderDynamicPrompt(displayPromptText, post.id)}
                                             {isLongPrompt && (
                                                 <button onClick={(e) => togglePrompt(post.id, e)} className="text-blue-600 dark:text-blue-400 font-extrabold ml-1.5 hover:underline focus:outline-none">
                                                     {isExpanded ? 'See less' : 'See more'}
                                                 </button>
                                             )}
-                                        </p>
+                                        </div>
                                     );
                                 })()}
                                 <div className="absolute -top-2.5 -left-0.5 bg-white dark:bg-slate-800 p-0.5 rounded border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-2.5 h-2.5 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
@@ -2257,7 +2293,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         <div className="absolute inset-0 bg-cover bg-center blur-3xl opacity-40 scale-125" style={{backgroundImage: `url(${commentModal.post.imageUrl})`}}></div>
                                         <img src={commentModal.post.imageUrl} className="w-full h-full object-contain md:rounded-2xl no-drag relative z-0" alt="Post" />
                                     </div>
-                                    <button onClick={() => { const ta = document.createElement("textarea"); ta.value = commentModal.post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(commentModal.post.id); handlePostCopy(commentModal.post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                                    <button onClick={() => { const ta = document.createElement("textarea"); ta.value = getFilledPrompt(commentModal.post); document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(commentModal.post.id); handlePostCopy(commentModal.post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
                                         {copiedId === commentModal.post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-5 h-5 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-5 h-5 md:w-6 md:h-6" />}
                                     </button>
                                 </div>
@@ -2276,7 +2312,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 </div>
                                             </div>
                                             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 italic relative">
-                                                <p className="text-[13px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap no-select">{formatPrompt(commentModal.post.prompt)}</p>
+                                                <div className="text-[13px] font-mono text-slate-600 dark:text-slate-300 leading-loose break-words whitespace-pre-wrap no-select">{renderDynamicPrompt(commentModal.post.prompt, commentModal.post.id)}</div>
                                             </div>
                                             
                                             {/* Action Buttons */}
