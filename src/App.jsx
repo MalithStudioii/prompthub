@@ -360,32 +360,47 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             }, [isDarkMode]);
 
             useEffect(() => {
-                // DOM එක render වෙලා ඉවර වෙනකම් මිලිසෙකන්ඩ් 100ක් ඉමු
-                const timer = setTimeout(() => {
+                const handleWheelScroll = (e) => {
                     const container = document.getElementById('tags-scroll-container');
                     if (!container) return;
-
-                    const handleWheelScroll = (e) => {
-                        if (e.deltaY !== 0) {
-                            e.preventDefault();
-                            container.scrollLeft += e.deltaY;
-                        }
-                    };
-
-                    container.addEventListener('wheel', handleWheelScroll, { passive: false });
-                    
-                    // Cleanup function එක ඇතුළේ listener එක අයින් කරමු
-                    container._wheelHandler = handleWheelScroll;
-                }, 100);
-
-                return () => {
-                    clearTimeout(timer);
-                    const container = document.getElementById('tags-scroll-container');
-                    if (container && container._wheelHandler) {
-                        container.removeEventListener('wheel', container._wheelHandler);
+                    if (e.deltaY !== 0) {
+                        e.preventDefault();
+                        container.scrollLeft += e.deltaY;
                     }
                 };
-            }, [view, posts]); // View එක හෝ Posts මාරු වෙද්දී අනිවාර්යයෙන්ම listener එක බඳිනවා
+
+                // DOM එක නිරීක්ෂණය කරලා Container එක ආපු ගමන් Listener එක බඳින ලොජික් එක
+                const setupListener = () => {
+                    const container = document.getElementById('tags-scroll-container');
+                    if (container) {
+                        container.removeEventListener('wheel', handleWheelScroll); // Duplicate නොවෙන්න කලින් එක අයින් කරනවා
+                        container.addEventListener('wheel', handleWheelScroll, { passive: false });
+                        return true;
+                    }
+                    return false;
+                };
+
+                // 1. වහාම ට්‍රැක් කරලා බලනවා තියෙනවද කියලා
+                setupListener();
+
+                // 2. Initial load එකේදී පස්සේ render වුණොත් අල්ලන්න Observer එකක්
+                const observer = new MutationObserver(() => {
+                    if (setupListener()) {
+                        // එක පාරක් බැඳුනට පස්සේ Observer එක නවත්වනවා Performance අපරාදේ නිසා
+                        observer.disconnect();
+                    }
+                });
+
+                observer.observe(document.body, { childList: true, subtree: true });
+
+                return () => {
+                    observer.disconnect();
+                    const container = document.getElementById('tags-scroll-container');
+                    if (container) {
+                        container.removeEventListener('wheel', handleWheelScroll);
+                    }
+                };
+            }, [view, posts]);
 
             const uploadToImgBB = async (file) => {
                 const compressImage = (imgFile) => {
