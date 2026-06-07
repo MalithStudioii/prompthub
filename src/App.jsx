@@ -2290,27 +2290,34 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 {(!commentModal.post.comments || commentModal.post.comments.length === 0) ? (
                                                     <div className="text-center py-8"><Icon name="message" className="w-10 h-10 text-slate-200 dark:text-slate-700 mx-auto mb-3"/><p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Be the first to comment!</p></div>
                                                 ) : (
-                                                    commentModal.post.comments.map(c => (
-                                                        <div key={c.id} className={`flex items-start gap-3 group ${c.replyToId ? 'ml-10 md:ml-12 relative before:content-[""] before:absolute before:-left-6 before:top-4 before:w-4 before:h-px before:bg-slate-300 dark:before:bg-slate-700 before:border-l-2 before:border-slate-300 dark:before:border-slate-700' : ''}`}>
-                                                            <img src={c.userPhoto} onClick={() => { setCommentModal({open: false, post: null, text: '', replyingTo: null}); openPublicProfile(c.userId); }} className="w-8 h-8 rounded-full object-cover bg-slate-100 dark:bg-slate-800 shadow-sm cursor-pointer no-drag z-10" />
-                                                            <div className="flex-1">
-                                                                <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700/50 shadow-sm inline-block max-w-full">
-                                                                    <p onClick={() => { setCommentModal({open: false, post: null, text: '', replyingTo: null}); openPublicProfile(c.userId); }} className="font-extrabold text-[12px] text-slate-900 dark:text-white cursor-pointer hover:underline inline-block mr-2">{c.userName}</p>
-                                                                    {c.replyToName && <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 mr-2 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-md">@{c.replyToName}</span>}
-                                                                    <p className="text-[13px] text-slate-700 dark:text-slate-300 mt-0.5 whitespace-pre-wrap break-words">{c.text}</p>
-                                                                </div>
-                                                                
-                                                                {/* Like & Reply Buttons */}
-                                                                <div className="flex items-center gap-4 mt-1.5 ml-2">
-                                                                    <button onClick={() => toggleCommentLike(c.id)} className={`text-[10px] font-extrabold transition-colors flex items-center gap-1 ${c.likes?.includes(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
-                                                                        {c.likes?.length > 0 && <span>{c.likes.length}</span>}
-                                                                        {c.likes?.includes(user?.uid) ? 'Liked' : 'Like'}
-                                                                    </button>
-                                                                    <button onClick={() => setCommentModal({...commentModal, replyingTo: c})} className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Reply</button>
+                                                    commentModal.post.comments.map(c => {
+                                                        // 🚀 Live Sync: කමෙන්ට් එක දාපු කෙනාගේ අලුත්ම ප්‍රොෆයිල් විස්තර ලයිව් ඇදලා ගන්නවා
+                                                        const commentAuthor = allCreators.find(creator => creator.id === c.userId);
+                                                        const currentPhoto = commentAuthor?.photoURL || c.userPhoto;
+                                                        const currentName = commentAuthor?.name || c.userName;
+
+                                                        return (
+                                                            <div key={c.id} className={`flex items-start gap-3 group ${c.replyToId ? 'ml-10 md:ml-12 relative before:content-[""] before:absolute before:-left-6 before:top-4 before:w-4 before:h-px before:bg-slate-300 dark:before:bg-slate-700 before:border-l-2 before:border-slate-300 dark:before:border-slate-700' : ''}`}>
+                                                                <img src={currentPhoto} onClick={() => { setCommentModal({open: false, post: null, text: '', replyingTo: null}); openPublicProfile(c.userId); }} className="w-8 h-8 rounded-full object-cover bg-slate-100 dark:bg-slate-800 shadow-sm cursor-pointer no-drag z-10" />
+                                                                <div className="flex-1">
+                                                                    <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700/50 shadow-sm inline-block max-w-full">
+                                                                        <p onClick={() => { setCommentModal({open: false, post: null, text: '', replyingTo: null}); openPublicProfile(c.userId); }} className="font-extrabold text-[12px] text-slate-900 dark:text-white cursor-pointer hover:underline inline-block mr-2">{currentName}</p>
+                                                                        {c.replyToName && <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 mr-2 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-md">@{c.replyToName}</span>}
+                                                                        <p className="text-[13px] text-slate-700 dark:text-slate-300 mt-0.5 whitespace-pre-wrap break-words">{c.text}</p>
+                                                                    </div>
+                                                                    
+                                                                    {/* Like & Reply Buttons */}
+                                                                    <div className="flex items-center gap-4 mt-1.5 ml-2">
+                                                                        <button onClick={() => toggleCommentLike(c.id)} className={`text-[10px] font-extrabold transition-colors flex items-center gap-1 ${c.likes?.includes(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
+                                                                            {c.likes?.length > 0 && <span>{c.likes.length}</span>}
+                                                                            {c.likes?.includes(user?.uid) ? 'Liked' : 'Like'}
+                                                                        </button>
+                                                                        <button onClick={() => setCommentModal({...commentModal, replyingTo: c})} className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Reply</button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    ))
+                                                        );
+                                                    })
                                                 )}
                                             </div>
                                         </div>
