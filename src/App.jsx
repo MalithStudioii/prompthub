@@ -1157,8 +1157,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     text: commentModal.text, 
                     timestamp: new Date().toISOString(),
                     likes: [],
-                    replyToId: commentModal.replyingTo?.id || null, // Reply කරන කෙනාගේ ID එක
-                    replyToName: commentModal.replyingTo?.userName || null
+                    replyToId: commentModal.replyingTo?.userId || null // රිප්ලයි කරන කෙනාගේ userId එක
                 };
 
                 try {
@@ -2296,9 +2295,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                         const currentPhoto = commentAuthor?.photoURL || c.userPhoto;
                                                         const currentName = commentAuthor?.name || c.userName;
 
-                                                        // 🚀 Reply Live Sync: රිප්ලයි කරපු කෙනාගේ අලුත්ම නම ලයිව් ඇදලා ගන්නවා
+                                                        // 🚀 Reply Live Sync: දැන් ID එක පාවිච්චි කරලා අලුත්ම නම ලයිව් ඇදලා ගන්නවා
                                                         const replyTargetUser = c.replyToId ? allCreators.find(creator => creator.id === c.replyToId) : null;
-                                                        const currentReplyName = replyTargetUser?.name || c.replyToName;
+                                                        const currentReplyName = replyTargetUser?.name;
 
                                                         return (
                                                             <div key={c.id} className={`flex items-start gap-3 group ${c.replyToId ? 'ml-10 md:ml-12 relative before:content-[""] before:absolute before:-left-6 before:top-4 before:w-4 before:h-px before:bg-slate-300 dark:before:bg-slate-700 before:border-l-2 before:border-slate-300 dark:before:border-slate-700' : ''}`}>
