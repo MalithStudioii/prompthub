@@ -1559,13 +1559,21 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 <button onClick={() => setFeedAlgorithm('trending')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'trending' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="flame" className="w-4 h-4" /> {t('trending')}</button>
                                                 <button onClick={() => setFeedAlgorithm('latest')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'latest' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="clock" className="w-4 h-4" /> {t('latest')}</button>
                                             </div>
-                                            <div 
-                                                id="tags-scroll-container"
-                                                className="flex items-center gap-2 overflow-x-auto max-w-full no-scrollbar pb-2 pt-1 touch-pan-x select-none"
-                                            >
-                                                {availableFilters.map(filter => (
-                                                    <button key={filter} onClick={() => setActiveFilter(filter)} className={`px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs whitespace-nowrap transition-all border shadow-sm flex-shrink-0 ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>{filter === 'All' ? t('all') : filter}</button>
-                                                ))}
+                                            <div className="relative group/tags w-full">
+                                                {/* 🖥️ Desktop එකේදී විතරක් මවුස් එක ගෙනිච්චම පෙනෙන Tooltip එක */}
+                                                <div className="hidden md:group-hover/tags:flex absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900/90 dark:bg-blue-600/90 backdrop-blur text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-md shadow-xl pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200 items-center gap-1.5">
+                                                    <svg className="w-3 h-3 animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path></svg>
+                                                    Use Mouse Wheel to Scroll Tags
+                                                </div>
+
+                                                <div 
+                                                    id="tags-scroll-container"
+                                                    className="flex items-center gap-2 overflow-x-auto max-w-full no-scrollbar pb-2 pt-1 touch-pan-x select-none"
+                                                >
+                                                    {availableFilters.map(filter => (
+                                                        <button key={filter} onClick={() => setActiveFilter(filter)} className={`px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs whitespace-nowrap transition-all border shadow-sm flex-shrink-0 ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>{filter === 'All' ? t('all') : filter}</button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
