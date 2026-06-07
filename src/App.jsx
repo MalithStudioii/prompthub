@@ -370,6 +370,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 return seconds < 10 ? 'Just now' : Math.floor(seconds) + 's ago';
             };
 
+            const navigateToTree = (parentId) => {
+                alert("🚀 Tree View Coming Soon! Parent ID: " + parentId);
+            };
+
             useEffect(() => {
                 try {
                     const savedTheme = localStorage.getItem('nexus_theme');
@@ -1246,6 +1250,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         repostedBy: profileData.name || user.displayName,
                         isRepost: true,
                         originalAuthorId: post.originalAuthorId || post.userId,
+                        parentId: post.id, // 🚀 මෙන්න මේකයි වැදගත්: ඔරිජිනල් පෝස්ට් එකේ ID එක සේව් වෙනවා
                         userName: post.userName,
                         userPhoto: post.userPhoto,
                         prompt: post.prompt,
@@ -1433,6 +1438,16 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             
                             {post.userId === user?.uid && (!post.boostedAt || ((Date.now() / 1000) - post.boostedAt.seconds > 86400)) && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBoostPost(post.id); }} className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2 md:py-2.5 rounded-xl shadow-md hover:scale-[1.02] active:scale-95 transition-all mb-3"><Icon name="flame" className="w-3.5 h-3.5" /> Boost Post (50 Coins)</button>
+                            )}
+
+                            {/* 🚀 Remix / Repost පෝස්ට් එකක් නම් විතරක් පෙනෙන Evolution Tree Button එක */}
+                            {post.parentId && (
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); navigateToTree(post.parentId); }} 
+                                    className="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all mb-3"
+                                >
+                                    <Icon name="terminal" className="w-3.5 h-3.5" /> View Evolution Tree
+                                </button>
                             )}
                             
                             <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3 md:pt-4 px-1 mt-3 md:mt-4">
