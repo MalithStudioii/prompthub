@@ -155,6 +155,96 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             );
         };
 
+        // 🚀 NEXIA EXPERTISE RADAR CHART (CYBERPUNK SVG)
+        const RadarChart = ({ data }) => {
+            const size = 180;
+            const center = size / 2;
+            const radius = (size / 2) - 20;
+            
+            // Default models if user has no posts
+            const defaultModels = { 'Midjourney': 1, 'DALL-E 3': 1, 'Flux': 1, 'Stable Diffusion': 1 };
+            const chartData = Object.keys(data).length > 2 ? data : defaultModels;
+            
+            const labels = Object.keys(chartData);
+            const values = Object.values(chartData);
+            const maxVal = Math.max(...values, 5); // Minimum scale of 5
+            
+            const numPoints = labels.length;
+            const angleStep = (Math.PI * 2) / numPoints;
+
+            // Calculate polygon points based on data
+            const getPoints = (scale = 1) => {
+                return values.map((val, i) => {
+                    const r = (val / maxVal) * radius * scale;
+                    const x = center + r * Math.sin(i * angleStep);
+                    const y = center - r * Math.cos(i * angleStep);
+                    return `${x},${y}`;
+                }).join(' ');
+            };
+
+            // Background web grid
+            const gridLevels = [0.25, 0.5, 0.75, 1];
+
+            return (
+                <div className="relative w-full flex flex-col items-center justify-center py-2">
+                    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible drop-shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                        {/* Draw Web Background */}
+                        {gridLevels.map(level => (
+                            <polygon key={level} points={getPoints(level).replace(/,/g, ' ').replace(/([0-9.]+\s[0-9.]+)/g, (match, p1, offset, string) => {
+                                // A trick to draw perfect regular polygons for the grid based on max radius, not data values
+                                return values.map((_, i) => {
+                                    const r = radius * level;
+                                    const x = center + r * Math.sin(i * angleStep);
+                                    const y = center - r * Math.cos(i * angleStep);
+                                    return `${x},${y}`;
+                                }).join(' ');
+                            })} fill="none" stroke="currentColor" strokeWidth="0.5" className="text-blue-500/20 dark:text-blue-400/20" />
+                        ))}
+                        
+                        {/* Draw Axes connecting center to outer web */}
+                        {labels.map((_, i) => {
+                            const x = center + radius * Math.sin(i * angleStep);
+                            const y = center - radius * Math.cos(i * angleStep);
+                            return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="currentColor" strokeWidth="0.5" className="text-blue-500/30 dark:text-blue-400/30" />;
+                        })}
+
+                        {/* Draw Actual Data Polygon */}
+                        <polygon points={getPoints()} fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="2" className="text-blue-600 dark:text-blue-400 animate-pulse duration-3000" />
+                        
+                        {/* Data Points (Dots) */}
+                        {values.map((val, i) => {
+                            const r = (val / maxVal) * radius;
+                            const x = center + r * Math.sin(i * angleStep);
+                            const y = center - r * Math.cos(i * angleStep);
+                            return <circle key={i} cx={x} cy={y} r="3" fill="#fff" stroke="currentColor" strokeWidth="1.5" className="text-blue-600 dark:text-blue-400" />;
+                        })}
+
+                        {/* Labels */}
+                        {labels.map((label, i) => {
+                            // Slightly push labels outward
+                            const r = radius + 15;
+                            const x = center + r * Math.sin(i * angleStep);
+                            const y = center - r * Math.cos(i * angleStep);
+                            
+                            // Determine text anchor based on position
+                            let anchor = "middle";
+                            if (x < center - 10) anchor = "end";
+                            if (x > center + 10) anchor = "start";
+                            
+                            // Shorten labels for UI fit
+                            const shortLabel = label.replace(' Midjourney', 'MJ').replace('Stable Diffusion', 'SD').substring(0, 10);
+
+                            return (
+                                <text key={i} x={x} y={y + 3} textAnchor={anchor} className="text-[8px] font-black uppercase fill-slate-500 dark:fill-slate-400 tracking-widest">
+                                    {shortLabel}
+                                </text>
+                            );
+                        })}
+                    </svg>
+                </div>
+            );
+        };
+
         const App = () => {
             const [isReady, setIsReady] = useState(false);
             const [user, setUser] = useState(null);
@@ -1523,6 +1613,27 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const followerIds = allFollows.filter(f => f.followingId === activeProfileId).map(f => f.followerId);
             const displayedNetworkCreators = sidebarNetworkTab === 'following' ? allCreators.filter(c => followingIds.includes(c.id)) : allCreators.filter(c => followerIds.includes(c.id));
 
+            // 🚀 Logic to calculate AI Model Expertise for the Radar Chart
+            const modelExpertiseData = useMemo(() => {
+                const activePosts = view === 'profile' ? userPosts : targetUserPosts;
+                if (!activePosts || activePosts.length === 0) return {};
+                
+                const counts = {};
+                activePosts.forEach(p => {
+                    if (p.model) {
+                        // Simplify model names for the chart
+                        let baseModel = p.model;
+                        if(baseModel.includes('Midjourney')) baseModel = 'Midjourney';
+                        else if(baseModel.includes('DALL-E')) baseModel = 'DALL-E 3';
+                        else if(baseModel.includes('Stable')) baseModel = 'Stable Diff';
+                        else if(baseModel.includes('Flux')) baseModel = 'Flux';
+                        
+                        counts[baseModel] = (counts[baseModel] || 0) + 1;
+                    }
+                });
+                return counts;
+            }, [userPosts, targetUserPosts, view]);
+
             if (loading) {
                 return (
                     <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[9999] animate-in fade-in duration-500">
@@ -1826,9 +1937,60 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 </h2>
                                                 <p className="text-blue-600 dark:text-blue-400 font-black text-[10px] tracking-[0.2em] uppercase mb-6">{targetData.email}</p>
                                                 
+                                                {/* Followers & Following Stats */}
                                                 <div className="flex gap-8 mb-6">
                                                     <div><p className="text-2xl font-black text-slate-900 dark:text-white">{targetData.followersCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('followers')}</p></div>
                                                     <div className="border-l border-slate-100 dark:border-slate-700 pl-8"><p className="text-2xl font-black text-slate-900 dark:text-white">{targetData.followingCount || 0}</p><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('following')}</p></div>
+                                                </div>
+
+                                                {/* 🚀 NEXIA ADVANCED GLOBAL RANK & STREAK DASHBOARD */}
+                                                <div className="w-full max-w-md grid grid-cols-2 gap-4 mb-6">
+                                                    {/* Global AI Rank Card */}
+                                                    <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/5 dark:from-blue-600/20 dark:to-transparent border border-blue-500/20 dark:border-blue-500/30 rounded-[1.8rem] p-4 flex items-center gap-3 shadow-inner relative overflow-hidden group">
+                                                        <div className="absolute -right-2 -top-2 w-12 h-12 bg-blue-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+                                                        <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
+                                                            <Icon name="trophy" className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">GLOBAL RANK</p>
+                                                            <p className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
+                                                                #{isOwnProfile ? (currentUserRank || 'N/A') : (allCreators.sort((a, b) => (b.followersCount || 0) - (a.followersCount || 0)).findIndex(c => c.id === targetData.id) + 1 || 'N/A')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Daily Burn Streak Card */}
+                                                    <div className={`bg-gradient-to-br border rounded-[1.8rem] p-4 flex items-center gap-3 shadow-inner relative overflow-hidden group transition-all duration-300 ${targetData.streak >= 7 ? 'from-orange-500/20 to-red-500/5 border-orange-500/40 shadow-[0_0_15px_rgba(249,115,22,0.15)] animate-pulse' : 'from-orange-500/10 to-transparent border-orange-500/20 dark:border-orange-500/30'}`}>
+                                                        <div className="absolute -right-2 -top-2 w-12 h-12 bg-orange-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+                                                        <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center shadow-lg ${targetData.streak >= 7 ? 'bg-gradient-to-tr from-orange-500 to-red-600 shadow-orange-500/40' : 'bg-orange-500 shadow-orange-500/30'}`}>
+                                                            <Icon name="flame" className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">DAILY STREAK</p>
+                                                            <p className={`text-xl font-black mt-0.5 ${targetData.streak >= 7 ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500' : 'text-orange-500'}`}>
+                                                                {targetData.streak || 1} Days
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 🚀 NEXIA AI EXPERTISE RADAR */}
+                                                <div className="w-full max-w-md bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-100 dark:border-slate-700 mb-8 p-6 relative overflow-hidden">
+                                                    <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                                                        <Icon name="cpu" className="w-24 h-24 text-blue-500" />
+                                                    </div>
+                                                    <div className="flex items-center justify-between mb-4 relative z-10">
+                                                        <div>
+                                                            <h4 className="font-extrabold text-[13px] text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                                                                <Icon name="zap" className="w-4 h-4 text-blue-500" />
+                                                                AI Expertise Radar
+                                                            </h4>
+                                                            <p className="text-[9px] font-bold text-slate-400 mt-1">Based on global intelligence output</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="relative z-10">
+                                                        <RadarChart data={modelExpertiseData} />
+                                                    </div>
                                                 </div>
 
                                                 {!isOwnProfile && !isFollowing && (
