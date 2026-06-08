@@ -579,7 +579,34 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                 let heartbeat;
                 if (!user.isAnonymous) {
-                    const updatePresence = () => setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { lastActive: Date.now() }, { merge: true }).catch(()=>{});
+                    const updatePresence = async () => {
+                        const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid);
+                        const today = new Date().setHours(0,0,0,0);
+                        
+                        let currentStreak = profileData.streak || 0;
+                        let lastActiveDay = profileData.lastActiveDay ? new Date(profileData.lastActiveDay).setHours(0,0,0,0) : null;
+                        
+                        if (lastActiveDay) {
+                            const diffTime = Math.abs(today - lastActiveDay);
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            if (diffDays === 1) {
+                                // 🚀 ඊයේ ඇවිත් අදත් ආවා නම් Streak එක 1කින් වැඩි කරනවා
+                                currentStreak += 1;
+                            } else if (diffDays > 1) {
+                                // 🚀 දවසක් මිස් වුණොත් Streak එක Reset වෙනවා
+                                currentStreak = 1;
+                            }
+                        } else {
+                            currentStreak = 1;
+                        }
+
+                        await setDoc(statsRef, { 
+                            lastActive: Date.now(),
+                            lastActiveDay: new Date().toISOString(),
+                            streak: currentStreak
+                        }, { merge: true }).catch(()=>{});
+                    };
                     updatePresence();
                     heartbeat = setInterval(updatePresence, 180000); 
                 }
@@ -592,6 +619,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
             const filteredCreators = searchQuery.trim() === '' ? [] : allCreators.filter(c => c.name?.toLowerCase().includes(searchQuery.toLowerCase()));
             const totalMembers = allCreators.length;
+            // 🚀 Live Nexia Ranking Logic
+            const currentUserRank = useMemo(() => {
+                if (!user || user.isAnonymous) return null;
+                const sortedCreators = [...allCreators].sort((a, b) => (b.followersCount || 0) - (a.followersCount || 0));
+                const rankIndex = sortedCreators.findIndex(c => c.id === user.uid);
+                return rankIndex !== -1 ? rankIndex + 1 : sortedCreators.length;
+            }, [allCreators, user]);
             const onlineMembers = Math.max(1, allCreators.filter(c => c.lastActive && (Date.now() - c.lastActive < 300000)).length);
 
             const getAuthorBadges = (userId, followersOnly = false) => {
