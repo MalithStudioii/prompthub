@@ -327,20 +327,37 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const MASTER_ADMIN_EMAIL = 'creativeworld9204@gmail.com';
             const isAdmin = user && user.email === MASTER_ADMIN_EMAIL;
             
+            // Check dynamically if the current creator is a designated Sub-Admin
+            const isSubAdmin = useMemo(() => {
+                if(!user) return false;
+                const currentCreator = allCreators.find(c => c.id === user.uid);
+                return currentCreator?.isSubAdmin || false;
+            }, [allCreators, user]);
+
+            const hasAdminAccess = isAdmin || isSubAdmin;
+            
             const [adminConfig, setAdminConfig] = useState({ likesWeight: 3, commentsWeight: 5, creatorBonusWeight: 0.1, timeDecay: 1.5, jitter: 5 });
             const [adminTab, setAdminTab] = useState('algorithm');
             const [allReports, setAllReports] = useState([]);
 
-            // Admin Reports Fetcher
+            // ✅ FIXED: Admin Reports Fetcher (Now supports both Master and Sub-Admins)
             useEffect(() => {
-                if (!isReady || !user || !isAdmin) return;
+                if (!isReady || !user || !hasAdminAccess) return;
                 const { db, appId, collection, onSnapshot } = window.fb;
                 const unsubReports = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'reports'), (snap) => {
                     setAllReports(snap.docs.map(d => ({ id: d.id, ...d.data() })));
                 });
                 return () => unsubReports();
-            }, [isReady, user, isAdmin]);
+            }, [isReady, user, hasAdminAccess]);
             const [officialPost, setOfficialPost] = useState({ prompt: '', imageFile: null });
+
+            // ⏳ Auto-hide live popups exactly after 10 seconds stream
+            useEffect(() => {
+                if (liveAlert) {
+                    const alertTimer = setTimeout(() => setLiveAlert(null), 10000);
+                    return () => clearTimeout(alertTimer);
+                }
+            }, [liveAlert]);
             
             const handleCreateOfficialPost = async (e) => {
                 e.preventDefault();
@@ -1576,8 +1593,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 <div className="absolute -top-2.5 -left-0.5 bg-white dark:bg-slate-800 p-0.5 rounded border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-2.5 h-2.5 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
                             </div>
                             
-                            {post.userId === user?.uid && (!post.boostedAt || ((Date.now() / 1000) - post.boostedAt.seconds > 86400)) && (
-                                <button onClick={(e) => { e.stopPropagation(); handleBoostPost(post.id); }} className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2 md:py-2.5 rounded-xl shadow-md hover:scale-[1.02] active:scale-95 transition-all mb-3"><Icon name="flame" className="w-3.5 h-3.5" /> Boost Post (50 Coins)</button>
+                            {post.userId === user?.uid && (
+                                <button 
+                                    disabled 
+                                    className="w-full flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2 md:py-2.5 rounded-xl mb-3 border border-slate-200/40 dark:border-slate-700/40 cursor-not-allowed"
+                                >
+                                    <Icon name="lock" className="w-3.5 h-3.5" /> Boost Post (⚡ Coins System Coming Soon)
+                                </button>
                             )}
 
                             {/* 🚀 Remix / Repost පෝස්ට් එකක් නම් විතරක් පෙනෙන Evolution Tree Button එක */}
@@ -1591,15 +1613,14 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             )}
                             
                             {/* Actions Footer Bar */}
-                            <div className="border-t border-slate-100 dark:border-slate-700/60 pt-3 md:pt-4 px-1 mt-3 md:mt-4">
+                            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3 md:pt-4 px-1 mt-3 md:mt-4">
                                 {post.isOfficial ? (
-                                    /* 🔐 Premium Secured Layout for Official Announcements */
-                                    <div className="w-full py-2.5 px-4 bg-blue-50/40 dark:bg-blue-950/20 border border-dashed border-blue-200/60 dark:border-blue-800/40 rounded-2xl flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em]">
-                                            <Icon name="lock" className="w-3.5 h-3.5 text-blue-500" />
-                                            <span>Secured System Broadcast Terminal</span>
-                                        </div>
-                                        <span className="text-[8px] md:text-[9px] font-black bg-blue-600 text-white px-2 py-0.5 rounded uppercase tracking-widest shadow-sm">READ ONLY</span>
+                                    /* 💎 Clean Professional Broadcast Layout (No more locks bars) */
+                                    <div className="w-full flex items-center justify-between opacity-60 select-none cursor-not-allowed">
+                                        <div className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400"><Icon name="thumbsup" className="w-3.5 h-3.5 md:w-5 md:h-5" /> 0</div>
+                                        <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] md:text-xs"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> Announcement</div>
+                                        <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] md:text-xs"><Icon name="share" className="w-3.5 h-3.5 md:w-5 md:h-5" /> Global Stream</div>
+                                        <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] md:text-xs"><Icon name="checkcircle" className="w-3.5 h-3.5 text-blue-500" /> Official Intel</div>
                                     </div>
                                 ) : (
                                     /* Normal Layout for Regular Creator Posts */
@@ -1741,19 +1762,62 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                         <section className="flex-1 max-w-2xl w-full min-w-0 pb-safe" key={`main-view-${view}`}>
                             
-                            {view === 'admin_panel' && isAdmin && (
+                            {view === 'admin_panel' && hasAdminAccess && (
                                 <div className="animate-in fade-in duration-700">
                                     <div className="bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[4rem] shadow-sm p-6 md:p-12 mb-10 border border-slate-100 dark:border-slate-700">
                                         <div className="flex flex-col items-center mb-10 border-b border-slate-100 dark:border-slate-700 pb-8 text-center"><div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-red-100 dark:border-red-900/50"><Icon name="alert" className="w-10 h-10" /></div><h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none font-outfit">Nexia Command Center</h2><p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase mt-3 text-red-500 dark:text-red-400">Master Admin Access Only</p></div>
                                         
                                         <div className="flex justify-center gap-4 mb-10 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-[2rem] border border-slate-100 dark:border-slate-700 flex-wrap md:flex-nowrap overflow-x-auto custom-scrollbar">
-                                            <button onClick={() => setAdminTab('algorithm')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Algorithm</button>
-                                            <button onClick={() => setAdminTab('users')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Users</button>
+                                            {/* Master Admin ට විතරක් පෙනෙන සෙට් එක */}
+                                            {isAdmin && <button onClick={() => setAdminTab('algorithm')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'algorithm' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Algorithm</button>}
+                                            {isAdmin && <button onClick={() => setAdminTab('users')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'users' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Users</button>}
+                                            {isAdmin && <button onClick={() => setAdminTab('nominate_admins')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'nominate_admins' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-blue-500'}`}>Admins</button>}
+                                            
+                                            {/* Sub-Admin ලට සහ Master Admin දෙගොල්ලන්ටම පෙනෙන සෙට් එක */}
                                             <button onClick={() => setAdminTab('reports')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all relative ${adminTab === 'reports' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>
                                                 Reports {allReports.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-slate-800"></span>}
                                             </button>
                                             <button onClick={() => setAdminTab('official')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'official' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Official Post</button>
                                         </div>
+
+                                        {/* 👥 ADMIN MANAGEMENT AND NOMINATION PANEL */}
+                                        {adminTab === 'nominate_admins' && isAdmin && (
+                                            <div className="space-y-6 animate-in slide-in-from-right-4">
+                                                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+                                                    <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-start gap-2">
+                                                        <Icon name="user" className="w-4 h-4 flex-shrink-0 mt-0.5" /> 
+                                                        Master Admin Control: You can nominate creators as Sub-Admins to help manage reports, delete posts, and handle community moderation.
+                                                    </p>
+                                                </div>
+                                                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                                    {allCreators.filter(c => c.id !== user.uid).map(creator => (
+                                                        <div key={creator.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <img src={creator.photoURL} className="w-10 h-10 rounded-xl object-cover" />
+                                                                <div>
+                                                                    <p className="font-extrabold text-sm text-slate-900 dark:text-white">{creator.name}</p>
+                                                                    <p className="text-[10px] font-bold text-slate-400">{creator.isSubAdmin ? '🛡️ Sub-Admin Access Enabled' : 'Regular Network Creator'}</p>
+                                                                </div>
+                                                            </div>
+                                                            <button 
+                                                                onClick={async () => {
+                                                                    const { db, appId, doc, setDoc } = window.fb;
+                                                                    const nextStatus = !creator.isSubAdmin;
+                                                                    if(window.confirm(`Are you sure you want to ${nextStatus ? 'Grant' : 'Revoke'} Admin status for ${creator.name}?`)) {
+                                                                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', creator.id), { isSubAdmin: nextStatus }, { merge: true });
+                                                                        alert("Privileges successfully synchronization stream! 🔥");
+                                                                        setAdminTab('nominate_admins');
+                                                                    }
+                                                                }}
+                                                                className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-sm transition-all ${creator.isSubAdmin ? 'bg-red-50 dark:bg-red-900/20 text-red-600 border border-red-200' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                                                            >
+                                                                {creator.isSubAdmin ? 'Revoke Admin' : 'Nominate Admin'}
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {adminTab === 'algorithm' && (
                                             <div className="space-y-8 animate-in slide-in-from-right-4">
@@ -2460,38 +2524,38 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </aside>
                     </main>
 
-                    {/* Live Toast Notification - FIXED FOR CEO 😎 */}
+                    {/* Live Toast Notification with explicit close handler */}
                     {liveAlert && (
-                        <div className="fixed top-20 right-4 md:top-24 md:right-8 z-[9999] bg-white dark:bg-slate-800 border-l-4 border-blue-600 p-4 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] flex items-center gap-4 cursor-pointer hover:-translate-x-2 transition-transform duration-300" 
-                            onClick={() => { 
-                                if(liveAlert.type === 'follow') { 
-                                    openPublicProfile(liveAlert.fromUserId); 
-                                } else if ((liveAlert.type === 'like' || liveAlert.type === 'comment') && liveAlert.postId) {
-                                    const targetPost = posts.find(p => p.id === liveAlert.postId);
-                                    if (targetPost) {
-                                        setCommentModal({ open: true, post: targetPost, text: '' });
-                                    } else {
-                                        navigate('home');
+                        <div className="fixed top-4 right-4 left-4 md:left-auto md:top-24 md:right-8 z-[9999] bg-white dark:bg-slate-800 border-l-4 border-blue-600 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-300">
+                            <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" 
+                                onClick={() => { 
+                                    if(liveAlert.type === 'follow') openPublicProfile(liveAlert.fromUserId); 
+                                    else if (liveAlert.postId) {
+                                        const targetPost = posts.find(p => p.id === liveAlert.postId);
+                                        if (targetPost) setCommentModal({ open: true, post: targetPost, text: '' });
                                     }
-                                } else { 
-                                    navigate('home'); 
-                                } 
-                                setLiveAlert(null); 
-                            }}
-                        >
-                            <div className="relative">
-                                <img src={liveAlert.fromUserPhoto} className="w-11 h-11 rounded-xl object-cover shadow-sm no-drag" />
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 animate-ping"></div>
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800"></div>
+                                    setLiveAlert(null); 
+                                }}
+                            >
+                                <div className="relative flex-shrink-0">
+                                    <img src={liveAlert.fromUserPhoto} className="w-10 h-10 rounded-xl object-cover shadow-sm no-drag" />
+                                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></div>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="font-extrabold text-[12px] text-slate-900 dark:text-white leading-tight truncate">{liveAlert.fromUserName}</p>
+                                    <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                        {liveAlert.type === 'follow' ? 'started following you!' : liveAlert.type === 'like' ? 'liked your post!' : 'commented on your post!'}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="pr-4">
-                                <p className="font-extrabold text-[13px] text-slate-900 dark:text-white leading-tight">
-                                    {liveAlert.fromUserName}
-                                </p>
-                                <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                                    {liveAlert.type === 'follow' ? 'started following you!' : liveAlert.type === 'like' ? 'liked your post!' : 'commented on your post!'}
-                                </p>
-                            </div>
+                            
+                            {/* Manual Close cross button trigger */}
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); setLiveAlert(null); }} 
+                                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 rounded-lg transition-colors flex-shrink-0"
+                            >
+                                <Icon name="x" className="w-3.5 h-3.5" />
+                            </button>
                         </div>
                     )}
 
