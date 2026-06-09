@@ -1615,16 +1615,11 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             {/* Actions Footer Bar */}
                             <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3 md:pt-4 px-1 mt-3 md:mt-4">
                                 {post.isOfficial ? (
-                                    /* 💎 Clean Professional Broadcast Layout (No more locks bars) */
-                                    <div className="w-full flex items-center justify-between opacity-60 select-none cursor-not-allowed">
-                                        <div className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400"><Icon name="thumbsup" className="w-3.5 h-3.5 md:w-5 md:h-5" /> 0</div>
-                                        <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] md:text-xs"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> Announcement</div>
-                                        <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] md:text-xs"><Icon name="share" className="w-3.5 h-3.5 md:w-5 md:h-5" /> Global Stream</div>
-                                        <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] md:text-xs"><Icon name="checkcircle" className="w-3.5 h-3.5 text-blue-500" /> Official Intel</div>
-                                    </div>
+                                    /* 💎 Official Post එකක් නම් මෙතන කිසිම බටන් එකක් හෝ බාර් එකක් පෙන්වන්නේ නැත (Empty/Hidden) */
+                                    <div className="hidden"></div>
                                 ) : (
-                                    /* Normal Layout for Regular Creator Posts */
-                                    <div className="flex items-center justify-between">
+                                    /* Normal Layout for Regular Creator Posts (සාමාන්‍ය පෝස්ට් වලට විතරක් බටන්ස් පෙනේ) */
+                                    <div className="w-full flex items-center justify-between">
                                         <button onClick={() => toggleLike(post)} className={`flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-3.5 h-3.5 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
                                         <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
                                         <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors" title="Share on Nexia"><Icon name="repeat" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
@@ -1711,7 +1706,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                                 <div className="hidden md:flex items-center gap-6 mr-2 border-r border-slate-200 dark:border-slate-700 pr-6">
                                     <button onClick={() => setIsDarkMode(!isDarkMode)} className="transition-colors hover:scale-110 text-slate-400 dark:text-slate-500 hover:text-blue-600">{isDarkMode ? <Icon name="sun" /> : <Icon name="moon" />}</button>
-                                    {isAdmin && <button onClick={() => navigate('admin_panel')} className={`transition-colors hover:scale-110 ${view === 'admin_panel' ? 'text-red-500' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}><Icon name="sliders" /></button>}
+                                    {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}><Icon name="sliders" /> {t('commandCenter')}</button>}
                                     <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'leaderboard' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /></button>
                                     <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /></button>
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
@@ -1743,7 +1738,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 w-full flex gap-8 justify-center">
                         
                         <aside className="hidden lg:flex flex-col w-[260px] flex-shrink-0 sticky top-28 h-fit space-y-2">
-                            {isAdmin && <button onClick={() => navigate('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}><Icon name="sliders" /> {t('commandCenter')}</button>}
+                            {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}><Icon name="sliders" /> {t('commandCenter')}</button>}
                             <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /> {t('globalStream')}</button>
                             <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'leaderboard' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /> {t('leaderboard')}</button>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}>
@@ -2251,16 +2246,25 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 )}
 
                                                 {/* Action Buttons (Edit, Settings, Sign Out) */}
-                                                {isOwnProfile && (
-                                                    <div className="flex flex-wrap justify-center gap-3 w-full max-w-md">
-                                                        <button onClick={handleEditProfileOpen} className="flex-1 bg-slate-900 dark:bg-slate-700 text-white px-6 py-3 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-colors hover:bg-slate-800 shadow-sm whitespace-nowrap"><Icon name="edit" className="w-4 h-4"/> {t('editProfile')}</button>
-                                                        <button onClick={() => { navigate('settings'); setSettingsSection('menu'); }} className="bg-slate-100 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 px-6 py-3 rounded-full font-black text-xs uppercase hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"><Icon name="settings" className="w-4 h-4"/></button>
-                                                        {/* Logout Button */}
-                                                        <button onClick={handleSignOut} className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-6 py-3 rounded-full font-black text-xs uppercase hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-900/30 flex items-center justify-center" title="Sign Out"><Icon name="logout" className="w-4 h-4"/></button>
-                                                    </div>
-                                                )}
+                                        {isOwnProfile && (
+                                            <div className="flex flex-wrap justify-center gap-3 w-full max-w-md">
+                                                <button onClick={handleEditProfileOpen} className="flex-1 bg-slate-900 dark:bg-slate-700 text-white px-6 py-3 rounded-full font-black text-xs uppercase flex items-center justify-center gap-2 transition-colors hover:bg-slate-800 shadow-sm whitespace-nowrap"><Icon name="edit" className="w-4 h-4"/> {t('editProfile')}</button>
+                                                <button onClick={() => { navigate('settings'); setSettingsSection('menu'); }} className="bg-slate-100 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 px-6 py-3 rounded-full font-black text-xs uppercase hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"><Icon name="settings" className="w-4 h-4"/></button>
+                                                <button onClick={handleSignOut} className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-6 py-3 rounded-full font-black text-xs uppercase hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-900/30 flex items-center justify-center" title="Sign Out"><Icon name="logout" className="w-4 h-4"/></button>
                                             </div>
+                                        )}
+
+                                        {/* ☕ COFFEE WIDGET - ONLY VISIBLE ON MOBILE DEVICES */}
+                                        <div className="xl:hidden w-full max-w-md bg-gradient-to-br from-[#FFDD00]/10 to-transparent border border-[#FFDD00]/30 rounded-3xl p-5 text-center mt-6 relative overflow-hidden">
+                                            <h3 className="font-black text-sm text-slate-900 dark:text-white mb-1">Support Nexia Ecosystem ☕</h3>
+                                            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-4">Help us maintain our global AI stream servers.</p>
+                                            <a href="https://www.buymeacoffee.com/nexiatradingtool" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#FFDD00] text-slate-900 py-3 rounded-xl font-black text-[11px] uppercase tracking-wider shadow-md shadow-[#FFDD00]/10">
+                                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>
+                                                Buy us a coffee
+                                            </a>
                                         </div>
+                                    </div>
+                                </div>
 
                                         {!isTotallyLocked && canViewDetails && (
                                             <div className="space-y-6">
@@ -2524,9 +2528,11 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </aside>
                     </main>
 
-                    {/* Live Toast Notification with explicit close handler */}
+                    {/* 🔔 ADVANCED LIVE POPUP NOTIFICATION (10s Auto-hide + Close Button) */}
                     {liveAlert && (
-                        <div className="fixed top-4 right-4 left-4 md:left-auto md:top-24 md:right-8 z-[9999] bg-white dark:bg-slate-800 border-l-4 border-blue-600 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-300">
+                        <div className="fixed top-4 right-4 left-4 md:left-auto md:top-24 md:right-8 z-[9999] bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-l-4 border-blue-600 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-300">
+                            
+                            {/* Clickable Area for Navigation */}
                             <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" 
                                 onClick={() => { 
                                     if(liveAlert.type === 'follow') openPublicProfile(liveAlert.fromUserId); 
@@ -2542,15 +2548,16 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></div>
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="font-extrabold text-[12px] text-slate-900 dark:text-white leading-tight truncate">{liveAlert.fromUserName}</p>
+                                    <p className="font-extrabold text-[13px] text-slate-900 dark:text-white leading-tight truncate">{liveAlert.fromUserName}</p>
                                     <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5">
                                         {liveAlert.type === 'follow' ? 'started following you!' : liveAlert.type === 'like' ? 'liked your post!' : 'commented on your post!'}
                                     </p>
                                 </div>
                             </div>
                             
-                            {/* Manual Close cross button trigger */}
+                            {/* 'X' Close Button */}
                             <button 
+                                type="button"
                                 onClick={(e) => { e.stopPropagation(); setLiveAlert(null); }} 
                                 className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 rounded-lg transition-colors flex-shrink-0"
                             >
