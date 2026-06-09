@@ -337,7 +337,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const hasAdminAccess = isAdmin || isSubAdmin;
             
             const [adminConfig, setAdminConfig] = useState({ likesWeight: 3, commentsWeight: 5, creatorBonusWeight: 0.1, timeDecay: 1.5, jitter: 5 });
-            const [adminTab, setAdminTab] = useState('algorithm');
+            const [adminTab, setAdminTab] = useState('reports');
             const [allReports, setAllReports] = useState([]);
 
             // ✅ FIXED: Admin Reports Fetcher (Now supports both Master and Sub-Admins)
@@ -962,9 +962,21 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', user.uid), { followingCount: increment(1) }, { merge: true });
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', selectedUser.id), { followersCount: increment(1) }, { merge: true });
                         setSelectedUser(prev => ({ ...prev, followersCount: (prev.followersCount || 0) + 1 }));
-                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: selectedUser.id, type: 'follow', fromUserId: user.uid, fromUserName: profileData.name || user.displayName, fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
+                        
+                        // Target user ට Follow notification එක යවනවා (Live name synced)
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { 
+                            targetUserId: selectedUser.id, 
+                            type: 'follow', 
+                            fromUserId: user.uid, 
+                            fromUserName: profileData.name || 'Nexia User', 
+                            fromUserPhoto: profileData.photoURL || user.photoURL, 
+                            timestamp: serverTimestamp(), 
+                            read: false 
+                        });
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.error("Follow relational status update failure:", e);
+                }
             };
 
             const handleAuth = async (e) => {
@@ -1249,14 +1261,14 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         // ලයික් කරලා නැත්නම්, අලුතින් ලයික් එකක් එකතු කරනවා
                         await updateDoc(postRef, { likes: arrayUnion(user.uid) }); 
                         
-                        // පෝස්ට් එකේ අයිතිකාරයාට Notification එකක් යවනවා (තමන්ගේම ඒවට නැතුව)
+                        // ✅ FIXED: Live Profile Name Synced with Notifications Gateway
                         if (post.userId !== user.uid) {
                             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { 
                                 targetUserId: post.userId, 
                                 type: 'like', 
                                 postId: post.id, 
                                 fromUserId: user.uid, 
-                                fromUserName: profileData.name || user.displayName || 'Nexia User', 
+                                fromUserName: profileData.name || 'Nexia User', 
                                 fromUserPhoto: profileData.photoURL || user.photoURL, 
                                 timestamp: serverTimestamp(), 
                                 read: false 
@@ -1346,37 +1358,60 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 if (!commentModal.text.trim()) return;
                 const { db, appId, doc, updateDoc, arrayUnion, addDoc, collection, serverTimestamp } = window.fb;
                 
+                // Live name binding for the comment object inside the post
                 const newComment = { 
                     id: Date.now().toString(), 
                     userId: user.uid, 
-                    userName: profileData.name || user.displayName || 'Nexia User', 
+                    userName: profileData.name || 'Nexia User', 
                     userPhoto: profileData.photoURL || user.photoURL, 
                     text: commentModal.text, 
                     timestamp: new Date().toISOString(),
                     likes: [],
-                    replyToId: commentModal.replyingTo?.userId || null // රිප්ලයි කරන කෙනාගේ userId එක
+                    replyToId: commentModal.replyingTo?.userId || null
                 };
 
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', commentModal.post.id), { comments: arrayUnion(newComment) });
                     
-                    // Owner ට Notification යවනවා
+                    // Owner ට Notification යවනවා (Live name synced)
                     if (commentModal.post.userId !== user.uid) {
-                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: commentModal.post.userId, type: 'comment', postId: commentModal.post.id, commentText: commentModal.text, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexia User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { 
+                            targetUserId: commentModal.post.userId, 
+                            type: 'comment', 
+                            postId: commentModal.post.id, 
+                            commentText: commentModal.text, 
+                            fromUserId: user.uid, 
+                            fromUserName: profileData.name || 'Nexia User', 
+                            fromUserPhoto: profileData.photoURL || user.photoURL, 
+                            timestamp: serverTimestamp(), 
+                            read: false 
+                        });
                     }
                     
-                    // Reply කරපු කෙනාට වෙනම Notification එකක් යවනවා
+                    // Reply කරපු කෙනාට වෙනම Notification එකක් යවනවා (Live name synced)
                     if (commentModal.replyingTo && commentModal.replyingTo.userId !== user.uid) {
-                         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { targetUserId: commentModal.replyingTo.userId, type: 'reply', postId: commentModal.post.id, commentText: commentModal.text, fromUserId: user.uid, fromUserName: profileData.name || user.displayName || 'Nexia User', fromUserPhoto: profileData.photoURL || user.photoURL, timestamp: serverTimestamp(), read: false });
+                         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notifications'), { 
+                            targetUserId: commentModal.replyingTo.userId, 
+                            type: 'reply', 
+                            postId: commentModal.post.id, 
+                            commentText: commentModal.text, 
+                            fromUserId: user.uid, 
+                            fromUserName: profileData.name || 'Nexia User', 
+                            fromUserPhoto: profileData.photoURL || user.photoURL, 
+                            timestamp: serverTimestamp(), 
+                            read: false 
+                        });
                     }
 
-                    // 🚀 Input Box එක විතරක් Reset කරමු. Firebase Live Listener එකෙන් Comment එක ඉබේම ක්ෂණිකව අප්ඩේට් වෙනවා!
+                    // Input Box එක විතරක් Reset කිරීම
                     setCommentModal(prev => ({ 
                         ...prev, 
                         text: '', 
                         replyingTo: null 
                     }));
-                } catch (e) {}
+                } catch (e) {
+                    console.error("Comment submission execution failure:", e);
+                }
             };
 
             // 🚀 Internal Share (Repost) Logic (With Debug Logs)
@@ -1678,15 +1713,17 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
             return (
                 <div className={`min-h-screen pb-28 md:pb-0 transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`}>
-                    <nav className="sticky top-0 z-50 nexus-nav px-4 md:px-6 py-3 md:py-4">
-                        <div className="max-w-7xl mx-auto flex items-center justify-between">
-                            <div className="flex items-center gap-2 cursor-pointer group min-w-0" onClick={() => { navigate('home'); setSelectedUser(null); }}>
-                                <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center flex-shrink-0">
+                    <nav className="sticky top-0 z-50 nexus-nav px-3 md:px-6 py-2.5 md:py-4">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+                            {/* Logo and Brand Name */}
+                            <div className="flex items-center gap-1.5 cursor-pointer group min-w-0 flex-shrink-0" onClick={() => { navigate('home'); setSelectedUser(null); }}>
+                                <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center flex-shrink-0">
                                     <img src="/logo.png" className="w-full h-full object-contain" alt="Nexia Logo" />
                                 </div>
-                                <h1 className="text-[17px] xs:text-xl md:text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase whitespace-nowrap font-outfit">NEXIA<span className="text-blue-600 dark:text-blue-400 ml-1 text-sm md:text-lg">- PROMPTHUB</span></h1>
+                                <h1 className="text-[14px] xs:text-base md:text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase whitespace-nowrap font-outfit">NEXIA<span className="text-blue-600 dark:text-blue-400 ml-0.5 text-[10px] md:text-lg hidden xs:inline">- PROMPTHUB</span></h1>
                             </div>
                             
+                            {/* Desktop Only Search */}
                             <div className="hidden md:block flex-1 max-w-md mx-8 relative">
                                 <div className="relative group">
                                     <Icon name="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 transition-colors" />
@@ -1695,18 +1732,23 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 {searchQuery && <SearchResultsDropdown />}
                             </div>
 
-                            <div className="flex items-center gap-2 md:gap-6">
-                                {/* 📱 MOBILE SMART SUN/MOON TOGGLE WIDGET (Profile Pic එකට වම් පැත්තෙන්) */}
-                                <button 
-                                    onClick={() => setIsDarkMode(!isDarkMode)} 
-                                    className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700 hover:text-blue-500 transition-all active:scale-90"
-                                >
-                                    {isDarkMode ? <Icon name="sun" className="w-4 h-4 text-amber-500" /> : <Icon name="moon" className="w-4 h-4 text-blue-600" />}
-                                </button>
+                            {/* Icons and Actions Container */}
+                            <div className="flex items-center gap-2 md:gap-6 flex-shrink-0">
+                                {/* 📱 MOBILE ACTIVE ICONS BAR (Search & Notification Bell FIXED) */}
+                                <div className="flex md:hidden items-center gap-2.5">
+                                    <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-700">
+                                        {isDarkMode ? <Icon name="sun" className="w-3.5 h-3.5 text-amber-500" /> : <Icon name="moon" className="w-3.5 h-3.5 text-blue-600" />}
+                                    </button>
+                                    <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 relative ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400'}`}>
+                                        <Icon name="bell" className="w-3.5 h-3.5" />
+                                        {hasUnreadNotifications && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                                    </button>
+                                </div>
 
+                                {/* Desktop Only Icons Bar */}
                                 <div className="hidden md:flex items-center gap-6 mr-2 border-r border-slate-200 dark:border-slate-700 pr-6">
                                     <button onClick={() => setIsDarkMode(!isDarkMode)} className="transition-colors hover:scale-110 text-slate-400 dark:text-slate-500 hover:text-blue-600">{isDarkMode ? <Icon name="sun" /> : <Icon name="moon" />}</button>
-                                    {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}><Icon name="sliders" /> {t('commandCenter')}</button>}
+                                    {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`transition-colors hover:scale-110 ${view === 'admin_panel' ? 'text-red-500' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}><Icon name="sliders" /></button>}
                                     <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'leaderboard' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /></button>
                                     <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /></button>
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
@@ -1719,15 +1761,16 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     </button>
                                 </div>
 
+                                {/* User Meta Profile Badge */}
                                 {!user || user.isAnonymous ? (
-                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-4 py-2 md:px-7 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('signIn')}</button>
+                                    <button onClick={() => setAuthModal({ ...authModal, open: true, mode: 'login', error: '' })} className="bg-blue-600 text-white px-3.5 py-1.5 md:px-7 md:py-3 rounded-lg md:rounded-2xl font-bold text-[10px] md:text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('signIn')}</button>
                                 ) : (
-                                    <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-                                        <div className="hidden md:flex flex-col items-end justify-center mr-1 md:mr-2">
-                                            <p className="text-sm font-bold text-slate-900 dark:text-white leading-none mt-1">{profileData.name || user.displayName}</p>
+                                    <div className="flex items-center gap-1.5 md:gap-4 flex-shrink-0">
+                                        <div className="hidden sm:flex flex-col items-end justify-center max-w-[100px]">
+                                            <p className="text-xs md:text-sm font-bold text-slate-900 dark:text-white leading-none truncate w-full">{profileData.name || user.displayName}</p>
                                         </div>
-                                        <button onClick={() => { navigate('profile'); setSelectedUser(null); }} className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl overflow-hidden border-2 shadow-sm active:scale-90 transition-transform bg-white dark:bg-slate-800 p-0.5 flex-shrink-0 ${isAdmin ? 'border-red-500' : 'border-blue-500'}`}>
-                                            <img src={profileData.photoURL || user.photoURL} className="rounded-lg md:rounded-xl object-cover w-full h-full no-drag" />
+                                        <button onClick={() => { navigate('profile'); setSelectedUser(null); }} className={`w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-2xl overflow-hidden border-2 shadow-sm active:scale-90 transition-transform bg-white dark:bg-slate-800 p-0.5 flex-shrink-0 ${isAdmin ? 'border-red-500' : 'border-blue-500'}`}>
+                                            <img src={profileData.photoURL || user.photoURL} className="rounded-md md:rounded-xl object-cover w-full h-full no-drag" />
                                         </button>
                                     </div>
                                 )}
@@ -1814,7 +1857,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             </div>
                                         )}
 
-                                        {adminTab === 'algorithm' && (
+                                        {/* ✅ STRICT SECURITY: Algorithm weights can ONLY be viewed/edited by the Master Admin */}
+                                        {adminTab === 'algorithm' && isAdmin && (
                                             <div className="space-y-8 animate-in slide-in-from-right-4">
                                                 <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30 mb-6">
                                                     <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-start gap-2"><Icon name="alert" className="w-4 h-4 flex-shrink-0 mt-0.5" /> Adjust these weights to instantly change how the "Trending" feed is calculated globally. Higher values mean that factor has more impact.</p>
@@ -2628,6 +2672,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </span>
                     )}
                 </button>
+                        
+                        {/* 🛡️ MOBILE ADMIN PORTAL GATEWAY */}
+                        {hasAdminAccess && (
+                            <button onClick={() => navigate('admin_panel')} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${view === 'admin_panel' ? 'text-red-500 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
+                                <Icon name="sliders" className="w-5 h-5" />
+                            </button>
+                        )}
                         
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${(view === 'profile' || view === 'public_profile' || view === 'settings' || view === 'edit_profile') ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
                             <Icon name="user" className="w-5 h-5" />
