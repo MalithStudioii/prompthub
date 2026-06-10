@@ -372,7 +372,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
                         userId: 'nexia_official_system',
                         userName: 'NEXIA - OFFICIAL',
-                        userPhoto: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM0ZjQ2ZTUiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMzYjgyZjYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjI1IiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAiIHk9IjcwIiBmb250LWZhbWlseT0iJ3N5c3RlbS11aScsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5OPC90ZXh0Pjwvc3ZnPg==',
+                        // ✅ FIXED: Using Nexia's real branding asset logo directly
+                        userPhoto: '/logo.png',
                         prompt: officialPost.prompt,
                         imageUrl: finalImageUrl,
                         model: 'System Announcement',
@@ -381,13 +382,15 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         comments: [],
                         isOfficial: true,
                         isBoosted: true, 
-                        boostedAt: serverTimestamp() // Official ඒව හැමවෙලේම උඩින් තියෙන්න
+                        boostedAt: serverTimestamp()
                     });
                     setOfficialPost({ prompt: '', imageFile: null });
-                    alert("✨ Official Announcement Deployed Successfully!");
-                    setAdminTab('algorithm'); 
+                    alert("✨ Official Announcement Deployed Successfully! 🔥");
+                    setAdminTab('reports'); // කලින් අපි reports වලට හැදූ නිසා ඒකටම stream කළා
                     navigate('home');
-                } catch (err) { alert("Upload error"); }
+                } catch (err) { 
+                    alert("Upload error during broadcasting"); 
+                }
                 setUploading(false);
             };
             const resolveReport = async (reportId, postId, ownerId, actionType) => {
