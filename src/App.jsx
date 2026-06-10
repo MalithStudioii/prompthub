@@ -1612,7 +1612,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     'grid-cols-2 grid-rows-2 h-[300px] sm:h-[400px] md:h-[500px]'
                                 }`}>
                                     {post.imageUrls.map((imgUrl, idx) => (
-                                        <div key={idx} onClick={() => setImageViewModal({ open: true, url: imgUrl })} className={`relative bg-slate-100 dark:bg-slate-900 overflow-hidden cursor-pointer ${
+                                        <div key={idx} onClick={() => setImageViewModal({ open: true, urls: post.imageUrls, currentIndex: idx })} className={`relative bg-slate-100 dark:bg-slate-900 overflow-hidden cursor-pointer ${
                                             post.imageUrls.length === 3 && idx === 0 ? 'col-span-2 row-span-1' : ''
                                         }`}>
                                             <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${imgUrl})`}}></div>
@@ -1626,7 +1626,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     ))}
                                 </div>
                             ) : (
-                                <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm cursor-pointer" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}>
+                                <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm cursor-pointer" onClick={() => setImageViewModal({ open: true, urls: [post.imageUrl], currentIndex: 0 })}>
                                     <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
                                     <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
                                 </div>
@@ -2878,39 +2878,128 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             </div>
                         </div>
                     )}
-                    {/* Full Screen High-Res Image Viewer & Downloader */}
-                    {imageViewModal.open && (
-                        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center p-4">
-                            {/* Top Action Bar */}
-                            <div className="absolute top-0 left-0 w-full p-4 md:p-6 flex justify-between items-center z-50 bg-gradient-to-b from-black/60 to-transparent">
-                                <button onClick={() => setImageViewModal({ open: false, url: '' })} className="bg-white/10 hover:bg-white/20 text-white w-12 h-12 flex items-center justify-center rounded-full transition-colors backdrop-blur-md">
-                                    <Icon name="x" className="w-6 h-6" />
-                                </button>
-                                <button onClick={async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                        // Fetch as blob to force download instead of opening in new tab
-                                        const res = await fetch(imageViewModal.url);
-                                        const blob = await res.blob();
-                                        const link = document.createElement('a');
-                                        link.href = window.URL.createObjectURL(blob);
-                                        link.download = `Nexia_Art_${Date.now()}.jpg`;
-                                        document.body.appendChild(link);
-                                        link.click();
-                                        document.body.removeChild(link);
-                                    } catch(err) {
-                                        window.open(imageViewModal.url, '_blank'); // Fallback if blocked
-                                    }
-                                }} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors shadow-lg flex items-center gap-2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                    Save Image
-                                </button>
+                    {/* 🖥️📱 ADVANCED QUANTUM SLIDER & GESTURE ZOOM IMAGE MATRIX WITH BLOB DOWNLOADER */}
+                    {imageViewModal.open && (() => {
+                        const [zoomScale, setZoomScale] = React.useState(1);
+                        const [touchStartDist, setTouchStartDist] = React.useState(0);
+                        const urlsList = imageViewModal.urls || [];
+                        const currentIndex = imageViewModal.currentIndex || 0;
+
+                        // Reset zoom level whenever user slides to another image
+                        const handleNavigate = (nextIdx) => {
+                            setZoomScale(1);
+                            setImageViewModal(prev => ({ ...prev, currentIndex: nextIdx }));
+                        };
+
+                        // PC Wheel Zoom Controller Engine
+                        const handleWheelZoom = (e) => {
+                            e.preventDefault();
+                            const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
+                            setZoomScale(prev => Math.min(4, Math.max(1, prev + zoomFactor)));
+                        };
+
+                        // Mobile Touch Gesture Zoom Controller Engine (Pinch to Zoom)
+                        const handleTouchStart = (e) => {
+                            if (e.touches.length === 2) {
+                                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                                setTouchStartDist(dist);
+                            }
+                        };
+
+                        const handleTouchMove = (e) => {
+                            if (e.touches.length === 2 && touchStartDist > 0) {
+                                const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                                const scaleChange = (currentDist / touchStartDist) - 1;
+                                setZoomScale(prev => Math.min(4, Math.max(1, prev + scaleChange * 0.5)));
+                            }
+                        };
+
+                        return (
+                            <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-3xl flex items-center justify-center select-none" onClick={() => setImageViewModal({ open: false, urls: [], currentIndex: 0 })}>
+                                
+                                {/* Top Action Bar (Retained and optimized for current active image index) */}
+                                <div className="absolute top-0 left-0 w-full p-4 md:p-6 flex justify-between items-center z-50 bg-gradient-to-b from-black/60 to-transparent">
+                                    <button type="button" onClick={() => setImageViewModal({ open: false, urls: [], currentIndex: 0 })} className="bg-white/10 hover:bg-white/20 text-white w-12 h-12 flex items-center justify-center rounded-full transition-colors backdrop-blur-md">
+                                        <Icon name="x" className="w-6 h-6" />
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            try {
+                                                // Dynamic active image source routing fetch protocol
+                                                const currentTargetUrl = urlsList[currentIndex];
+                                                const res = await fetch(currentTargetUrl);
+                                                const blob = await res.blob();
+                                                const link = document.createElement('a');
+                                                link.href = window.URL.createObjectURL(blob);
+                                                link.download = `Nexia_Art_${Date.now()}.jpg`;
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                            } catch(err) {
+                                                window.open(urlsList[currentIndex], '_blank');
+                                            }
+                                        }} 
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors shadow-lg flex items-center gap-2"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                        Save Image
+                                    </button>
+                                </div>
+                                
+                                {/* Left Sliding Arrow Control */}
+                                {urlsList.length > 1 && (
+                                    <button 
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); if (currentIndex > 0) handleNavigate(currentIndex - 1); }}
+                                        disabled={currentIndex === 0}
+                                        className="absolute left-4 md:left-8 text-white bg-white/10 hover:bg-white/20 disabled:opacity-20 p-3 rounded-full backdrop-blur z-50 transition-all active:scale-90 cursor-pointer"
+                                    >
+                                        <Icon name="arrowleft" className="w-5 h-5" />
+                                    </button>
+                                )}
+
+                                {/* Main Matrix Image Node Viewport (Scroll Wheel & Touch Gesture Bound) */}
+                                <div 
+                                    className="max-w-4xl max-h-[85vh] p-2 flex items-center justify-center overflow-hidden transition-all duration-200"
+                                    onClick={e => e.stopPropagation()}
+                                    onWheel={handleWheelZoom}
+                                    onTouchStart={handleTouchStart}
+                                    onTouchMove={handleTouchMove}
+                                    onTouchEnd={() => setTouchStartDist(0)}
+                                >
+                                    <img 
+                                        src={urlsList[currentIndex]} 
+                                        style={{ transform: `scale(${zoomScale})`, transition: touchStartDist > 0 ? 'none' : 'transform 0.2s cubic-bezier(0.1, 0.7, 0.1, 1)' }}
+                                        className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl pointer-events-auto cursor-zoom-in" 
+                                        onContextMenu={e => e.preventDefault()}
+                                    />
+                                </div>
+
+                                {/* Right Sliding Arrow Control */}
+                                {urlsList.length > 1 && (
+                                    <button 
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); if (currentIndex < urlsList.length - 1) handleNavigate(currentIndex + 1); }}
+                                        disabled={currentIndex === urlsList.length - 1}
+                                        className="absolute right-4 md:right-8 text-white bg-white/10 hover:bg-white/20 disabled:opacity-20 p-3 rounded-full backdrop-blur z-50 transition-all active:scale-90 cursor-pointer"
+                                    >
+                                        <Icon name="arrowleft" className="w-5 h-5 rotate-180" />
+                                    </button>
+                                )}
+
+                                {/* Pagination Dots Indicator Overlay */}
+                                {urlsList.length > 1 && (
+                                    <div className="absolute bottom-6 flex gap-2 z-50 bg-black/40 px-4 py-2 rounded-full backdrop-blur">
+                                        {urlsList.map((_, dotIdx) => (
+                                            <span key={dotIdx} className={`w-2 h-2 rounded-full transition-all ${dotIdx === currentIndex ? 'bg-blue-500 scale-125 shadow-[0_0_8px_#3b82f6]' : 'bg-white/40'}`}></span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                            
-                            {/* The Image */}
-                            <img src={imageViewModal.url} className="max-w-full max-h-[85vh] object-contain no-drag select-none drop-shadow-2xl relative z-10" onContextMenu={e=>e.preventDefault()} />
-                        </div>
-                    )}
+                        );
+                    })()}
 
                     {/* 🌳 PROMPT EVOLUTION TREE MODAL (The Masterpiece) */}
                     {treeModal.open && treeModal.rootPost && (
@@ -3079,6 +3168,23 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                                 <button onClick={() => setShareModal({ open: false, post: null })} className="w-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Done</button>
                             </div>
+                        </div>
+                    )}
+
+                    {/* ⚡ NEXIA CUSTOM CYBERPUNK UPLOAD ANIMATION STREAM */}
+                    {uploading && (
+                        <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300">
+                            <div className="relative w-24 h-24 flex items-center justify-center">
+                                {/* Outer Neon Cyan Spinning Ring */}
+                                <div className="absolute inset-0 border-4 border-t-blue-500 border-r-transparent border-b-indigo-500 border-l-transparent rounded-full animate-spin duration-1000"></div>
+                                {/* Inner Reverse Neon Magenta Ring */}
+                                <div className="absolute inset-2 border-2 border-b-purple-500 border-t-transparent border-l-cyan-500 border-r-transparent rounded-full animate-spin duration-750 direction-reverse"></div>
+                                {/* Core Quantum Core Pulse */}
+                                <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping absolute"></div>
+                                <div className="w-3 h-3 bg-indigo-600 rounded-full absolute shadow-[0_0_15px_#3b82f6]"></div>
+                            </div>
+                            <h3 className="text-white font-black text-xs uppercase tracking-[0.4em] mt-6 animate-pulse font-outfit">TRANSMITTING INTEL</h3>
+                            <p className="text-slate-500 font-mono text-[9px] uppercase mt-1.5 tracking-widest">Deploying core assets to cognitive stream...</p>
                         </div>
                     )}
                 </div>
