@@ -2883,46 +2883,60 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     )}
                     {/* 🖥️📱 ADVANCED QUANTUM SLIDER & GESTURE ZOOM IMAGE MATRIX WITH BLOB DOWNLOADER */}
                     {imageViewModal.open && (() => {
-                        const [zoomScale, setZoomScale] = React.useState(1);
-                        const [touchStartDist, setTouchStartDist] = React.useState(0);
-                        const urlsList = (imageViewModal.urls && imageViewModal.urls.length > 0)
-                        ? imageViewModal.urls 
-    : (imageViewModal.url ? [imageViewModal.url] : []);
+                        // ✅ FIXED: No React Hooks inside conditions! Pure JS processing for infinite stability.
+                        const urlsList = (imageViewModal.urls && imageViewModal.urls.length > 0) 
+                            ? imageViewModal.urls 
+                            : (imageViewModal.url ? [imageViewModal.url] : []);
                         const currentIndex = imageViewModal.currentIndex || 0;
 
-                        // Reset zoom level whenever user slides to another image
                         const handleNavigate = (nextIdx) => {
-                            setZoomScale(1);
+                            const img = document.getElementById('nexus-zoom-img');
+                            if(img) {
+                                img.style.transform = 'scale(1)';
+                                img.setAttribute('data-scale', '1');
+                            }
                             setImageViewModal(prev => ({ ...prev, currentIndex: nextIdx }));
                         };
 
-                        // PC Wheel Zoom Controller Engine
                         const handleWheelZoom = (e) => {
                             e.preventDefault();
-                            const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
-                            setZoomScale(prev => Math.min(4, Math.max(1, prev + zoomFactor)));
+                            const img = document.getElementById('nexus-zoom-img');
+                            if(!img) return;
+                            let currentScale = parseFloat(img.getAttribute('data-scale')) || 1;
+                            const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2; // Scroll up = zoom in, down = out
+                            currentScale = Math.min(4, Math.max(1, currentScale + zoomFactor));
+                            img.setAttribute('data-scale', currentScale);
+                            img.style.transform = `scale(${currentScale})`;
                         };
 
-                        // Mobile Touch Gesture Zoom Controller Engine (Pinch to Zoom)
+                        let initialDist = 0;
+                        let initialScale = 1;
+
                         const handleTouchStart = (e) => {
                             if (e.touches.length === 2) {
-                                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                                setTouchStartDist(dist);
+                                const img = document.getElementById('nexus-zoom-img');
+                                initialScale = parseFloat(img?.getAttribute('data-scale')) || 1;
+                                initialDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
                             }
                         };
 
                         const handleTouchMove = (e) => {
-                            if (e.touches.length === 2 && touchStartDist > 0) {
+                            if (e.touches.length === 2 && initialDist > 0) {
+                                e.preventDefault();
+                                const img = document.getElementById('nexus-zoom-img');
+                                if(!img) return;
                                 const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                                const scaleChange = (currentDist / touchStartDist) - 1;
-                                setZoomScale(prev => Math.min(4, Math.max(1, prev + scaleChange * 0.5)));
+                                const scaleChange = currentDist / initialDist;
+                                let newScale = Math.min(4, Math.max(1, initialScale * scaleChange));
+                                img.setAttribute('data-scale', newScale);
+                                img.style.transform = `scale(${newScale})`;
                             }
                         };
 
                         return (
                             <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-3xl flex items-center justify-center select-none" onClick={() => setImageViewModal({ open: false, urls: [], currentIndex: 0 })}>
                                 
-                                {/* Top Action Bar (Retained and optimized for current active image index) */}
+                                {/* Top Action Bar */}
                                 <div className="absolute top-0 left-0 w-full p-4 md:p-6 flex justify-between items-center z-50 bg-gradient-to-b from-black/60 to-transparent">
                                     <button type="button" onClick={() => setImageViewModal({ open: false, urls: [], currentIndex: 0 })} className="bg-white/10 hover:bg-white/20 text-white w-12 h-12 flex items-center justify-center rounded-full transition-colors backdrop-blur-md">
                                         <Icon name="x" className="w-6 h-6" />
@@ -2932,7 +2946,6 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         onClick={async (e) => {
                                             e.stopPropagation();
                                             try {
-                                                // Dynamic active image source routing fetch protocol
                                                 const currentTargetUrl = urlsList[currentIndex];
                                                 const res = await fetch(currentTargetUrl);
                                                 const blob = await res.blob();
@@ -2965,18 +2978,19 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     </button>
                                 )}
 
-                                {/* Main Matrix Image Node Viewport (Scroll Wheel & Touch Gesture Bound) */}
+                                {/* Main Matrix Image Node Viewport */}
                                 <div 
-                                    className="max-w-4xl max-h-[85vh] p-2 flex items-center justify-center overflow-hidden transition-all duration-200"
+                                    className="max-w-4xl max-h-[85vh] p-2 flex items-center justify-center overflow-hidden transition-all duration-200 w-full h-full"
                                     onClick={e => e.stopPropagation()}
                                     onWheel={handleWheelZoom}
                                     onTouchStart={handleTouchStart}
                                     onTouchMove={handleTouchMove}
-                                    onTouchEnd={() => setTouchStartDist(0)}
                                 >
                                     <img 
+                                        id="nexus-zoom-img"
+                                        data-scale="1"
                                         src={urlsList[currentIndex]} 
-                                        style={{ transform: `scale(${zoomScale})`, transition: touchStartDist > 0 ? 'none' : 'transform 0.2s cubic-bezier(0.1, 0.7, 0.1, 1)' }}
+                                        style={{ transition: 'transform 0.15s ease-out' }}
                                         className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl pointer-events-auto cursor-zoom-in" 
                                         onContextMenu={e => e.preventDefault()}
                                     />
