@@ -1218,6 +1218,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     let imageUrlsArray = [];
                     let finalImageUrl = postModal.imageUrl || '';
 
+                    // පින්තූර කිහිපයක් තියේ නම් ලූප් එකක් දාලා ඔක්කොම අප්ලෝඩ් කරනවා
                     if (postModal.imageFiles && postModal.imageFiles.length > 0) {
                         for (let file of postModal.imageFiles) {
                             const url = await uploadToImgBB(file);
@@ -1237,7 +1238,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         userPhoto: profileData.photoURL || user.photoURL,
                         prompt: postModal.prompt, 
                         imageUrl: finalImageUrl, 
-                        imageUrls: imageUrlsArray, // Supports multiple grid
+                        imageUrls: imageUrlsArray, // 🚀 අලුත් Multiple Array එක ඩේටාබේස් එකට යනවා
                         model: postModal.model, 
                         createdAt: serverTimestamp(), 
                         likes: [], 
@@ -1608,7 +1609,6 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 <div className={`grid gap-1 overflow-hidden rounded-[1.4rem] md:rounded-[3rem] shadow-sm ${
                                     post.imageUrls.length === 1 ? 'grid-cols-1 h-[300px] sm:h-[400px] md:h-[550px]' : 
                                     post.imageUrls.length === 2 ? 'grid-cols-2 h-[250px] sm:h-[300px] md:h-[400px]' : 
-                                    post.imageUrls.length === 3 ? 'grid-cols-2 grid-rows-2 h-[300px] sm:h-[400px] md:h-[500px]' : 
                                     'grid-cols-2 grid-rows-2 h-[300px] sm:h-[400px] md:h-[500px]'
                                 }`}>
                                     {post.imageUrls.map((imgUrl, idx) => (
@@ -1616,20 +1616,23 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             post.imageUrls.length === 3 && idx === 0 ? 'col-span-2 row-span-1' : ''
                                         }`}>
                                             <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${imgUrl})`}}></div>
-                                            <img src={imgUrl} className="w-full h-full object-contain relative z-0 no-drag transition-transform duration-500 hover:scale-105" loading="lazy" />
-                                            {post.imageUrls.length >= 4 && idx === 3 && (
-                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
-                                                    <span className="text-white font-black text-2xl md:text-4xl drop-shadow-md">+</span>
+                                            <img src={imgUrl} className="w-full h-full object-cover relative z-0 no-drag transition-transform duration-500 hover:scale-105" loading="lazy" />
+                                            {post.imageUrls.length > 4 && idx === 3 && (
+                                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                                                    <span className="text-white font-black text-2xl md:text-4xl">+{post.imageUrls.length - 4}</span>
                                                 </div>
                                             )}
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm cursor-pointer" onClick={() => setImageViewModal({ open: true, urls: [post.imageUrl], currentIndex: 0 })}>
-                                    <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
-                                    <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
-                                </div>
+                                <>
+                                    <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
+                                    <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm">
+                                        <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
+                                        <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
+                                    </div>
+                                </>
                             )}
 
                             <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); handlePostCopy(post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-2.5 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
@@ -2882,7 +2885,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     {imageViewModal.open && (() => {
                         const [zoomScale, setZoomScale] = React.useState(1);
                         const [touchStartDist, setTouchStartDist] = React.useState(0);
-                        const urlsList = imageViewModal.urls || [];
+                        const urlsList = (imageViewModal.urls && imageViewModal.urls.length > 0)
+                        ? imageViewModal.urls 
+    : (imageViewModal.url ? [imageViewModal.url] : []);
                         const currentIndex = imageViewModal.currentIndex || 0;
 
                         // Reset zoom level whenever user slides to another image
