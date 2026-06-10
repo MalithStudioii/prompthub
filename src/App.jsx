@@ -2442,7 +2442,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                     <div className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${isDarkMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'}`}><div className={`w-4 h-4 bg-white rounded-full absolute transition-transform ${isDarkMode ? 'translate-x-7' : 'translate-x-1'}`}></div></div>
                                                 </button>
                                                 <button onClick={() => setSettingsSection('Language')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600">
-                                                    <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="globe" className="w-5 h-5"/></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Language / භාෂාව</span></div>
+                                                    <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="globe" className="w-5 h-5"/></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Language</span></div>
                                                     <div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-400">{profileData.language || 'English'}</span><Icon name="chevronright" className="text-slate-300 dark:text-slate-500 w-5 h-5" /></div>
                                                 </button>
                                                 <button onClick={() => setSettingsSection('Privacy_Policy')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600">
@@ -2881,9 +2881,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             </div>
                         </div>
                     )}
-                    {/* 🖥️📱 ADVANCED QUANTUM SLIDER & GESTURE ZOOM IMAGE MATRIX WITH BLOB DOWNLOADER */}
+                    {/* 🖥️📱 ADVANCED QUANTUM SLIDER & GESTURE ZOOM IMAGE MATRIX WITH BLOB DOWNLOADER (SMART SWIPE BOUND) */}
                     {imageViewModal.open && (() => {
-                        // ✅ FIXED: No React Hooks inside conditions! Pure JS processing for infinite stability.
                         const urlsList = (imageViewModal.urls && imageViewModal.urls.length > 0) 
                             ? imageViewModal.urls 
                             : (imageViewModal.url ? [imageViewModal.url] : []);
@@ -2903,34 +2902,88 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             const img = document.getElementById('nexus-zoom-img');
                             if(!img) return;
                             let currentScale = parseFloat(img.getAttribute('data-scale')) || 1;
-                            const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2; // Scroll up = zoom in, down = out
+                            const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
                             currentScale = Math.min(4, Math.max(1, currentScale + zoomFactor));
                             img.setAttribute('data-scale', currentScale);
                             img.style.transform = `scale(${currentScale})`;
                         };
 
+                        // ✅ DYNAMIC GESTURE QUANTUM TRACKING SYSTEM
                         let initialDist = 0;
                         let initialScale = 1;
+                        let touchStartX = 0;
+                        let touchStartY = 0; // tracking vertical to prevent accidental scroll interference
+                        const SWIPE_THRESHOLD = 50; // Minimum distance (pixels) to trigger a swipe
+                        const VERTICAL_THRESHOLD = 80; // If they move vertically more than this, cancel swipe (assume scroll)
 
                         const handleTouchStart = (e) => {
+                            const img = document.getElementById('nexus-zoom-img');
+                            const currentScale = parseFloat(img?.getAttribute('data-scale')) || 1;
+
                             if (e.touches.length === 2) {
-                                const img = document.getElementById('nexus-zoom-img');
-                                initialScale = parseFloat(img?.getAttribute('data-scale')) || 1;
+                                // Pinch logic stream
+                                initialScale = currentScale;
                                 initialDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                            } else if (e.touches.length === 1 && currentScale === 1) {
+                                // Swipe initiation protocol (Only if NOT zoomed)
+                                touchStartX = e.touches[0].clientX;
+                                touchStartY = e.touches[0].clientY;
                             }
                         };
 
                         const handleTouchMove = (e) => {
+                            const img = document.getElementById('nexus-zoom-img');
+                            const currentScale = parseFloat(img?.getAttribute('data-scale')) || 1;
+
                             if (e.touches.length === 2 && initialDist > 0) {
+                                // Zoom transmission
                                 e.preventDefault();
-                                const img = document.getElementById('nexus-zoom-img');
                                 if(!img) return;
                                 const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
                                 const scaleChange = currentDist / initialDist;
                                 let newScale = Math.min(4, Math.max(1, initialScale * scaleChange));
                                 img.setAttribute('data-scale', newScale);
                                 img.style.transform = `scale(${newScale})`;
+                            } else if (e.touches.length === 1 && currentScale === 1 && touchStartX > 0) {
+                                // Swipe verification protocol
+                                const touchEndX = e.touches[0].clientX;
+                                const touchEndY = e.touches[0].clientY;
+                                const deltaX = touchStartX - touchEndX;
+                                const deltaY = touchStartY - touchEndY;
+
+                                // Prevent vertical scrolling interference
+                                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaY) < VERTICAL_THRESHOLD) {
+                                    if (e.cancelable) e.preventDefault(); // Lock screen for smooth swipe flow
+                                }
                             }
+                        };
+
+                        const handleTouchEnd = (e) => {
+                            initialDist = 0;
+                            const img = document.getElementById('nexus-zoom-img');
+                            const currentScale = parseFloat(img?.getAttribute('data-scale')) || 1;
+
+                            // Finalizing smart swipe stream
+                            if (touchStartX > 0 && currentScale === 1 && urlsList.length > 1) {
+                                const touchEndX = e.changedTouches[0].clientX;
+                                const touchEndY = e.changedTouches[0].clientY;
+                                const deltaX = touchStartX - touchEndX;
+                                const deltaY = touchStartY - touchEndY;
+
+                                // Strict validation for horizontal swipe gesture integrity
+                                if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaY) < VERTICAL_THRESHOLD) {
+                                    if (deltaX > 0 && currentIndex < urlsList.length - 1) {
+                                        // Swiped Left -> Deploy Next Image Matrix
+                                        handleNavigate(currentIndex + 1);
+                                    } else if (deltaX < 0 && currentIndex > 0) {
+                                        // Swiped Right -> Retract Previous Image Matrix
+                                        handleNavigate(currentIndex - 1);
+                                    }
+                                }
+                            }
+                            // Reset core trackers
+                            touchStartX = 0;
+                            touchStartY = 0;
                         };
 
                         return (
@@ -2966,13 +3019,16 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     </button>
                                 </div>
                                 
-                                {/* Left Sliding Arrow Control */}
+                                {/* 📱 LEFT SIDE SWIPE TARGET (Invisible region for better swipe capture on edge) */}
+                                {urlsList.length > 1 && currentIndex > 0 && <div className="absolute left-0 top-20 bottom-20 w-16 z-40"></div>}
+
+                                {/* Left Sliding Arrow Control (Desktop Only, hidden on mobile for cleaner UX) */}
                                 {urlsList.length > 1 && (
                                     <button 
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); if (currentIndex > 0) handleNavigate(currentIndex - 1); }}
                                         disabled={currentIndex === 0}
-                                        className="absolute left-4 md:left-8 text-white bg-white/10 hover:bg-white/20 disabled:opacity-20 p-3 rounded-full backdrop-blur z-50 transition-all active:scale-90 cursor-pointer"
+                                        className="absolute left-4 md:left-8 text-white bg-white/10 hover:bg-white/20 disabled:opacity-20 p-3 rounded-full backdrop-blur z-50 transition-all active:scale-90 cursor-pointer hidden md:flex"
                                     >
                                         <Icon name="arrowleft" className="w-5 h-5" />
                                     </button>
@@ -2980,29 +3036,33 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                                 {/* Main Matrix Image Node Viewport */}
                                 <div 
-                                    className="max-w-4xl max-h-[85vh] p-2 flex items-center justify-center overflow-hidden transition-all duration-200 w-full h-full"
+                                    className="max-w-4xl max-h-[85vh] p-2 flex items-center justify-center overflow-hidden transition-all duration-200 w-full h-full pointer-events-none"
                                     onClick={e => e.stopPropagation()}
                                     onWheel={handleWheelZoom}
-                                    onTouchStart={handleTouchStart}
-                                    onTouchMove={handleTouchMove}
                                 >
                                     <img 
                                         id="nexus-zoom-img"
                                         data-scale="1"
                                         src={urlsList[currentIndex]} 
-                                        style={{ transition: 'transform 0.15s ease-out' }}
+                                        style={{ transition: 'transform 0.1s ease-out' }}
                                         className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl pointer-events-auto cursor-zoom-in" 
                                         onContextMenu={e => e.preventDefault()}
+                                        onTouchStart={handleTouchStart}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
                                     />
                                 </div>
 
-                                {/* Right Sliding Arrow Control */}
+                                {/* 📱 RIGHT SIDE SWIPE TARGET */}
+                                {urlsList.length > 1 && currentIndex < urlsList.length - 1 && <div className="absolute right-0 top-20 bottom-20 w-16 z-40"></div>}
+
+                                {/* Right Sliding Arrow Control (Desktop Only) */}
                                 {urlsList.length > 1 && (
                                     <button 
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); if (currentIndex < urlsList.length - 1) handleNavigate(currentIndex + 1); }}
                                         disabled={currentIndex === urlsList.length - 1}
-                                        className="absolute right-4 md:right-8 text-white bg-white/10 hover:bg-white/20 disabled:opacity-20 p-3 rounded-full backdrop-blur z-50 transition-all active:scale-90 cursor-pointer"
+                                        className="absolute right-4 md:right-8 text-white bg-white/10 hover:bg-white/20 disabled:opacity-20 p-3 rounded-full backdrop-blur z-50 transition-all active:scale-90 cursor-pointer hidden md:flex"
                                     >
                                         <Icon name="arrowleft" className="w-5 h-5 rotate-180" />
                                     </button>
