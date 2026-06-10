@@ -1525,8 +1525,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
             const renderPostCard = (post) => {
                 const postOwner = allCreators.find(c => c.id === (post.originalAuthorId || post.userId));
-                const displayPhoto = postOwner?.photoURL || post.userPhoto;
-                const displayName = postOwner?.name || post.userName;
+                
+                // ✅ FIXED: Force Real Logo and Name for Official Posts (Overrides old database records completely)
+                const displayPhoto = post.isOfficial ? '/logo.png' : (postOwner?.photoURL || post.userPhoto);
+                const displayName = post.isOfficial ? 'NEXIA - OFFICIAL' : (postOwner?.name || post.userName);
                 
                 const reposter = post.isRepost ? allCreators.find(c => c.id === post.userId) : null;
                 const reposterName = reposter?.name || post.repostedBy;
