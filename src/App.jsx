@@ -558,7 +558,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             }, [view, posts]);
 
             const uploadToImgBB = async (file) => {
-                const compressImage = (imgFile) => {
+                // Client-side compression targeting ~300KB
+                const compressImage = (imgFile, targetSizeKB = 300) => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.readAsDataURL(imgFile);
@@ -567,43 +568,35 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             img.src = event.target.result;
                             img.onload = () => {
                                 const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
+                                let width = img.width; let height = img.height;
+                                const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
                                 
-                                const MAX_WIDTH = 1200;
-                                const MAX_HEIGHT = 1200;
+                                if (width > height && width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                else if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                                 
-                                if (width > height) {
-                                    if (width > MAX_WIDTH) {
-                                        height *= MAX_WIDTH / width;
-                                        width = MAX_WIDTH;
-                                    }
-                                } else {
-                                    if (height > MAX_HEIGHT) {
-                                        width *= MAX_HEIGHT / height;
-                                        height = MAX_HEIGHT;
-                                    }
-                                }
-                                
-                                canvas.width = width;
-                                canvas.height = height;
+                                canvas.width = width; canvas.height = height;
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0, width, height);
                                 
-                                canvas.toBlob((blob) => {
-                                    resolve(new File([blob], imgFile.name, {
-                                        type: 'image/jpeg',
-                                        lastModified: Date.now()
-                                    }));
-                                }, 'image/jpeg', 0.75);
+                                let quality = 0.9;
+                                const compress = () => {
+                                    canvas.toBlob((blob) => {
+                                        if (blob.size / 1024 > targetSizeKB && quality > 0.1) {
+                                            quality -= 0.1; 
+                                            compress();
+                                        } else {
+                                            resolve(new File([blob], imgFile.name, { type: 'image/jpeg', lastModified: Date.now() }));
+                                        }
+                                    }, 'image/jpeg', quality);
+                                };
+                                compress();
                             };
                         };
                     });
                 };
 
                 try {
-                    const optimizedFile = file.size > 500000 ? await compressImage(file) : file;
-                    
+                    const optimizedFile = file.size > 300000 ? await compressImage(file) : file;
                     const formData = new FormData();
                     formData.append('image', optimizedFile);
                     
@@ -1218,28 +1211,39 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const handleCreatePost = async (e) => {
                 e.preventDefault();
                 if (!user || user.isAnonymous) return setAuthModal({ ...authModal, open: true, mode: 'login', error: 'Sign in required' });
-                if (!postModal.imageFile && !postModal.imageUrl) return alert("Please select an image or paste a URL.");
+                if ((!postModal.imageFiles || postModal.imageFiles.length === 0) && !postModal.imageFile && !postModal.imageUrl) return alert("Please select an image or paste a URL.");
                 setUploading(true);
                 const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
                 try {
-                    let finalImageUrl = postModal.imageUrl;
-                    if (postModal.imageFile) {
+                    let imageUrlsArray = [];
+                    let finalImageUrl = postModal.imageUrl || '';
+
+                    if (postModal.imageFiles && postModal.imageFiles.length > 0) {
+                        for (let file of postModal.imageFiles) {
+                            const url = await uploadToImgBB(file);
+                            if (url) imageUrlsArray.push(url);
+                        }
+                        if (imageUrlsArray.length > 0) finalImageUrl = imageUrlsArray[0]; 
+                    } else if (postModal.imageFile) {
                         finalImageUrl = await uploadToImgBB(postModal.imageFile);
-                        if (!finalImageUrl) throw new Error("Upload failed");
+                        if (finalImageUrl) imageUrlsArray.push(finalImageUrl);
                     }
-                    // 🚀 FIXED: නමයි Profile Pic එකයි ඩේටාබේස් එකට යවනවා!
+                    
+                    if (imageUrlsArray.length === 0 && !finalImageUrl) throw new Error("Upload failed");
+
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
                         userId: user.uid, 
                         userName: profileData.name || user.displayName || 'Nexia Creator',
                         userPhoto: profileData.photoURL || user.photoURL,
                         prompt: postModal.prompt, 
                         imageUrl: finalImageUrl, 
+                        imageUrls: imageUrlsArray, // Supports multiple grid
                         model: postModal.model, 
                         createdAt: serverTimestamp(), 
                         likes: [], 
                         comments: []
                     });
-                    setPostModal({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' }); navigate('home');
+                    setPostModal({ prompt: '', imageUrl: '', imageFile: null, imageFiles: [], model: 'Midjourney v6.1 Pro' }); navigate('home');
                 } catch (err) { 
                     alert("⚠️ ERROR DURING UPLOAD: " + err.message); 
                 }
@@ -1600,12 +1604,33 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </div>
 
                         <div className="secure-img-wrapper px-1.5 md:px-4 relative group">
-                            <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
-                            
-                            <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm">
-                                <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
-                                <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
-                            </div>
+                            {post.imageUrls && post.imageUrls.length > 0 ? (
+                                <div className={`grid gap-1 overflow-hidden rounded-[1.4rem] md:rounded-[3rem] shadow-sm ${
+                                    post.imageUrls.length === 1 ? 'grid-cols-1 h-[300px] sm:h-[400px] md:h-[550px]' : 
+                                    post.imageUrls.length === 2 ? 'grid-cols-2 h-[250px] sm:h-[300px] md:h-[400px]' : 
+                                    post.imageUrls.length === 3 ? 'grid-cols-2 grid-rows-2 h-[300px] sm:h-[400px] md:h-[500px]' : 
+                                    'grid-cols-2 grid-rows-2 h-[300px] sm:h-[400px] md:h-[500px]'
+                                }`}>
+                                    {post.imageUrls.map((imgUrl, idx) => (
+                                        <div key={idx} onClick={() => setImageViewModal({ open: true, url: imgUrl })} className={`relative bg-slate-100 dark:bg-slate-900 overflow-hidden cursor-pointer ${
+                                            post.imageUrls.length === 3 && idx === 0 ? 'col-span-2 row-span-1' : ''
+                                        }`}>
+                                            <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${imgUrl})`}}></div>
+                                            <img src={imgUrl} className="w-full h-full object-contain relative z-0 no-drag transition-transform duration-500 hover:scale-105" loading="lazy" />
+                                            {post.imageUrls.length >= 4 && idx === 3 && (
+                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                                                    <span className="text-white font-black text-2xl md:text-4xl drop-shadow-md">+</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm cursor-pointer" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}>
+                                    <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
+                                    <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
+                                </div>
+                            )}
 
                             <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); handlePostCopy(post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-2.5 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
                                 {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-4 h-4 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-4 h-4 md:w-6 md:h-6" />}
@@ -2016,9 +2041,17 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 ml-1 flex items-center gap-1.5">
                                                     <Icon name="image" className="w-3.5 h-3.5" /> Visual Output Asset
                                                 </p>
-                                                <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-700/80 rounded-2xl p-6 text-center hover:bg-white dark:hover:bg-slate-900/60 cursor-pointer group transition-all duration-300">
-                                                    <input type="file" accept="image/*" onChange={e => setPostModal({...postModal, imageFile: e.target.files[0]})} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                                                    {postModal.imageFile ? (
+                                                <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-[2rem] p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer group transition-colors">
+                                                    <input type="file" multiple accept="image/*" onChange={e => {
+                                                        const filesArray = Array.from(e.target.files).slice(0, 4);
+                                                        setPostModal({...postModal, imageFiles: filesArray});
+                                                    }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                                    {postModal.imageFiles && postModal.imageFiles.length > 0 ? (
+                                                        <div className="text-green-600 dark:text-green-400 font-bold text-sm flex flex-col items-center gap-2">
+                                                            <Icon name="checkcircle" className="w-8 h-8 text-green-500 animate-bounce" />
+                                                            <span className="text-[10px] font-mono uppercase tracking-widest">{postModal.imageFiles.length} Images Selected</span>
+                                                        </div>
+                                                    ) : postModal.imageFile ? (
                                                         <div className="text-green-600 dark:text-green-400 font-bold text-sm flex flex-col items-center gap-2">
                                                             <Icon name="checkcircle" className="w-8 h-8 text-green-500 animate-bounce" />
                                                             <span className="text-[10px] font-mono uppercase max-w-[200px] truncate px-2">{postModal.imageFile.name}</span>
@@ -2026,7 +2059,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                     ) : (
                                                         <div className="text-slate-400 font-bold text-sm flex flex-col items-center gap-2.5 group-hover:text-blue-500 transition-colors">
                                                             <Icon name="uploadcloud" className="w-8 h-8 text-slate-300 dark:text-slate-600 group-hover:scale-110 transition-transform" />
-                                                            <span className="text-[10px] uppercase tracking-wider">Tap to select generated image</span>
+                                                            <span className="text-[10px] uppercase tracking-wider">Tap to select up to 4 images</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -2423,7 +2456,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                                         {settingsSection === 'Language' && (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {['English', 'Sinhala (සිංහල)', 'Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'].map(lang => {
+                                                {['English', 'Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'].map(lang => {
                                                     const isSelected = profileData.language === lang || (!profileData.language && lang === 'English');
                                                     return (
                                                         <button 
@@ -2505,25 +2538,32 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 <div className="animate-in fade-in duration-700 max-w-xl mx-auto">
                                     <div className="flex items-center gap-4 mb-8 px-4"><div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center text-blue-600 dark:text-blue-400"><Icon name="bell" className="w-7 h-7" /></div><h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">{t('alerts')}</h2></div>
                                     <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 p-4 space-y-2">
-                                        {notifications.length === 0 ? <div className="text-center py-16"><Icon name="belloff" className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-4" /><p className="text-slate-400 font-bold text-xs uppercase">No new alerts.</p></div> : notifications.map(notif => (
-                                            <div key={notif.id} onClick={() => { 
-                                                if(notif.type === 'follow') {
-                                                    openPublicProfile(notif.fromUserId); 
-                                                } else if ((notif.type === 'like' || notif.type === 'comment') && notif.postId) {
-                                                    const targetPost = posts.find(p => p.id === notif.postId);
-                                                    if (targetPost) {
-                                                        setCommentModal({ open: true, post: targetPost, text: '' });
+                                        {notifications.length === 0 ? <div className="text-center py-16"><Icon name="belloff" className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-4" /><p className="text-slate-400 font-bold text-xs uppercase">No new alerts.</p></div> : notifications.map(notif => {
+                                            // Dynamic lookup to fetch the latest profile data for notifications
+                                            const liveUser = allCreators.find(c => c.id === notif.fromUserId);
+                                            const displayPhoto = liveUser ? liveUser.photoURL : notif.fromUserPhoto;
+                                            const displayName = liveUser ? liveUser.name : notif.fromUserName;
+
+                                            return (
+                                                <div key={notif.id} onClick={() => { 
+                                                    if(notif.type === 'follow') {
+                                                        openPublicProfile(notif.fromUserId); 
+                                                    } else if ((notif.type === 'like' || notif.type === 'comment') && notif.postId) {
+                                                        const targetPost = posts.find(p => p.id === notif.postId);
+                                                        if (targetPost) {
+                                                            setCommentModal({ open: true, post: targetPost, text: '' });
+                                                        } else {
+                                                            navigate('home');
+                                                        }
                                                     } else {
-                                                        navigate('home'); // Post එක මකලා නම් Home එකට යනවා
+                                                        navigate('home');
                                                     }
-                                                } else {
-                                                    navigate('home');
-                                                }
-                                            }} className={`flex items-start gap-4 p-5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-3xl cursor-pointer ${!notif.read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''}`}>
-                                                <img src={notif.fromUserPhoto} className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 object-cover no-drag" />
-                                                <div className="flex-1 pt-1"><p className="font-extrabold text-[15px] text-slate-900 dark:text-white">{notif.fromUserName} <span className="font-medium text-slate-500 dark:text-slate-400">{notif.type === 'follow' ? t('followedYou') : notif.type === 'like' ? 'liked your post' : 'commented on your post'}</span></p>{notif.commentText && <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">"{notif.commentText}"</p>}<p className="text-[10px] font-black text-blue-500 dark:text-blue-400 uppercase mt-2">{!notif.read && <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>}Alert</p></div>
-                                            </div>
-                                        ))}
+                                                }} className={`flex items-start gap-4 p-5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-3xl cursor-pointer ${!notif.read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''}`}>
+                                                    <img src={displayPhoto} className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 object-cover no-drag flex-shrink-0" />
+                                                    <div className="flex-1 pt-1"><p className="font-extrabold text-[15px] text-slate-900 dark:text-white">{displayName} <span className="font-medium text-slate-500 dark:text-slate-400">{notif.type === 'follow' ? t('followedYou') : notif.type === 'like' ? 'liked your post' : 'commented on your post'}</span></p>{notif.commentText && <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">"{notif.commentText}"</p>}<p className="text-[10px] font-black text-blue-500 dark:text-blue-400 uppercase mt-2">{!notif.read && <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>}Alert</p></div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                     <button onClick={() => navigate('home')} className="w-full py-5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-300 rounded-full font-black hover:bg-slate-200 dark:hover:bg-slate-700 uppercase tracking-[0.2em] text-[9px] mt-8 lg:hidden">Return to Feed</button>
                                 </div>
