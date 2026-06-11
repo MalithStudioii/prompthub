@@ -1774,7 +1774,16 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     </button>
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 relative ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400'}`}>
                                         <Icon name="bell" className="w-3.5 h-3.5" />
-                                        {hasUnreadNotifications && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                                        {hasUnreadNotifications ? (() => {
+                                            const latestUnread = notifications.find(n => !n.read);
+                                            const liveUser = latestUnread ? allCreators.find(c => c.id === latestUnread.fromUserId) : null;
+                                            const picUrl = liveUser ? liveUser.photoURL : latestUnread?.fromUserPhoto;
+                                            return picUrl ? (
+                                                <img src={picUrl} className="absolute -top-1 -right-1 w-4 h-4 rounded-full border-[1.5px] border-white dark:border-slate-800 object-cover shadow-sm animate-bounce" />
+                                            ) : (
+                                                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                            );
+                                        })() : null}
                                     </button>
                                 </div>
 
@@ -1786,11 +1795,21 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /></button>
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
                                         <Icon name="bell" />
-                                        {hasUnreadNotifications && (
-                                            <span className="absolute top-3 left-7 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md">
-                                                {hasUnreadNotifications > 9 ? '9+' : hasUnreadNotifications}
-                                            </span>
-                                        )}
+                                        {hasUnreadNotifications ? (() => {
+                                            const latestUnread = notifications.find(n => !n.read);
+                                            const liveUser = latestUnread ? allCreators.find(c => c.id === latestUnread.fromUserId) : null;
+                                            const picUrl = liveUser ? liveUser.photoURL : latestUnread?.fromUserPhoto;
+                                            return picUrl ? (
+                                                <div className="absolute -top-1 -right-3 flex items-center bg-red-500 rounded-full pl-0.5 pr-1.5 py-0.5 border-2 border-white dark:border-slate-900 shadow-md animate-bounce">
+                                                    <img src={picUrl} className="w-4 h-4 rounded-full object-cover mr-1 border border-white/50" />
+                                                    <span className="text-white text-[9px] font-black leading-none">{hasUnreadNotifications > 9 ? '9+' : hasUnreadNotifications}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900 shadow-md animate-bounce">
+                                                    {hasUnreadNotifications > 9 ? '9+' : hasUnreadNotifications}
+                                                </span>
+                                            );
+                                        })() : null}
                                     </button>
                                 </div>
 
@@ -2548,7 +2567,15 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             const displayName = liveUser ? liveUser.name : notif.fromUserName;
 
                                             return (
-                                                <div key={notif.id} onClick={() => { 
+                                                <div key={notif.id} onClick={async () => { 
+                                                    // 🚀 SMART FIX: Mark as read in Firebase Database permanently
+                                                    if (!notif.read) {
+                                                        try {
+                                                            const { db, appId, doc, updateDoc } = window.fb;
+                                                            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'notifications', notif.id), { read: true });
+                                                        } catch (error) { console.error("Mark read failed", error); }
+                                                    }
+
                                                     if(notif.type === 'follow') {
                                                         openPublicProfile(notif.fromUserId); 
                                                     } else if ((notif.type === 'like' || notif.type === 'comment') && notif.postId) {
@@ -2561,7 +2588,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                     } else {
                                                         navigate('home');
                                                     }
-                                                }} className={`flex items-start gap-4 p-5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-3xl cursor-pointer ${!notif.read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''}`}>
+                                                }} className={`flex items-start gap-4 p-5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-3xl cursor-pointer transition-colors ${!notif.read ? 'bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30' : ''}`}>
                                                     <img src={displayPhoto} className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 object-cover no-drag flex-shrink-0" />
                                                     <div className="flex-1 pt-1"><p className="font-extrabold text-[15px] text-slate-900 dark:text-white">{displayName} <span className="font-medium text-slate-500 dark:text-slate-400">{notif.type === 'follow' ? t('followedYou') : notif.type === 'like' ? 'liked your post' : 'commented on your post'}</span></p>{notif.commentText && <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">"{notif.commentText}"</p>}<p className="text-[10px] font-black text-blue-500 dark:text-blue-400 uppercase mt-2">{!notif.read && <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>}Alert</p></div>
                                                 </div>
