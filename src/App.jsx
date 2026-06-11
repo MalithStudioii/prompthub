@@ -74,10 +74,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 accountExists: 'Этот адрес электронной почты уже связан с другим провайдером. Пожалуйста, войдите с его помощью.'
             }
         };
-        
-        const fallbackLangs = ['Spanish (Español)', 'French (Français)', 'German (Deutsch)', 'Chinese (中文)', 'Japanese (日本語)', 'Arabic (العربية)', 'Hindi (हिन्दी)', 'Russian (Русский)'];
-        fallbackLangs.forEach(lang => { TRANSLATIONS[lang] = { ...TRANSLATIONS['English'] }; });
-
+                
         const Icon = ({ name, className = "w-5 h-5", title, ...props }) => {
             if (name === 'google') return (
                 <svg viewBox="0 0 24 24" className={className} {...props}>
@@ -558,7 +555,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             }, [view, posts]);
 
             const uploadToImgBB = async (file) => {
-                // Client-side compression targeting ~300KB
+                // Client-side image compression algorithm (Target: ~300KB)
                 const compressImage = (imgFile, targetSizeKB = 300) => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
@@ -568,13 +565,23 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             img.src = event.target.result;
                             img.onload = () => {
                                 const canvas = document.createElement('canvas');
-                                let width = img.width; let height = img.height;
-                                const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
+                                let width = img.width; 
+                                let height = img.height;
                                 
-                                if (width > height && width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                                else if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                // Max resolution cap to prevent memory bloat
+                                const MAX_WIDTH = 1200; 
+                                const MAX_HEIGHT = 1200;
                                 
-                                canvas.width = width; canvas.height = height;
+                                if (width > height && width > MAX_WIDTH) { 
+                                    height *= MAX_WIDTH / width; 
+                                    width = MAX_WIDTH; 
+                                } else if (height > MAX_HEIGHT) { 
+                                    width *= MAX_HEIGHT / height; 
+                                    height = MAX_HEIGHT; 
+                                }
+                                
+                                canvas.width = width; 
+                                canvas.height = height;
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0, width, height);
                                 
@@ -582,7 +589,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 const compress = () => {
                                     canvas.toBlob((blob) => {
                                         if (blob.size / 1024 > targetSizeKB && quality > 0.1) {
-                                            quality -= 0.1; 
+                                            quality -= 0.1; // Gracefully degrade quality until target is met
                                             compress();
                                         } else {
                                             resolve(new File([blob], imgFile.name, { type: 'image/jpeg', lastModified: Date.now() }));
@@ -596,7 +603,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 };
 
                 try {
+                    // Apply compression only if file exceeds 300KB
                     const optimizedFile = file.size > 300000 ? await compressImage(file) : file;
+                    
                     const formData = new FormData();
                     formData.append('image', optimizedFile);
                     
@@ -604,6 +613,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         method: 'POST',
                         body: formData
                     });
+                    
                     const resData = await response.json();
                     return resData.data.url;
                 } catch (error) {
