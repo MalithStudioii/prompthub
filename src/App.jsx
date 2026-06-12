@@ -2048,7 +2048,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 </div>
                             )}
 
-                            {{view === 'create_post' && (
+                            {view === 'create_post' && (
                                 <div className="animate-in slide-in-from-bottom-6 duration-500 max-w-xl mx-auto px-1">
                                     <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800/80 p-5 md:p-8 overflow-hidden relative">
                                         
