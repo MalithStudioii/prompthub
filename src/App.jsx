@@ -1405,6 +1405,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             };
 
             const toggleLike = async (post) => {
+                playCyberClick(); // ⚡ මෙන්න මේකයි මිස් වෙලා තිබුණේ! 
                 if (!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'});
                 
                 const { db, appId, doc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp } = window.fb;
@@ -1841,7 +1842,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 ) : (
                                     /* Normal Layout for Regular Creator Posts */
                                     <div className="w-full flex items-center justify-between">
-                                        <button onClick={() => toggleLike(post)} className={`flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-3.5 h-3.5 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
+                                        <button onClick={() => toggleLike(post)} className={`group flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-all duration-300 ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)] scale-110' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600 hover:scale-105'}`}><Icon name="thumbsup" className={`w-3.5 h-3.5 md:w-5 md:h-5 transition-transform duration-300 group-active:scale-75 ${post.likes?.includes?.(user?.uid) ? 'fill-current animate-pulse' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
                                         <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
                                         <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="repeat" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
                                         <button onClick={() => handleShare(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="share" /></button>
