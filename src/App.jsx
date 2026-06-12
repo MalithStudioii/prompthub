@@ -370,6 +370,39 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             }, [isReady, user, hasAdminAccess]);
             const [officialPost, setOfficialPost] = useState({ prompt: '', imageFile: null });
 
+            // 🚀 NEXIA PREMIUM LEADERBOARD ALGORITHM (Ranks by Posts)
+            const getCreatorRank = (userId) => {
+                // Count posts per user
+                const sorted = [...allCreators].map(c => ({
+                    id: c.id, 
+                    postCount: posts.filter(p => p.userId === c.id).length 
+                })).sort((a, b) => b.postCount - a.postCount); // Sort by highest posts
+
+                const idx = sorted.findIndex(c => c.id === userId);
+                return idx !== -1 ? idx + 1 : 999;
+            };
+
+            // ⚡ 100% NEXIA CUSTOM BADGE UI DESIGN
+            const renderNexiaBadge = (rank) => {
+                if (rank === 1) return (
+                    <div title="Weekly Champion: Most Posts" className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-300 via-yellow-500 to-amber-700 p-0.5 shadow-[0_0_20px_#eab308] animate-bounce z-40 flex items-center justify-center border-2 border-white dark:border-slate-900">
+                        <div className="absolute inset-0 rounded-full bg-white/30 animate-ping"></div>
+                        <Icon name="trophy" className="w-4 h-4 text-white drop-shadow-md relative z-10" />
+                    </div>
+                );
+                if (rank === 2) return (
+                    <div title="Rank 2: Silver Elite" className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gradient-to-tr from-slate-200 via-slate-400 to-slate-600 p-0.5 shadow-[0_0_15px_#94a3b8] z-40 flex items-center justify-center border-2 border-white dark:border-slate-900">
+                        <Icon name="trophy" className="w-3.5 h-3.5 text-white drop-shadow-md" />
+                    </div>
+                );
+                if (rank === 3) return (
+                    <div title="Rank 3: Bronze Pro" className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gradient-to-tr from-orange-300 via-orange-500 to-rose-700 p-0.5 shadow-[0_0_15px_#f97316] z-40 flex items-center justify-center border-2 border-white dark:border-slate-900">
+                        <Icon name="trophy" className="w-3.5 h-3.5 text-white drop-shadow-md" />
+                    </div>
+                );
+                return null;
+            };
+
             // ⏳ Auto-hide live popups exactly after 10 seconds stream
             useEffect(() => {
                 if (liveAlert) {
@@ -2205,14 +2238,35 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             <span className="flex-1 text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 md:ml-4">Creator</span>
                                             <span className="w-20 md:w-24 text-right text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('followers')}</span>
                                         </div>
-                                        {allCreators.sort((a, b) => (b.followersCount || 0) - (a.followersCount || 0)).slice(0, 10).map((creator, index) => (
-                                            <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className="flex items-center gap-3 md:gap-4 p-4 md:p-6 border-b border-slate-50 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors group">
-                                                <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-black text-xs md:text-sm shadow-sm ${index === 0 ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400' : index === 1 ? 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300' : index === 2 ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500'}`}>#{index + 1}</div>
-                                                <img src={creator.photoURL} className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl object-cover border border-slate-200 dark:border-slate-600 no-drag group-hover:scale-105 transition-transform" />
-                                                <div className="flex-1 min-w-0 flex flex-col justify-center"><div className="flex items-center gap-1 md:gap-2"><p className="font-extrabold text-[13px] md:text-base text-slate-900 dark:text-white truncate">{creator.name}</p>{getAuthorBadges(creator.id)}</div><p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 md:mt-1 truncate">Nexia Network</p></div>
-                                                <div className="w-16 md:w-24 text-right font-black text-slate-800 dark:text-slate-200 text-sm md:text-base">{creator.followersCount || 0}</div>
-                                            </div>
-                                        ))}
+                                        {/* 🚀 NEXIA DYNAMIC LEADERBOARD RANKED BY POSTS */}
+                                        {allCreators
+                                            .map(c => ({...c, postCount: posts.filter(p => p.userId === c.id).length }))
+                                            .sort((a, b) => b.postCount - a.postCount)
+                                            .slice(0, 10)
+                                            .map((creator, index) => {
+                                                const rank = index + 1;
+                                                return (
+                                                    <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className={`bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-6 shadow-sm border flex items-center justify-between cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] mb-3 mx-4 ${rank === 1 ? 'border-yellow-400 dark:border-yellow-500/50 shadow-[0_0_20px_rgba(250,204,21,0.15)] bg-gradient-to-r from-yellow-50/50 to-white dark:from-yellow-900/10 dark:to-slate-900' : 'border-slate-100 dark:border-slate-800'}`}>
+                                                        <div className="flex items-center gap-4 md:gap-5">
+                                                            <h2 className={`font-black text-xl md:text-3xl w-6 md:w-8 text-center ${rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-slate-400' : rank === 3 ? 'text-orange-500' : 'text-slate-300 dark:text-slate-700'}`}>#{rank}</h2>
+                                                            <div className="relative">
+                                                                {renderNexiaBadge(rank)}
+                                                                <img src={creator.photoURL} className="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] md:rounded-2xl object-cover border-2 border-slate-100 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm" />
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="font-extrabold text-[15px] md:text-lg text-slate-900 dark:text-white flex items-center gap-2">{creator.name} {creator.isOfficial && <Icon name="checkcircle" className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />}</h3>
+                                                                <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">{creator.postCount} {t('creations') || 'Creations'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right hidden sm:block">
+                                                            <div className="bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-700">
+                                                                <p className="text-[9px] uppercase tracking-widest font-black text-slate-400 mb-0.5">{t('followers') || 'Followers'}</p>
+                                                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{creator.followers?.length || 0}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                     </div>
                                     <button onClick={() => navigate('home')} className="w-full py-5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-300 rounded-full font-black hover:bg-slate-200 dark:hover:bg-slate-700 uppercase tracking-[0.2em] text-[9px] lg:hidden">Return to Feed</button>
                                 </div>
@@ -2238,6 +2292,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             </div>
                                             <div className="px-6 pb-12 relative flex flex-col items-center">
                                                 <div className="-mt-16 relative z-10 mb-4 secure-img-wrapper" style={{width: '128px', height: '128px'}}>
+                                                    {/* 🏆 NEXIA PREMIUM PROFILE BADGE INJECTION */}
+                                                    {renderNexiaBadge(getCreatorRank(targetData.id))}
+                                                    
                                                     <div className="secure-overlay cursor-pointer" onClick={() => setProfilePicModal({open: true, url: targetData.photoURL, userId: targetData.id || user?.uid, likes: targetData.profilePicLikes || []})}></div>
                                                     <img src={targetData.photoURL} className="w-32 h-32 rounded-[2.5rem] border-8 border-white dark:border-slate-800 bg-white dark:bg-slate-800 object-cover shadow-2xl no-drag" />
                                                     {isOwnProfile && uploading && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center z-20"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
