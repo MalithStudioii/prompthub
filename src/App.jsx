@@ -473,6 +473,59 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 return () => { document.removeEventListener('keydown', handleKeyDown); document.removeEventListener('contextmenu', preventContextMenu); };
             }, []);
 
+            // 🚀 NEXIA DYNAMIC SEO & OPEN GRAPH ENGINE (STEP 1 POLISH)
+            useEffect(() => {
+                let title = "Nexia PromptHub | Global AI Network";
+                let desc = "Join the world-class AI creators community. Share, discover, and evolve premium AI prompts.";
+                let ogImage = "https://nexus.vercel.app/logo.png"; // Default Platform Logo
+
+                // 🧠 Dynamic Logic: Change titles based on where the user is
+                if (view === 'profile' || (view === 'public_profile' && selectedUser)) {
+                    const userName = view === 'profile' ? profileData.name : selectedUser.name;
+                    if (userName) {
+                        title = `${userName} on Nexia | Elite AI Creator`;
+                        desc = `Check out ${userName}'s AI intelligence portfolio and prompts on Nexia.`;
+                        ogImage = view === 'profile' ? profileData.photoURL : selectedUser.photoURL;
+                    }
+                } else if (commentModal.open && commentModal.post) {
+                    title = `Prompt by ${commentModal.post.userName} | Nexia`;
+                    desc = `"${commentModal.post.prompt.substring(0, 100)}..." - Explore this AI formula.`;
+                    ogImage = commentModal.post.imageUrl;
+                } else if (view === 'leaderboard') {
+                    title = "Top AI Creators | Nexia Leaderboard";
+                } else if (view === 'admin_panel') {
+                    title = "Nexia Command Center | Admin";
+                }
+
+                // Update Browser Tab
+                document.title = title;
+                
+                // ⚡ Dynamic Meta Tag Injector function for Scrapers (WhatsApp, Facebook, X)
+                const setMetaTag = (attribute, attrValue, content) => {
+                    let tag = document.querySelector(`meta[${attribute}="${attrValue}"]`);
+                    if (!tag) {
+                        tag = document.createElement('meta');
+                        tag.setAttribute(attribute, attrValue);
+                        document.head.appendChild(tag);
+                    }
+                    if (content) tag.setAttribute("content", content);
+                };
+
+                // Standard SEO
+                setMetaTag("name", "description", desc);
+                // Facebook / Open Graph
+                setMetaTag("property", "og:title", title);
+                setMetaTag("property", "og:description", desc);
+                setMetaTag("property", "og:image", ogImage);
+                setMetaTag("property", "og:type", "website");
+                // Twitter / X
+                setMetaTag("name", "twitter:card", "summary_large_image");
+                setMetaTag("name", "twitter:title", title);
+                setMetaTag("name", "twitter:description", desc);
+                setMetaTag("name", "twitter:image", ogImage);
+
+            }, [view, selectedUser, profileData.name, commentModal]);
+
             const navigate = (newView) => {
                 if (view !== newView) {
                     setView(newView);
