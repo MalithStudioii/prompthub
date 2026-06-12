@@ -1353,9 +1353,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 setUploading(false);
             };
 
-            const submitReport = async (e) => {
-                e.preventDefault();
-                if (!reportModal.reason.trim()) return;
+            const submitReport = async (selectedReason) => {
+                if (!selectedReason) return;
                 const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
                 setUploading(true);
                 try {
@@ -1363,7 +1362,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         postId: reportModal.post.id,
                         postOwnerId: reportModal.post.userId,
                         reportedBy: user.uid,
-                        reason: reportModal.reason,
+                        reason: selectedReason,
                         timestamp: serverTimestamp(),
                         status: 'pending'
                     });
@@ -1375,6 +1374,18 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 }
                 setUploading(false);
             };
+
+            // 🚀 Admin Function: Delete User Profile & Stats completely
+            const deleteAdminUser = async (targetId, targetName) => {
+                if (!hasAdminAccess) return;
+                if (!window.confirm(`⚠️ WARNING: Are you sure you want to permanently delete ${targetName}'s profile data from Nexia?`)) return;
+                try {
+                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, 'artifacts', window.fb.appId, 'users', targetId, 'profile', 'info'));
+                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, 'artifacts', window.fb.appId, 'public', 'data', 'stats', targetId));
+                    alert("User purged successfully. 🛡️");
+                } catch (e) { alert("Failed to delete user."); }
+            };
+
             const handleSignOut = async () => {
                 const { auth, signOut } = window.fb;
                 try {
@@ -1994,7 +2005,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 {/* Desktop Only Icons Bar */}
                                 <div className="hidden md:flex items-center gap-6 mr-2 border-r border-slate-200 dark:border-slate-700 pr-6">
                                     <button onClick={() => setIsDarkMode(!isDarkMode)} className="transition-colors hover:scale-110 text-slate-400 dark:text-slate-500 hover:text-blue-600">{isDarkMode ? <Icon name="sun" /> : <Icon name="moon" />}</button>
-                                    {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`transition-colors hover:scale-110 ${view === 'admin_panel' ? 'text-red-500' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}><Icon name="sliders" /></button>}
+                                    {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`transition-colors relative hover:scale-110 ${view === 'admin_panel' ? 'text-red-500' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
+                                        <Icon name="sliders" />
+                                        {allReports.length > 0 && <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900 shadow-md animate-pulse">{allReports.length}</span>}
+                                    </button>}
                                     <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'leaderboard' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /></button>
                                     <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`transition-colors hover:scale-110 ${view === 'home' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /></button>
                                     <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`transition-colors relative hover:scale-110 ${view === 'notifications' ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
@@ -2037,7 +2051,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 w-full flex gap-8 justify-center">
                         
                         <aside className="hidden lg:flex flex-col w-[260px] flex-shrink-0 sticky top-28 h-fit space-y-2">
-                            {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`flex items-center gap-4 p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}><Icon name="sliders" /> {t('commandCenter')}</button>}
+                            {hasAdminAccess && <button onClick={() => navigate('admin_panel')} className={`flex justify-between items-center p-4 rounded-2xl font-black transition-all mb-4 ${view === 'admin_panel' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-500'}`}>
+                                <div className="flex items-center gap-4"><Icon name="sliders" /> {t('commandCenter')}</div>
+                                {allReports.length > 0 && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">{allReports.length}</span>}
+                            </button>}
                             <button onClick={() => { navigate('home'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'home' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="home" /> {t('globalStream')}</button>
                             <button onClick={() => { navigate('leaderboard'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'leaderboard' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="trophy" /> {t('leaderboard')}</button>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('notifications'); setHasUnreadNotifications(false); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all relative ${view === 'notifications' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}>
@@ -2144,8 +2161,14 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                                 <p className="text-[10px] font-bold text-slate-500">{creator.followersCount || 0} Followers</p>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-2 flex-wrap justify-end">
                                                             <button onClick={() => toggleAdminUserStatus(creator.id, 'isVerified')} className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ${creator.isVerified ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200 dark:border-slate-600'}`}><Icon name="checkcircle" className="w-4 h-4 inline mr-1"/> Verify</button>
+                                                            {hasAdminAccess && (
+                                                                <button onClick={() => navigate('admin_panel')} className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'admin_panel' ? 'text-red-500 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
+                                                                    <Icon name="sliders" className="w-5 h-5" />
+                                                                {allReports.length > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white ring-2 ring-white dark:ring-slate-900 animate-pulse">{allReports.length}</span>}
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 ))}
@@ -3477,6 +3500,25 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                                 <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em]">Nexia Evolution Mapping Protocol v1.0</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {/* 🚀 Report Post Modal (One-Click Selection) */}
+                    {reportModal.open && reportModal.post && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
+                            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center border border-slate-100 dark:border-slate-700">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase flex items-center gap-2"><Icon name="flag" className="text-red-500" /> Report Post</h2>
+                                    <button onClick={() => setReportModal({ open: false, post: null, reason: '' })} className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full text-slate-400 hover:text-red-500 transition-colors"><Icon name="x" /></button>
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Select a reason to report</p>
+                                <div className="space-y-2">
+                                    {['Spam or misleading', 'Inappropriate or NSFW content', 'Not an AI prompt', 'Harassment or hate speech'].map((reason, idx) => (
+                                        <button key={idx} disabled={uploading} onClick={() => submitReport(reason)} className="w-full text-left px-5 py-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 font-bold text-xs transition-colors border border-slate-100 dark:border-slate-700 hover:border-red-200">
+                                            {uploading ? 'Submitting...' : reason}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         </div>
