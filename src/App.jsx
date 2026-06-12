@@ -1595,17 +1595,17 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 <>
                                                     <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); setEditPostModal({ open: true, post: post, newPrompt: post.prompt }); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-lg md:rounded-xl text-slate-700 dark:text-slate-200">
                                                         <Icon name="edit" className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500" />
-                                                        <span className="font-bold text-xs">Edit Prompt</span>
+                                                        <span className="font-bold text-xs">{t('editPrompt') || 'Edit Prompt'}</span>
                                                     </button>
                                                     <button onClick={(e) => { e.stopPropagation(); deletePost(post.id); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
                                                         <Icon name="trash" className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
-                                                        <span className="font-bold text-xs">Delete Post</span>
+                                                        <span className="font-bold text-xs">{t('deletePost') || 'Delete Post'}</span>
                                                     </button>
                                                 </>
                                             ) : (
                                                 <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setReportModal({ open: true, post: post, reason: '' }); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
                                                     <Icon name="flag" className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
-                                                    <span className="font-bold text-xs">Report Post</span>
+                                                    <span className="font-bold text-xs">{t('reportPost') || 'Report Post'}</span>
                                                 </button>
                                             )}
                                         </div>
@@ -1696,15 +1696,15 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     /* 💎 Official Post එකක් නම් මෙතන කිසිම බටන් එකක් හෝ බාර් එකක් පෙන්වන්නේ නැත (Empty/Hidden) */
                                     <div className="hidden"></div>
                                 ) : (
-                                    /* Normal Layout for Regular Creator Posts (සාමාන්‍ය පෝස්ට් වලට විතරක් බටන්ස් පෙනේ) */
+                                    /* Normal Layout for Regular Creator Posts */
                                     <div className="w-full flex items-center justify-between">
                                         <button onClick={() => toggleLike(post)} className={`flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-colors ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="thumbsup" className={`w-3.5 h-3.5 md:w-5 md:h-5 ${post.likes?.includes?.(user?.uid) ? 'fill-current' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
                                         <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
-                                        <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors" title="Share on Nexia"><Icon name="repeat" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
+                                        <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="repeat" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
                                         <button onClick={() => handleShare(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="share" /></button>
-                                        <div className="flex items-center gap-1 md:gap-2 text-slate-400 dark:text-slate-500 font-bold text-[10px] md:text-xs cursor-default" title="Total Copies">
+                                        <div className="flex items-center gap-1 md:gap-2 text-slate-400 dark:text-slate-500 font-bold text-[10px] md:text-xs cursor-default">
                                             <Icon name="checkcircle" className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" /> 
-                                            <span>{post.copiesCount || 0} copies</span>
+                                            <span>{post.copiesCount || 0} {t('copies') || 'copies'}</span>
                                         </div>
                                         <button onClick={() => toggleSave(post)} className={`flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-3.5 h-3.5 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> <span className="hidden sm:inline">{profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</span></button>
                                     </div>
@@ -1856,8 +1856,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         )}
                     </button>
                             <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'profile' || view === 'public_profile' || view === 'edit_profile' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="user" /> {t('elitePortfolio')}</button>
-                            <button onClick={() => { navigate('settings'); setSettingsSection('menu'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'settings' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="settings" /> {t('settings')}</button>
-                            <div className="pt-6"><button onClick={() => { if(!user || user.isAnonymous) setAuthModal({...authModal, open: true, mode: 'login'}); else navigate('create_post'); }} className="w-full btn-nexus-main text-white py-4 rounded-[1.5rem] font-black text-xs tracking-widest shadow-xl active:scale-95 transition-all uppercase flex items-center justify-center gap-2"><Icon name="plus" /> {t('transmitInsight')}</button></div>
+                            <button onClick={() => { navigate('settings'); setSettingsSection('menu'); setSelectedUser(null); }} className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${view === 'settings' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}><Icon name="settings" /> {t('settings')}</button>                            
                         </aside>
 
                         <section className="flex-1 max-w-2xl w-full min-w-0 pb-safe" key={`main-view-${view}`}>
@@ -2049,7 +2048,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 </div>
                             )}
 
-                            {view === 'create_post' && (
+                            {{view === 'create_post' && (
                                 <div className="animate-in slide-in-from-bottom-6 duration-500 max-w-xl mx-auto px-1">
                                     <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800/80 p-5 md:p-8 overflow-hidden relative">
                                         
@@ -2060,7 +2059,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                     <Icon name="arrowleft" className="w-5 h-5" />
                                                 </button>
                                                 <div>
-                                                    <h2 className="text-md md:text-xl font-black text-slate-900 dark:text-white uppercase font-outfit tracking-tight">TRANSMIT INTEL</h2>
+                                                    <h2 className="text-md md:text-xl font-black text-slate-900 dark:text-white uppercase font-outfit tracking-tight">{t('transmitInsight') || 'TRANSMIT INTEL'}</h2>
                                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Deploy Formula to Global Stream</p>
                                                 </div>
                                             </div>
@@ -2073,25 +2072,56 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 ml-1 flex items-center gap-1.5">
                                                     <Icon name="image" className="w-3.5 h-3.5" /> Visual Output Asset
                                                 </p>
-                                                <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-[2rem] p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer group transition-colors">
+                                                
+                                                {/* ⚡ NEXIA PREMIUM DRAG & DROP ZONE WITH SMART PROGRESS BAR */}
+                                                <div 
+                                                    className="relative border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-[2rem] p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer group transition-all overflow-hidden"
+                                                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-500', 'bg-blue-50/50', 'dark:bg-blue-900/20'); }}
+                                                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50/50', 'dark:bg-blue-900/20'); }}
+                                                    onDrop={(e) => {
+                                                        e.preventDefault();
+                                                        e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50/50', 'dark:bg-blue-900/20');
+                                                        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                                            const filesArray = Array.from(e.dataTransfer.files).slice(0, 4);
+                                                            const bar = document.getElementById('nexia-upload-progress');
+                                                            if(bar) {
+                                                                bar.style.width = '0%'; bar.style.opacity = '1';
+                                                                void bar.offsetWidth; // Trigger DOM reflow
+                                                                setTimeout(() => { bar.style.width = '100%'; }, 50);
+                                                                setTimeout(() => { setPostModal({...postModal, imageFiles: filesArray}); }, 1300);
+                                                            } else { setPostModal({...postModal, imageFiles: filesArray}); }
+                                                        }
+                                                    }}
+                                                >
                                                     <input type="file" multiple accept="image/*" onChange={e => {
                                                         const filesArray = Array.from(e.target.files).slice(0, 4);
-                                                        setPostModal({...postModal, imageFiles: filesArray});
-                                                    }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                                        const bar = document.getElementById('nexia-upload-progress');
+                                                        if(bar) {
+                                                            bar.style.width = '0%'; bar.style.opacity = '1';
+                                                            void bar.offsetWidth; 
+                                                            setTimeout(() => { bar.style.width = '100%'; }, 50);
+                                                            setTimeout(() => { setPostModal({...postModal, imageFiles: filesArray}); }, 1300);
+                                                        } else { setPostModal({...postModal, imageFiles: filesArray}); }
+                                                    }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                                                    
+                                                    {/* ⚡ Nexia Premium Progress Bar */}
+                                                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-200 dark:bg-slate-700/50 z-10">
+                                                        <div id="nexia-upload-progress" className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 w-0 transition-all duration-[1200ms] ease-out shadow-[0_0_15px_#3b82f6] opacity-0"></div>
+                                                    </div>
+
                                                     {postModal.imageFiles && postModal.imageFiles.length > 0 ? (
-                                                        <div className="text-green-600 dark:text-green-400 font-bold text-sm flex flex-col items-center gap-2">
-                                                            <Icon name="checkcircle" className="w-8 h-8 text-green-500 animate-bounce" />
-                                                            <span className="text-[10px] font-mono uppercase tracking-widest">{postModal.imageFiles.length} Images Selected</span>
-                                                        </div>
-                                                    ) : postModal.imageFile ? (
-                                                        <div className="text-green-600 dark:text-green-400 font-bold text-sm flex flex-col items-center gap-2">
-                                                            <Icon name="checkcircle" className="w-8 h-8 text-green-500 animate-bounce" />
-                                                            <span className="text-[10px] font-mono uppercase max-w-[200px] truncate px-2">{postModal.imageFile.name}</span>
+                                                        <div className="text-green-600 dark:text-green-400 font-bold text-sm flex flex-col items-center gap-2 animate-in zoom-in duration-300 relative z-10">
+                                                            <div className="relative">
+                                                                <Icon name="checkcircle" className="w-8 h-8 text-green-500" />
+                                                                <div className="absolute inset-0 bg-green-500/20 blur-md rounded-full animate-pulse"></div>
+                                                            </div>
+                                                            <span className="text-[10px] font-mono uppercase tracking-widest">{postModal.imageFiles.length} Assets 100% Ready</span>
                                                         </div>
                                                     ) : (
-                                                        <div className="text-slate-400 font-bold text-sm flex flex-col items-center gap-2.5 group-hover:text-blue-500 transition-colors">
+                                                        <div className="text-slate-400 font-bold text-sm flex flex-col items-center gap-2.5 group-hover:text-blue-500 transition-colors relative z-10">
                                                             <Icon name="uploadcloud" className="w-8 h-8 text-slate-300 dark:text-slate-600 group-hover:scale-110 transition-transform" />
-                                                            <span className="text-[10px] uppercase tracking-wider">Tap to select up to 4 images</span>
+                                                            <span className="text-[10px] uppercase tracking-wider text-center">Drag & Drop or Tap to Select</span>
+                                                            <span className="text-[8px] uppercase tracking-widest opacity-60">Max 4 items allowed</span>
                                                         </div>
                                                     )}
                                                 </div>
