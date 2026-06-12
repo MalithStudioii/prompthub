@@ -260,7 +260,36 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             );
         };
 
-        // 🎵 NEXIA CYBER AUDIO ENGINE (Zero-Latency Web Audio API)
+        // 🚀 NEXIA QUANTUM SCROLL ENGINE (Intersection Observer & Lazy Loading)
+        const NexiaScrollEngine = ({ children }) => {
+            const [isVisible, setIsVisible] = React.useState(false);
+            const domRef = React.useRef();
+
+            React.useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    if (entries[0].isIntersecting) {
+                        setIsVisible(true);
+                        observer.unobserve(domRef.current);
+                    }
+                }, { rootMargin: '400px' }); // 400px before entering viewport for seamless render
+
+                const currentRef = domRef.current;
+                if (currentRef) observer.observe(currentRef);
+                return () => { if (currentRef) observer.unobserve(currentRef); };
+            }, []);
+
+            return (
+                <div ref={domRef} className={`transition-all duration-[800ms] ease-out w-full ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}>
+                    {isVisible ? children : (
+                        <div className="h-[400px] md:h-[500px] w-full bg-slate-100/50 dark:bg-slate-800/30 rounded-[2.5rem] md:rounded-[3.5rem] animate-pulse mb-8 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center gap-4">
+                            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Rendering Node...</span>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         // 🎵 NEXIA CYBER AUDIO ENGINE (LOUDER & BYPASS BROWSER BLOCKS)
         const playCyberClick = () => {
             try {
@@ -1685,7 +1714,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const renderPostCard = (post) => {
                 const postOwner = allCreators.find(c => c.id === (post.originalAuthorId || post.userId));
                 
-                // ✅ FIXED: Force Real Logo and Name for Official Posts (Overrides old database records completely)
+                // ✅ FIXED: Force Real Logo and Name for Official Posts
                 const displayPhoto = post.isOfficial ? '/logo.png' : (postOwner?.photoURL || post.userPhoto);
                 const displayName = post.isOfficial ? 'NEXIA - OFFICIAL' : (postOwner?.name || post.userName);
                 
@@ -1693,169 +1722,171 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 const reposterName = reposter?.name || post.repostedBy;
 
                 return (
-                    <div key={post.id} className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-5 md:mb-14 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
-                        
-                        {post.isRepost && (
-                            <div className="px-4 md:px-6 pt-3 md:pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
-                                <Icon name="repeat" className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" />
-                                <span><span className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); openPublicProfile(post.userId); }}>{reposterName}</span> shared this</span>
-                            </div>
-                        )}
+                    <NexiaScrollEngine key={post.id}>
+                        <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-5 md:mb-14 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
+                            
+                            {post.isRepost && (
+                                <div className="px-4 md:px-6 pt-3 md:pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
+                                    <Icon name="repeat" className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" />
+                                    <span><span className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); openPublicProfile(post.userId); }}>{reposterName}</span> shared this</span>
+                                </div>
+                            )}
 
-                        <div className="p-3 md:p-6 flex items-center justify-between relative">
-                            <div className="flex items-center gap-2.5 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
-                                <div className="p-0.5 rounded-lg md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={displayPhoto} className="w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
-                                <div className="flex flex-col">
-                                    <span className="font-extrabold text-[13px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1 flex-wrap">
-                                        {displayName} 
-                                        {post.isOfficial ? (
-                                            <span className="bg-blue-600 text-white text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="shieldcheck" className="w-2.5 h-2.5 md:w-3 md:h-3" /> OFFICIAL</span>
-                                        ) : (
-                                            getAuthorBadges(post.originalAuthorId || post.userId)
-                                        )}
-                                        {post.boostedAt && ((Date.now() / 1000) - post.boostedAt.seconds < 86400) && !post.isOfficial && <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="flame" className="w-2.5 h-2.5" /> Boosted</span>}
-                                    </span>
-                                    <span className="text-[8px] md:text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1.5 opacity-80 mt-1 md:mt-1.5">
-                                        <span className="flex items-center gap-1"><Icon name={post.isOfficial ? 'globe' : 'cpu'} className="w-2.5 md:w-3 mr-0.5" />{post.model}</span>
-                                        <span className="text-slate-300 dark:text-slate-600 font-normal">•</span>
-                                        <span className="text-slate-400 dark:text-slate-500 lowercase flex items-center gap-1"><Icon name="clock" className="w-2.5 h-2.5" />{formatTimeAgo(post.createdAt)}</span>
-                                    </span>
+                            <div className="p-3 md:p-6 flex items-center justify-between relative">
+                                <div className="flex items-center gap-2.5 md:gap-4 cursor-pointer group" onClick={() => openPublicProfile(post.originalAuthorId || post.userId)}>
+                                    <div className="p-0.5 rounded-lg md:rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-sm group-hover:scale-105 transition-transform"><img src={displayPhoto} className="w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-2xl bg-white dark:bg-slate-800 p-0.5 object-cover no-drag" /></div>
+                                    <div className="flex flex-col">
+                                        <span className="font-extrabold text-[13px] md:text-[16px] text-slate-800 dark:text-slate-200 tracking-tight leading-none group-hover:text-blue-600 transition-colors flex items-center gap-1 flex-wrap">
+                                            {displayName} 
+                                            {post.isOfficial ? (
+                                                <span className="bg-blue-600 text-white text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="shieldcheck" className="w-2.5 h-2.5 md:w-3 md:h-3" /> OFFICIAL</span>
+                                            ) : (
+                                                getAuthorBadges(post.originalAuthorId || post.userId)
+                                            )}
+                                            {post.boostedAt && ((Date.now() / 1000) - post.boostedAt.seconds < 86400) && !post.isOfficial && <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 rounded-md uppercase tracking-widest ml-1 shadow-sm flex items-center gap-1"><Icon name="flame" className="w-2.5 h-2.5" /> Boosted</span>}
+                                        </span>
+                                        <span className="text-[8px] md:text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1.5 opacity-80 mt-1 md:mt-1.5">
+                                            <span className="flex items-center gap-1"><Icon name={post.isOfficial ? 'globe' : 'cpu'} className="w-2.5 md:w-3 mr-0.5" />{post.model}</span>
+                                            <span className="text-slate-300 dark:text-slate-600 font-normal">•</span>
+                                            <span className="text-slate-400 dark:text-slate-500 lowercase flex items-center gap-1"><Icon name="clock" className="w-2.5 h-2.5" />{formatTimeAgo(post.createdAt)}</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(postOptionsMenuOpen === post.id ? null : post.id); }} 
+                                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 md:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        <Icon name="morehorizontal" className="w-4 h-4 md:w-5 md:h-5" />
+                                    </button>
+
+                                    {postOptionsMenuOpen === post.id && (
+                                        <>
+                                            <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); }}></div>
+                                            <div className="absolute right-0 top-full mt-2 w-44 md:w-48 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-in zoom-in-95 duration-200 p-1">
+                                                {(post.userId === user?.uid || isAdmin) ? (
+                                                    <>
+                                                        <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); setEditPostModal({ open: true, post: post, newPrompt: post.prompt }); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-lg md:rounded-xl text-slate-700 dark:text-slate-200">
+                                                            <Icon name="edit" className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500" />
+                                                            <span className="font-bold text-xs">{t('editPrompt') || 'Edit Prompt'}</span>
+                                                        </button>
+                                                        <button onClick={(e) => { e.stopPropagation(); deletePost(post.id); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
+                                                            <Icon name="trash" className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
+                                                            <span className="font-bold text-xs">{t('deletePost') || 'Delete Post'}</span>
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setReportModal({ open: true, post: post, reason: '' }); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
+                                                        <Icon name="flag" className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
+                                                        <span className="font-bold text-xs">{t('reportPost') || 'Report Post'}</span>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="relative">
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(postOptionsMenuOpen === post.id ? null : post.id); }} 
-                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 md:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                >
-                                    <Icon name="morehorizontal" className="w-4 h-4 md:w-5 md:h-5" />
-                                </button>
-
-                                {postOptionsMenuOpen === post.id && (
+                            <div className="secure-img-wrapper px-1.5 md:px-4 relative group">
+                                {post.imageUrls && post.imageUrls.length > 0 ? (
+                                    <div className={`grid gap-1 overflow-hidden rounded-[1.4rem] md:rounded-[3rem] shadow-sm ${
+                                        post.imageUrls.length === 1 ? 'grid-cols-1 h-[300px] sm:h-[400px] md:h-[550px]' : 
+                                        post.imageUrls.length === 2 ? 'grid-cols-2 h-[250px] sm:h-[300px] md:h-[400px]' : 
+                                        'grid-cols-2 grid-rows-2 h-[300px] sm:h-[400px] md:h-[500px]'
+                                    }`}>
+                                        {post.imageUrls.map((imgUrl, idx) => (
+                                            <div key={idx} onClick={() => setImageViewModal({ open: true, urls: post.imageUrls, currentIndex: idx })} className={`relative bg-slate-100 dark:bg-slate-900 overflow-hidden cursor-pointer ${
+                                                post.imageUrls.length === 3 && idx === 0 ? 'col-span-2 row-span-1' : ''
+                                            }`}>
+                                                <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${imgUrl})`}}></div>
+                                                <img src={imgUrl} className="w-full h-full object-cover relative z-0 no-drag transition-transform duration-500 hover:scale-105" loading="lazy" />
+                                                {post.imageUrls.length > 4 && idx === 3 && (
+                                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                                                        <span className="text-white font-black text-2xl md:text-4xl">+{post.imageUrls.length - 4}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
                                     <>
-                                        <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); }}></div>
-                                        <div className="absolute right-0 top-full mt-2 w-44 md:w-48 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-in zoom-in-95 duration-200 p-1">
-                                            {(post.userId === user?.uid || isAdmin) ? (
-                                                <>
-                                                    <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); setEditPostModal({ open: true, post: post, newPrompt: post.prompt }); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-lg md:rounded-xl text-slate-700 dark:text-slate-200">
-                                                        <Icon name="edit" className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500" />
-                                                        <span className="font-bold text-xs">{t('editPrompt') || 'Edit Prompt'}</span>
-                                                    </button>
-                                                    <button onClick={(e) => { e.stopPropagation(); deletePost(post.id); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
-                                                        <Icon name="trash" className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
-                                                        <span className="font-bold text-xs">{t('deletePost') || 'Delete Post'}</span>
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <button onClick={(e) => { e.stopPropagation(); setPostOptionsMenuOpen(null); if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); setReportModal({ open: true, post: post, reason: '' }); }} className="w-full flex items-center gap-2.5 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors rounded-xl text-red-600 dark:text-red-400">
-                                                    <Icon name="flag" className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
-                                                    <span className="font-bold text-xs">{t('reportPost') || 'Report Post'}</span>
-                                                </button>
-                                            )}
+                                        <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
+                                        <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm">
+                                            <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
+                                            <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
                                         </div>
                                     </>
                                 )}
-                            </div>
-                        </div>
 
-                        <div className="secure-img-wrapper px-1.5 md:px-4 relative group">
-                            {post.imageUrls && post.imageUrls.length > 0 ? (
-                                <div className={`grid gap-1 overflow-hidden rounded-[1.4rem] md:rounded-[3rem] shadow-sm ${
-                                    post.imageUrls.length === 1 ? 'grid-cols-1 h-[300px] sm:h-[400px] md:h-[550px]' : 
-                                    post.imageUrls.length === 2 ? 'grid-cols-2 h-[250px] sm:h-[300px] md:h-[400px]' : 
-                                    'grid-cols-2 grid-rows-2 h-[300px] sm:h-[400px] md:h-[500px]'
-                                }`}>
-                                    {post.imageUrls.map((imgUrl, idx) => (
-                                        <div key={idx} onClick={() => setImageViewModal({ open: true, urls: post.imageUrls, currentIndex: idx })} className={`relative bg-slate-100 dark:bg-slate-900 overflow-hidden cursor-pointer ${
-                                            post.imageUrls.length === 3 && idx === 0 ? 'col-span-2 row-span-1' : ''
-                                        }`}>
-                                            <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${imgUrl})`}}></div>
-                                            <img src={imgUrl} className="w-full h-full object-cover relative z-0 no-drag transition-transform duration-500 hover:scale-105" loading="lazy" />
-                                            {post.imageUrls.length > 4 && idx === 3 && (
-                                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                                                    <span className="text-white font-black text-2xl md:text-4xl">+{post.imageUrls.length - 4}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                                <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); handlePostCopy(post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-2.5 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
+                                    {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-4 h-4 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-4 h-4 md:w-6 md:h-6" />}
+                                </button>
+                            </div>
+
+                            <div className="px-3 pb-3 pt-3 md:px-8 md:pb-6 md:pt-6">
+                                <div className="bg-slate-50/70 dark:bg-slate-900/50 p-3.5 md:p-7 rounded-[1.4rem] md:rounded-[2.8rem] border border-slate-100 dark:border-slate-700 italic relative mb-3">
+                                    {(() => {
+                                        const isExpanded = expandedPrompts[post.id];
+                                        const isLongPrompt = post.prompt && post.prompt.length > 150;
+                                        const displayPromptText = (!isLongPrompt || isExpanded) ? post.prompt : post.prompt.substring(0, 150) + '...';
+                                        
+                                        return (
+                                            <div className="text-[12px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-loose break-words whitespace-pre-wrap no-select">
+                                                {renderDynamicPrompt(displayPromptText, post.id)}
+                                                {isLongPrompt && (
+                                                    <button onClick={(e) => togglePrompt(post.id, e)} className="text-blue-600 dark:text-blue-400 font-extrabold ml-1.5 hover:underline focus:outline-none">
+                                                        {isExpanded ? 'See less' : 'See more'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                    <div className="absolute -top-2.5 -left-0.5 bg-white dark:bg-slate-800 p-0.5 rounded border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-2.5 h-2.5 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="secure-overlay cursor-pointer z-10" onClick={() => setImageViewModal({ open: true, url: post.imageUrl })}></div>
-                                    <div className="bg-slate-100 dark:bg-slate-950 rounded-[1.4rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center relative w-full h-[260px] sm:h-[400px] md:h-[550px] shadow-sm">
-                                        <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-60 dark:opacity-40 scale-110" style={{backgroundImage: `url(${post.imageUrl})`}}></div>
-                                        <img src={post.imageUrl} className="w-full h-full object-contain relative z-0 no-drag drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
-                                    </div>
-                                </>
-                            )}
-
-                            <button onClick={() => { const ta = document.createElement("textarea"); ta.value = post.prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); setCopiedId(post.id); handlePostCopy(post); setTimeout(() => setCopiedId(null), 2000); }} className="absolute bottom-4 right-4 md:bottom-8 md:right-8 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-900 dark:text-white p-2.5 md:p-4 rounded-xl md:rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border border-white/20 dark:border-slate-700 flex items-center justify-center z-20">
-                                {copiedId === post.id ? <Icon name="checkcheck" className="text-green-600 dark:text-green-400 w-4 h-4 md:w-6 md:h-6" /> : <Icon name="clipboard" className="w-4 h-4 md:w-6 md:h-6" />}
-                            </button>
-                        </div>
-
-                        <div className="px-3 pb-3 pt-3 md:px-8 md:pb-6 md:pt-6">
-                            <div className="bg-slate-50/70 dark:bg-slate-900/50 p-3.5 md:p-7 rounded-[1.4rem] md:rounded-[2.8rem] border border-slate-100 dark:border-slate-700 italic relative mb-3">
-                                {(() => {
-                                    const isExpanded = expandedPrompts[post.id];
-                                    const isLongPrompt = post.prompt && post.prompt.length > 150;
-                                    const displayPromptText = (!isLongPrompt || isExpanded) ? post.prompt : post.prompt.substring(0, 150) + '...';
-                                    
-                                    return (
-                                        <div className="text-[12px] md:text-[15px] font-mono text-slate-600 dark:text-slate-300 leading-loose break-words whitespace-pre-wrap no-select">
-                                            {renderDynamicPrompt(displayPromptText, post.id)}
-                                            {isLongPrompt && (
-                                                <button onClick={(e) => togglePrompt(post.id, e)} className="text-blue-600 dark:text-blue-400 font-extrabold ml-1.5 hover:underline focus:outline-none">
-                                                    {isExpanded ? 'See less' : 'See more'}
-                                                </button>
-                                            )}
-                                        </div>
-                                    );
-                                })()}
-                                <div className="absolute -top-2.5 -left-0.5 bg-white dark:bg-slate-800 p-0.5 rounded border border-slate-100 dark:border-slate-700 shadow-sm"><Icon name="terminal" className="w-2.5 h-2.5 md:w-4 md:h-4 text-slate-300 dark:text-slate-500" /></div>
-                            </div>
-                            
-                            {post.userId === user?.uid && (
-                                <button 
-                                    disabled 
-                                    className="w-full flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2 md:py-2.5 rounded-xl mb-3 border border-slate-200/40 dark:border-slate-700/40 cursor-not-allowed"
-                                >
-                                    <Icon name="lock" className="w-3.5 h-3.5" /> Boost Post (⚡ Coins System Coming Soon)
-                                </button>
-                            )}
-
-                            {/* 🚀 Remix / Repost පෝස්ට් එකක් නම් විතරක් පෙනෙන Evolution Tree Button එක */}
-                            {post.parentId && (
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); navigateToTree(post.parentId); }} 
-                                    className="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all mb-3"
-                                >
-                                    <Icon name="terminal" className="w-3.5 h-3.5" /> View Evolution Tree
-                                </button>
-                            )}
-                            
-                            {/* Actions Footer Bar */}
-                            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3 md:pt-4 px-1 mt-3 md:mt-4">
-                                {post.isOfficial ? (
-                                    /* 💎 Official Post එකක් නම් මෙතන කිසිම බටන් එකක් හෝ බාර් එකක් පෙන්වන්නේ නැත (Empty/Hidden) */
-                                    <div className="hidden"></div>
-                                ) : (
-                                    /* Normal Layout for Regular Creator Posts */
-                                    <div className="w-full flex items-center justify-between">
-                                        <button onClick={() => toggleLike(post)} className={`group flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-all duration-300 ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)] scale-110' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600 hover:scale-105'}`}><Icon name="thumbsup" className={`w-3.5 h-3.5 md:w-5 md:h-5 transition-transform duration-300 group-active:scale-75 ${post.likes?.includes?.(user?.uid) ? 'fill-current animate-pulse' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
-                                        <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
-                                        <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="repeat" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
-                                        <button onClick={() => handleShare(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="share" /></button>
-                                        <div className="flex items-center gap-1 md:gap-2 text-slate-400 dark:text-slate-500 font-bold text-[10px] md:text-xs cursor-default">
-                                            <Icon name="checkcircle" className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" /> 
-                                            <span>{post.copiesCount || 0} {t('copies') || 'copies'}</span>
-                                        </div>
-                                        <button onClick={() => toggleSave(post)} className={`flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-3.5 h-3.5 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> <span className="hidden sm:inline">{profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</span></button>
-                                    </div>
+                                
+                                {post.userId === user?.uid && (
+                                    <button 
+                                        disabled 
+                                        className="w-full flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2 md:py-2.5 rounded-xl mb-3 border border-slate-200/40 dark:border-slate-700/40 cursor-not-allowed"
+                                    >
+                                        <Icon name="lock" className="w-3.5 h-3.5" /> Boost Post (⚡ Coins System Coming Soon)
+                                    </button>
                                 )}
+
+                                {/* 🚀 Remix / Repost පෝස්ට් එකක් නම් විතරක් පෙනෙන Evolution Tree Button */}
+                                {post.parentId && (
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); navigateToTree(post.parentId); }} 
+                                        className="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all mb-3"
+                                    >
+                                        <Icon name="terminal" className="w-3.5 h-3.5" /> View Evolution Tree
+                                    </button>
+                                )}
+                                
+                                {/* Actions Footer Bar */}
+                                <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3 md:pt-4 px-1 mt-3 md:mt-4">
+                                    {post.isOfficial ? (
+                                        /* 💎 Official Post එකක් නම් මෙතන කිසිම බටන් එකක් හෝ බාර් එකක් පෙන්වන්නේ නැත (Empty/Hidden) */
+                                        <div className="hidden"></div>
+                                    ) : (
+                                        /* Normal Layout for Regular Creator Posts */
+                                        <div className="w-full flex items-center justify-between">
+                                            <button onClick={() => toggleLike(post)} className={`group flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-all duration-300 ${post.likes?.includes?.(user?.uid) ? 'text-blue-600 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)] scale-110' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600 hover:scale-105'}`}><Icon name="thumbsup" className={`w-3.5 h-3.5 md:w-5 md:h-5 transition-transform duration-300 group-active:scale-75 ${post.likes?.includes?.(user?.uid) ? 'fill-current animate-pulse' : ''}`} /> {typeof post.likes === 'number' ? post.likes : (post.likes?.length || 0)}</button>
+                                            <button onClick={() => setCommentModal({ open: true, post: post, text: '' })} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="message" className="w-3.5 h-3.5 md:w-5 md:h-5" /> {post.comments?.length || 0}</button>
+                                            <button onClick={() => handleRepostClick(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="repeat" className="w-3.5 h-3.5 md:w-5 md:h-5" /></button>
+                                            <button onClick={() => handleShare(post)} className="flex items-center gap-1 md:gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 font-bold text-[10px] md:text-xs transition-colors"><Icon name="share" /></button>
+                                            <div className="flex items-center gap-1 md:gap-2 text-slate-400 dark:text-slate-500 font-bold text-[10px] md:text-xs cursor-default">
+                                                <Icon name="checkcircle" className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" /> 
+                                                <span>{post.copiesCount || 0} {t('copies') || 'copies'}</span>
+                                            </div>
+                                            <button onClick={() => toggleSave(post)} className={`flex items-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs transition-colors ${profileData.savedPosts?.includes(post.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'}`}><Icon name="bookmark" className={`w-3.5 h-3.5 md:w-5 md:h-5 ${profileData.savedPosts?.includes(post.id) ? 'fill-current' : ''}`} /> <span className="hidden sm:inline">{profileData.savedPosts?.includes(post.id) ? t('saved') : t('save')}</span></button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </NexiaScrollEngine>
                 );
             };
 
