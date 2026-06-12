@@ -261,23 +261,38 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
         };
 
         // 🎵 NEXIA CYBER AUDIO ENGINE (Zero-Latency Web Audio API)
+        // 🎵 NEXIA CYBER AUDIO ENGINE (LOUDER & BYPASS BROWSER BLOCKS)
         const playCyberClick = () => {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (!AudioContext) return;
                 const ctx = new AudioContext();
+
+                // 🚀 BROWSER FIX: Wake up the audio engine if it's sleeping
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
                 gain.connect(ctx.destination);
-                osc.type = 'sine'; // High-tech blip sound
-                osc.frequency.setValueAtTime(1200, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime); // Subtle volume
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+                
+                osc.type = 'sine'; // High-tech blip
+                // සවුන්ඩ් එකේ Pitch එක ටිකක් වෙනස් කළා පැහැදිලිව ඇහෙන්න
+                osc.frequency.setValueAtTime(1500, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+                
+                // 🔊 Volume එක 0.1 ඉඳන් 0.5 ට වැඩි කළා
+                gain.gain.setValueAtTime(0.5, ctx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                
                 osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 0.05);
-            } catch (e) {}
+                // වෙලාවත් තත්පර 0.1ක් කළා (කලින් 0.05 යි)
+                osc.stop(ctx.currentTime + 0.1); 
+            } catch (e) {
+                console.error("Nexia Audio Engine Error:", e);
+            }
         };
 
         const App = () => {
