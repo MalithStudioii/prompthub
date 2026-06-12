@@ -386,6 +386,25 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const [notifications, setNotifications] = useState([]);
             const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
             const [liveAlert, setLiveAlert] = useState(null);
+
+            // 🗺️ NEXIA FIRST-TIME ONBOARDING TOUR STATE
+            const [showTour, setShowTour] = useState(false);
+            const [tourStep, setTourStep] = useState(0);
+
+            useEffect(() => {
+                const tourCompleted = localStorage.getItem('nexia_tour_completed');
+                if (!tourCompleted) {
+                    setTimeout(() => setShowTour(true), 2500); // App එක ලෝඩ් වෙලා තත්පර 2.5කින් ලස්සනට එනවා
+                }
+            }, []);
+
+            const tourSteps = [
+                { icon: 'globe', title: 'Welcome to Nexia', desc: 'You are now connected to the premier AI Intelligence Network. Let us show you around the interface.' },
+                { icon: 'cpu', title: 'Intelligence Formulas', desc: 'Prompts are not just text here. Copy, remix, and share high-quality AI prompts with the world.' },
+                { icon: 'terminal', title: 'The Evolution Tree', desc: 'When you remix a prompt, it branches out. Explore the Evolution Tree to trace the ancestry of any digital artifact.' },
+                { icon: 'trophy', title: 'Climb the Ranks', desc: 'Share premium intel, gain followers, and earn elite badges to climb the Global Leaderboard.' },
+                { icon: 'sparkles', title: 'Ready to Deploy?', desc: 'Tap the + button to transmit your first AI intel to the Global Stream. Welcome to the future.' }
+            ];
             
             const [allCreators, setAllCreators] = useState([]);
             const [allFollows, setAllFollows] = useState([]); 
@@ -2885,6 +2904,48 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             </div>
                         </aside>
                     </main>
+
+                    {/* 🗺️ NEXIA ONBOARDING TOUR MODAL */}
+                    {showTour && (
+                        <div className="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4">
+                            <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-[0_0_50px_rgba(37,99,235,0.2)] border border-blue-500/30 animate-in zoom-in-95 duration-500 relative overflow-hidden text-center">
+                                {/* Cyber Background Accents */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+                                
+                                <div className="relative z-10">
+                                    <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-blue-100 dark:border-blue-800">
+                                        <Icon name={tourSteps[tourStep].icon} className="w-10 h-10 animate-bounce" />
+                                    </div>
+                                    
+                                    <div className="flex justify-center gap-1.5 mb-6">
+                                        {tourSteps.map((_, idx) => (
+                                            <div key={idx} className={`h-1.5 rounded-full transition-all duration-300 ${idx === tourStep ? 'w-6 bg-blue-600 shadow-[0_0_8px_#3b82f6]' : 'w-1.5 bg-slate-200 dark:bg-slate-700'}`}></div>
+                                        ))}
+                                    </div>
+
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-3 font-outfit">{tourSteps[tourStep].title}</h2>
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">{tourSteps[tourStep].desc}</p>
+                                    
+                                    <div className="flex gap-3">
+                                        {tourStep < tourSteps.length - 1 && (
+                                            <button onClick={() => { playCyberClick(); localStorage.setItem('nexia_tour_completed', 'true'); setShowTour(false); }} className="flex-1 py-4 font-bold text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-widest transition-colors">Skip</button>
+                                        )}
+                                        <button 
+                                            onClick={() => {
+                                                playCyberClick();
+                                                if (tourStep < tourSteps.length - 1) setTourStep(prev => prev + 1);
+                                                else { localStorage.setItem('nexia_tour_completed', 'true'); setShowTour(false); }
+                                            }} 
+                                            className={`${tourStep === tourSteps.length - 1 ? 'w-full' : 'flex-1'} bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-600/30`}
+                                        >
+                                            {tourStep === tourSteps.length - 1 ? 'Start Exploring' : 'Next'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* 🔔 ADVANCED LIVE POPUP NOTIFICATION (10s Auto-hide + Close Button) */}
                     {liveAlert && (
