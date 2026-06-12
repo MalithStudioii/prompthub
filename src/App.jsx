@@ -356,13 +356,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             // 🚀 Evolution Tree Modal State
             const [treeModal, setTreeModal] = useState({ open: false, rootPost: null, relatedPosts: [] });
 
-            // 🚀 මැකිලා ගිය External Share Function එක
+            // 🚀 100% RELIABLE EXTERNAL SHARE FUNCTION
             const handleShare = async (post) => {
-                if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
-                    try { await navigator.share({ title: 'Nexia AI', text: `Check out this AI Prompt by ${post.userName}: "${post.prompt}"`, url: window.location.href }); } catch (err) {}
-                } else {
-                    setShareModal({ open: true, post: post });
-                }
+                playCyberClick(); // ⚡ Sound effect
+                setShareModal({ open: true, post: post }); // Always open the beautiful Nexia Modal!
             };
 
             const [profilePicModal, setProfilePicModal] = useState({ open: false, url: '', userId: '', likes: [] });
@@ -1753,7 +1750,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                 return (
                     <NexiaScrollEngine key={post.id}>
-                        <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-5 md:mb-14 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
+                        {/* 🚀 POST GAP REDUCED */}
+                    <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-3 md:mb-6 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
                             
                             {post.isRepost && (
                                 <div className="px-4 md:px-6 pt-3 md:pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
@@ -3073,8 +3071,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         
                         {/* 🛡️ MOBILE ADMIN PORTAL GATEWAY */}
                         {hasAdminAccess && (
-                            <button onClick={() => navigate('admin_panel')} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${view === 'admin_panel' ? 'text-red-500 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
+                            <button onClick={() => navigate('admin_panel')} className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'admin_panel' ? 'text-red-500 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
                                 <Icon name="sliders" className="w-5 h-5" />
+                                {allReports.length > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white ring-2 ring-white dark:ring-slate-900 animate-pulse">{allReports.length}</span>}
                             </button>
                         )}
                         
