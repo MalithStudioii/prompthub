@@ -260,6 +260,26 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             );
         };
 
+        // 🎵 NEXIA CYBER AUDIO ENGINE (Zero-Latency Web Audio API)
+        const playCyberClick = () => {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine'; // High-tech blip sound
+                osc.frequency.setValueAtTime(1200, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime); // Subtle volume
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.05);
+            } catch (e) {}
+        };
+
         const App = () => {
             const [isReady, setIsReady] = useState(false);
             const [user, setUser] = useState(null);
