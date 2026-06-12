@@ -284,6 +284,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             };
 
             const [profilePicModal, setProfilePicModal] = useState({ open: false, url: '', userId: '', likes: [] });
+            
+            // 🚀 NEW: Advanced Image Cropping Matrix States
+            const [cropModal, setCropModal] = useState({ open: false, file: null, previewUrl: '', type: 'avatar' });
+            const [cropZoom, setCropZoom] = useState(1);
             const [imageViewModal, setImageViewModal] = useState({ open: false, url: '' });
             const [privacyDropdownOpen, setPrivacyDropdownOpen] = useState(false);
             const [postOptionsMenuOpen, setPostOptionsMenuOpen] = useState(null); // null or postId
@@ -2212,7 +2216,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 {isOwnProfile && <><div className="absolute inset-0 bg-black/10 z-10"></div>
                                                 {uploading && <div className="absolute inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-20"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
                                                 <label htmlFor="cover-upload" className="absolute bottom-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-black/70 border border-white/20 z-30"><Icon name="camera" /></label>
-                                                <input type="file" id="cover-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'cover')} disabled={uploading} /></>}
+                                                <input type="file" id="cover-upload" accept="image/*" className="hidden" onChange={(e) => { if(e.target.files[0]) setCropModal({ open: true, file: e.target.files[0], previewUrl: URL.createObjectURL(e.target.files[0]), type: 'cover' }); e.target.value = ''; }} disabled={uploading} /></>}
                                             </div>
                                             <div className="px-6 pb-12 relative flex flex-col items-center">
                                                 <div className="-mt-16 relative z-10 mb-4 secure-img-wrapper" style={{width: '128px', height: '128px'}}>
@@ -2220,7 +2224,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                     <img src={targetData.photoURL} className="w-32 h-32 rounded-[2.5rem] border-8 border-white dark:border-slate-800 bg-white dark:bg-slate-800 object-cover shadow-2xl no-drag" />
                                                     {isOwnProfile && uploading && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center z-20"><div className="loader-spinner rounded-full border-4 border-t-4 border-blue-600 h-8 w-8"></div></div>}
                                                     {isOwnProfile && <><label htmlFor="avatar-upload" className="absolute bottom-0 right-0 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center cursor-pointer border-4 border-white dark:border-slate-800 z-30 shadow-xl hover:bg-blue-600 transition-colors"><Icon name="camera" className="w-4 h-4" /></label>
-                                                    <input type="file" id="avatar-upload" accept="image/*" className="hidden" onChange={(e) => handleQuickImageUpdate(e.target.files[0], 'avatar')} disabled={uploading} /></>}
+                                                    <input type="file" id="avatar-upload" accept="image/*" className="hidden" onChange={(e) => { if(e.target.files[0]) setCropModal({ open: true, file: e.target.files[0], previewUrl: URL.createObjectURL(e.target.files[0]), type: 'avatar' }); e.target.value = ''; }} disabled={uploading} /></>}
                                                 </div>
                                                 
                                                 <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase flex items-center gap-2 font-outfit">
@@ -3333,6 +3337,112 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             <p className="text-slate-500 font-mono text-[9px] uppercase mt-1.5 tracking-widest">Deploying core assets to cognitive stream...</p>
                         </div>
                     )}
+
+                    {/* ✂️ NEXIA QUANTUM CROP ENGINE MODAL */}
+                    {cropModal.open && (
+                        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-xl animate-in fade-in duration-200">
+                            <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-700">
+                                
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-lg md:text-xl font-black text-slate-900 dark:text-white uppercase flex items-center gap-2">
+                                        <Icon name="camera" className="text-blue-500" /> 
+                                        {cropModal.type === 'avatar' ? 'Adjust Profile Picture' : 'Adjust Cover Image'}
+                                    </h2>
+                                    <button onClick={() => { setCropModal({ open: false, file: null, previewUrl: '', type: 'avatar' }); setCropZoom(1); }} className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full text-slate-400 hover:text-red-500 transition-colors">
+                                        <Icon name="x" className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 text-center">Zoom & Center Your Image</p>
+
+                                {/* Live Preview Box */}
+                                <div className="relative w-full bg-slate-100 dark:bg-slate-900 rounded-3xl overflow-hidden mb-6 flex items-center justify-center border border-slate-200 dark:border-slate-700" style={{ height: '300px' }}>
+                                    <div 
+                                        className="relative overflow-hidden shadow-2xl" 
+                                        style={{ 
+                                            width: cropModal.type === 'avatar' ? '250px' : '100%', 
+                                            height: cropModal.type === 'avatar' ? '250px' : '160px', 
+                                            borderRadius: cropModal.type === 'avatar' ? '50%' : '1rem' 
+                                        }}
+                                    >
+                                        <img 
+                                            src={cropModal.previewUrl} 
+                                            className="w-full h-full object-cover transition-transform duration-100" 
+                                            style={{ transform: `scale(${cropZoom})` }} 
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_0_2000px_rgba(0,0,0,0.3)] z-10"></div>
+                                </div>
+
+                                {/* Zoom Slider */}
+                                <div className="mb-8 px-2">
+                                    <div className="flex items-center gap-4">
+                                        <Icon name="image" className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                                        <input type="range" min="1" max="3" step="0.1" value={cropZoom} onChange={(e) => setCropZoom(parseFloat(e.target.value))} className="flex-1 accent-blue-600 cursor-pointer" />
+                                        <Icon name="image" className="w-6 h-6 text-slate-400 flex-shrink-0" />
+                                    </div>
+                                </div>
+
+                                <button 
+                                    disabled={uploading} 
+                                    onClick={() => {
+                                        setUploading(true);
+                                        const img = new Image();
+                                        img.src = cropModal.previewUrl;
+                                        img.onload = async () => {
+                                            const canvas = document.createElement('canvas');
+                                            const ctx = canvas.getContext('2d');
+                                            
+                                            // Matrix Calculations based on type
+                                            const isAvatar = cropModal.type === 'avatar';
+                                            const targetWidth = isAvatar ? 500 : 1200;
+                                            const targetHeight = isAvatar ? 500 : 400; // 3:1 ratio for cover
+                                            
+                                            canvas.width = targetWidth; 
+                                            canvas.height = targetHeight;
+                                            
+                                            let sourceAspect = img.width / img.height;
+                                            let targetAspect = targetWidth / targetHeight;
+                                            let drawWidth = img.width; 
+                                            let drawHeight = img.height;
+                                            let offsetX = 0; let offsetY = 0;
+
+                                            // Simulate CSS object-fit: cover
+                                            if (sourceAspect > targetAspect) {
+                                                drawWidth = img.height * targetAspect;
+                                                offsetX = (img.width - drawWidth) / 2;
+                                            } else {
+                                                drawHeight = img.width / targetAspect;
+                                                offsetY = (img.height - drawHeight) / 2;
+                                            }
+
+                                            // Apply Zoom coordinates directly to canvas
+                                            drawWidth /= cropZoom; 
+                                            drawHeight /= cropZoom;
+                                            offsetX += (drawWidth * (cropZoom - 1)) / 2;
+                                            offsetY += (drawHeight * (cropZoom - 1)) / 2;
+
+                                            ctx.fillStyle = '#000'; 
+                                            ctx.fillRect(0, 0, targetWidth, targetHeight);
+                                            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight, 0, 0, targetWidth, targetHeight);
+                                            
+                                            canvas.toBlob(async (blob) => {
+                                                const file = new File([blob], `nexia_cropped_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                                                await handleQuickImageUpdate(file, cropModal.type);
+                                                setCropModal({ open: false, file: null, previewUrl: '', type: 'avatar' });
+                                                setCropZoom(1);
+                                                setUploading(false);
+                                            }, 'image/jpeg', 0.9);
+                                        };
+                                    }}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-sm uppercase hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+                                >
+                                    {uploading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <><Icon name="checkcircle" className="w-5 h-5"/> CROP & UPLOAD</>}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             );
         };
