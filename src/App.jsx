@@ -2230,7 +2230,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         <button className="bg-blue-600 text-white w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-[1rem] hover:bg-blue-700 transition-colors shadow-sm flex-shrink-0"><Icon name="plus" className="w-5 h-5" /></button>
                                     </div>
 
-                                    <div className="sticky top-[60px] md:top-[80px] z-30 bg-[#F8FAFC] dark:bg-[#020617] pt-2 pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+                                    {/* 🚀 FIXED: Removed ugly top gap on mobile */}
+                                    <div className="sticky top-[60px] md:top-[80px] z-30 bg-[#F8FAFC] dark:bg-[#020617] pt-0 pb-4 -mx-4 px-4 md:mx-0 md:px-0 -mt-5 md:mt-0">
                                         <div className="flex flex-col gap-4">
                                             <div className="flex justify-center md:justify-start gap-4">
                                                 <button onClick={() => setFeedAlgorithm('trending')} className={`px-6 py-2.5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-2 ${feedAlgorithm === 'trending' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Icon name="flame" className="w-4 h-4" /> {t('trending')}</button>
