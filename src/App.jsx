@@ -2406,22 +2406,22 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             .map((creator, index) => {
                                                 const rank = index + 1;
                                                 return (
-                                                    <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className={`bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-6 shadow-sm border flex items-center justify-between cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] mb-3 mx-4 ${rank === 1 ? 'border-yellow-400 dark:border-yellow-500/50 shadow-[0_0_20px_rgba(250,204,21,0.15)] bg-gradient-to-r from-yellow-50/50 to-white dark:from-yellow-900/10 dark:to-slate-900' : 'border-slate-100 dark:border-slate-800'}`}>
-                                                        <div className="flex items-center gap-4 md:gap-5">
-                                                            <h2 className={`font-black text-xl md:text-3xl w-6 md:w-8 text-center ${rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-slate-400' : rank === 3 ? 'text-orange-500' : 'text-slate-300 dark:text-slate-700'}`}>#{rank}</h2>
+                                                    <div key={creator.id} onClick={() => openPublicProfile(creator.id)} className={`bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-4 shadow-sm border flex items-center justify-between cursor-pointer transition-all hover:shadow-md hover:scale-[1.01] mb-2 mx-1 md:mx-0 ${rank === 1 ? 'border-yellow-400 dark:border-yellow-500/50 shadow-[0_0_15px_rgba(250,204,21,0.15)] bg-gradient-to-r from-yellow-50/50 to-white dark:from-yellow-900/10 dark:to-slate-900' : 'border-slate-100 dark:border-slate-800'}`}>
+                                                        <div className="flex items-center gap-3 md:gap-4">
+                                                            <h2 className={`font-black text-lg md:text-2xl w-5 md:w-8 text-center ${rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-slate-400' : rank === 3 ? 'text-orange-500' : 'text-slate-300 dark:text-slate-700'}`}>#{rank}</h2>
                                                             <div className="relative">
                                                                 {renderNexiaBadge(rank)}
-                                                                <img src={creator.photoURL} className="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] md:rounded-2xl object-cover border-2 border-slate-100 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm" />
+                                                                <img src={creator.photoURL} className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover border border-slate-100 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm" />
                                                             </div>
                                                             <div>
-                                                                <h3 className="font-extrabold text-[15px] md:text-lg text-slate-900 dark:text-white flex items-center gap-2">{creator.name} {creator.isOfficial && <Icon name="checkcircle" className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />}</h3>
-                                                                <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">{creator.postCount} {t('creations') || 'Creations'}</p>
+                                                                <h3 className="font-extrabold text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-1.5">{creator.name} {creator.isOfficial && <Icon name="checkcircle" className="w-3 h-3 text-blue-500" />}</h3>
+                                                                <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{creator.postCount} {t('creations') || 'Creations'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="text-right hidden sm:block">
-                                                            <div className="bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-700">
-                                                                <p className="text-[9px] uppercase tracking-widest font-black text-slate-400 mb-0.5">{t('followers') || 'Followers'}</p>
-                                                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{creator.followers?.length || 0}</p>
+                                                            <div className="bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-slate-400 mb-0.5">{t('followers') || 'Followers'}</p>
+                                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{creator.followers?.length || 0}</p>
                                                             </div>
                                                         </div>
                                                     </div>
