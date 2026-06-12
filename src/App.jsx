@@ -1750,8 +1750,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                 return (
                     <NexiaScrollEngine key={post.id}>
-                        {/* 🚀 POST GAP REDUCED EVEN MORE */}
-                    <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-1 md:mb-1 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
+                        {/* 🚀 POST GAP MINIMIZED TO MAX */}
+                    <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-1 md:mb-3 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
                             
                             {post.isRepost && (
                                 <div className="px-4 md:px-6 pt-3 md:pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
@@ -1982,6 +1982,12 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             <div className="flex items-center gap-2 md:gap-6 flex-shrink-0">
                                 {/* 📱 MOBILE ACTIVE ICONS BAR (Search & Notification Bell FIXED) */}
                                 <div className="flex md:hidden items-center gap-2.5">
+                                    {hasAdminAccess && (
+                                        <button onClick={() => navigate('admin_panel')} className={`w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 relative transition-colors ${view === 'admin_panel' ? 'text-red-500' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
+                                            <Icon name="sliders" className="w-3.5 h-3.5" />
+                                            {allReports.length > 0 && <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 flex items-center justify-center rounded-full bg-red-500 text-white text-[8px] font-black border border-white dark:border-slate-900 animate-pulse">{allReports.length}</span>}
+                                        </button>
+                                    )}
                                     <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-700">
                                         {isDarkMode ? <Icon name="sun" className="w-3.5 h-3.5 text-amber-500" /> : <Icon name="moon" className="w-3.5 h-3.5 text-blue-600" />}
                                     </button>
@@ -2418,10 +2424,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                                 <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{creator.postCount} {t('creations') || 'Creations'}</p>
                                                             </div>
                                                         </div>
-                                                        <div className="text-right hidden sm:block">
-                                                            <div className="bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-700">
-                                                                <p className="text-[8px] uppercase tracking-widest font-black text-slate-400 mb-0.5">{t('followers') || 'Followers'}</p>
-                                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{creator.followers?.length || 0}</p>
+                                                        <div className="text-right">
+                                                            <div className="bg-slate-50 dark:bg-slate-800 px-2 py-1.5 md:px-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                                <p className="text-[7px] md:text-[8px] uppercase tracking-widest font-black text-slate-400 mb-0.5">{t('followers') || 'Followers'}</p>
+                                                                <p className="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300">{creator.followersCount || 0}</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -3068,15 +3074,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </span>
                     )}
                 </button>
-                        
-                        {/* 🛡️ MOBILE ADMIN PORTAL GATEWAY */}
-                        {hasAdminAccess && (
-                            <button onClick={() => navigate('admin_panel')} className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'admin_panel' ? 'text-red-500 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
-                                <Icon name="sliders" className="w-5 h-5" />
-                                {allReports.length > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white ring-2 ring-white dark:ring-slate-900 animate-pulse">{allReports.length}</span>}
-                            </button>
-                        )}
-                        
+                                                                        
                         <button onClick={() => { if(!user || user.isAnonymous) return setAuthModal({...authModal, open: true, mode: 'login'}); navigate('profile'); setSelectedUser(null); }} className={`p-3 rounded-2xl transition-all active:scale-75 flex flex-col items-center gap-1 ${(view === 'profile' || view === 'public_profile' || view === 'settings' || view === 'edit_profile') ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500'}`}>
                             <Icon name="user" className="w-5 h-5" />
                         </button>
