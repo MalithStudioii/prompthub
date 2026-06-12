@@ -1751,7 +1751,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 return (
                     <NexiaScrollEngine key={post.id}>
                         {/* 🚀 POST GAP REDUCED EVEN MORE */}
-                    <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-1 md:mb-3 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
+                    <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-1 md:mb-1 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
                             
                             {post.isRepost && (
                                 <div className="px-4 md:px-6 pt-3 md:pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
