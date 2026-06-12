@@ -1750,8 +1750,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
                 return (
                     <NexiaScrollEngine key={post.id}>
-                        {/* 🚀 POST GAP REDUCED */}
-                    <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-3 md:mb-6 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
+                        {/* 🚀 POST GAP REDUCED EVEN MORE */}
+                    <div className={`rounded-[1.8rem] md:rounded-[3.5rem] overflow-hidden transition-all mb-1 md:mb-3 p-1.5 md:p-2 shadow-sm ${post.isOfficial ? 'bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-blue-400 dark:border-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.15)]' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 nexus-card'}`}>
                             
                             {post.isRepost && (
                                 <div className="px-4 md:px-6 pt-3 md:pt-4 pb-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase tracking-widest">
@@ -2162,9 +2162,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                         <div className="flex items-center gap-2 flex-wrap justify-end">
                                                             <button onClick={() => toggleAdminUserStatus(creator.id, 'isVerified')} className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ${creator.isVerified ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200 dark:border-slate-600'}`}><Icon name="checkcircle" className="w-4 h-4 inline mr-1"/> Verify</button>
                                                             {hasAdminAccess && (
-                                                                <button onClick={() => navigate('admin_panel')} className={`p-3 rounded-2xl transition-all active:scale-75 relative flex flex-col items-center gap-1 ${view === 'admin_panel' ? 'text-red-500 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-red-500'}`}>
-                                                                    <Icon name="sliders" className="w-5 h-5" />
-                                                                {allReports.length > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white ring-2 ring-white dark:ring-slate-900 animate-pulse">{allReports.length}</span>}
+                                                                <button onClick={() => deleteAdminUser(creator.id, creator.name)} className="px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-600 hover:text-white transition-colors">
+                                                                    <Icon name="trash" className="w-4 h-4 inline mr-1"/> Delete
                                                                 </button>
                                                             )}
                                                         </div>
