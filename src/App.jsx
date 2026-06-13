@@ -290,9 +290,14 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             );
         };
 
-        // 🎵 NEXIA CYBER AUDIO ENGINE (LOUDER & BYPASS BROWSER BLOCKS)
+        // 🎵 NEXIA CYBER AUDIO ENGINE & HAPTIC FEEDBACK 
         const playCyberClick = () => {
             try {
+                // 📳 Haptic Feedback for Mobile Devices (Subtle 40ms tap)
+                if (typeof window !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(40);
+                }
+
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (!AudioContext) return;
                 const ctx = new AudioContext();
@@ -387,6 +392,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             // 🗺️ NEXIA FIRST-TIME ONBOARDING TOUR STATE
             const [showTour, setShowTour] = useState(false);
             const [tourStep, setTourStep] = useState(0);
+
+            // 🍞 NEXIA CYBER TOAST NOTIFICATION SYSTEM
+            const [cyberToast, setCyberToast] = useState({ open: false, msg: '', type: 'info' });
+            const triggerToast = (msg, type = 'info') => {
+                setCyberToast({ open: true, msg, type });
+                setTimeout(() => setCyberToast(prev => ({ ...prev, open: false })), 3500);
+            };
 
             useEffect(() => {
                 const tourCompleted = localStorage.getItem('nexia_tour_completed');
@@ -1364,10 +1376,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         status: 'pending'
                     });
                     setReportModal({ open: false, post: null, reason: '' });
-                    alert("Report submitted successfully. Our team will review it.");
+                    triggerToast("Report submitted successfully. Team will review.", "success");
                 } catch (error) {
                     console.error("Report error", error);
-                    alert("Failed to submit report.");
+                    triggerToast("Failed to submit report.", "error");
                 }
                 setUploading(false);
             };
@@ -1379,8 +1391,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 try {
                     await window.fb.deleteDoc(window.fb.doc(window.fb.db, 'artifacts', window.fb.appId, 'users', targetId, 'profile', 'info'));
                     await window.fb.deleteDoc(window.fb.doc(window.fb.db, 'artifacts', window.fb.appId, 'public', 'data', 'stats', targetId));
-                    alert("User purged successfully. 🛡️");
-                } catch (e) { alert("Failed to delete user."); }
+                    triggerToast("User purged successfully. 🛡️", "success");
+                } catch (e) { triggerToast("Failed to delete user.", "error"); }
             };
 
             const handleSignOut = async () => {
