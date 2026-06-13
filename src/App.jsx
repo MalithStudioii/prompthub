@@ -379,6 +379,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const [postOptionsMenuOpen, setPostOptionsMenuOpen] = useState(null); // null or postId
             const [editPostModal, setEditPostModal] = useState({ open: false, post: null, newPrompt: '' });
             const [reportModal, setReportModal] = useState({ open: false, post: null, reason: '' });
+            // 📝 NEXIA FEEDBACK & BUG REPORT STATE
+            const [feedbackModal, setFeedbackModal] = useState({ open: false, type: 'bug', text: '' });
+            const [allFeedbacks, setAllFeedbacks] = useState([]);
             const [storeModal, setStoreModal] = useState(false);
             // Long Prompts වල See More පාලනය කරන්න
             const [expandedPrompts, setExpandedPrompts] = useState({});
@@ -453,14 +456,21 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const [adminTab, setAdminTab] = useState('reports');
             const [allReports, setAllReports] = useState([]);
 
-            // ✅ FIXED: Admin Reports Fetcher (Now supports both Master and Sub-Admins)
+            // ✅ FIXED: Admin Reports & Feedbacks Fetcher
             useEffect(() => {
                 if (!isReady || !user || !hasAdminAccess) return;
                 const { db, appId, collection, onSnapshot } = window.fb;
+                
                 const unsubReports = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'reports'), (snap) => {
                     setAllReports(snap.docs.map(d => ({ id: d.id, ...d.data() })));
                 });
-                return () => unsubReports();
+                
+                const unsubFeedbacks = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'feedbacks'), (snap) => {
+                    const sortedFeedbacks = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    setAllFeedbacks(sortedFeedbacks);
+                });
+
+                return () => { unsubReports(); unsubFeedbacks(); };
             }, [isReady, user, hasAdminAccess]);
             const [officialPost, setOfficialPost] = useState({ prompt: '', imageFile: null });
 
@@ -1382,6 +1392,31 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 } catch (error) {
                     console.error("Report error", error);
                     triggerToast("Failed to submit report.", "error");
+                }
+                setUploading(false);
+            };
+
+            // 📝 Submit Feedback / Bug Report Function
+            const submitFeedback = async (e) => {
+                e.preventDefault();
+                if (!feedbackModal.text.trim()) return;
+                setUploading(true);
+                const { db, appId, collection, addDoc, serverTimestamp } = window.fb;
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'feedbacks'), {
+                        userId: user?.uid || 'anonymous',
+                        userName: profileData?.name || user?.displayName || 'Anonymous User',
+                        userPhoto: profileData?.photoURL || user?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=guest',
+                        type: feedbackModal.type,
+                        text: feedbackModal.text,
+                        timestamp: serverTimestamp(),
+                        status: 'new'
+                    });
+                    setFeedbackModal({ open: false, type: 'bug', text: '' });
+                    triggerToast("Feedback submitted successfully. Thank you!", "success");
+                } catch (error) {
+                    console.error("Feedback error", error);
+                    triggerToast("Failed to submit feedback.", "error");
                 }
                 setUploading(false);
             };
@@ -2771,6 +2806,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 <button onClick={() => setSettingsSection('Terms_&_Conditions')} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group border border-transparent hover:border-blue-100 dark:hover:border-slate-600">
                                                     <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="filetext" className="w-5 h-5"/></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Terms & Conditions</span></div>
                                                 </button>
+                                                <button onClick={() => setFeedbackModal({ open: true, type: 'bug', text: '' })} className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-2xl transition-colors group mt-2 border border-transparent hover:border-blue-100 dark:hover:border-slate-600">
+                                                    <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"><Icon name="message" className="w-5 h-5"/></div><span className="font-extrabold text-[15px] text-slate-700 dark:text-slate-200">Submit Feedback / Bug</span></div>
+                                                </button>
                                                 <button onClick={() => { playCyberClick(); setDeleteConfirmModal({ open: true, text: '' }); }} className="w-full flex items-center justify-between p-5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-2xl transition-colors group mt-6 border border-transparent dark:border-red-900/30">
                                                     <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-red-500 group-hover:text-red-600"><Icon name="trash" className="w-5 h-5"/></div><span className="font-extrabold text-[15px] text-red-600 dark:text-red-400">Delete Account</span></div>
                                                 </button>
@@ -3795,6 +3833,34 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* 📝 FEEDBACK & BUG REPORT MODAL */}
+                    {feedbackModal.open && (
+                        <div className="fixed inset-0 z-[999998] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
+                            <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-700">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase flex items-center gap-2"><Icon name="message" className="text-blue-500" /> Send Feedback</h2>
+                                    <button onClick={() => setFeedbackModal({ open: false, type: 'bug', text: '' })} className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full text-slate-400 hover:text-red-500 transition-colors"><Icon name="x" /></button>
+                                </div>
+                                <form onSubmit={submitFeedback} className="space-y-5">
+                                    <div className="flex gap-3">
+                                        <button type="button" onClick={() => setFeedbackModal({...feedbackModal, type: 'bug'})} className={`flex-1 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${feedbackModal.type === 'bug' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>Report Bug</button>
+                                        <button type="button" onClick={() => setFeedbackModal({...feedbackModal, type: 'feature'})} className={`flex-1 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${feedbackModal.type === 'feature' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>Feature Request</button>
+                                    </div>
+                                    <textarea 
+                                        className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-2xl py-4 px-5 outline-none font-medium text-sm min-h-[140px] focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-200 shadow-inner"
+                                        value={feedbackModal.text}
+                                        onChange={e => setFeedbackModal({...feedbackModal, text: e.target.value})}
+                                        placeholder={feedbackModal.type === 'bug' ? "Describe the issue you found... (e.g., 'The like button doesn't work on mobile')" : "What should we add next? (e.g., 'Please add an option to download videos')"}
+                                        required
+                                    ></textarea>
+                                    <button disabled={uploading || !feedbackModal.text.trim()} type="submit" className="w-full bg-blue-600 text-white py-4 rounded-full font-black text-xs tracking-widest uppercase hover:bg-blue-700 disabled:opacity-50 transition-all shadow-lg active:scale-95">
+                                        {uploading ? 'TRANSMITTING...' : 'SUBMIT INTEL'}
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     )}
