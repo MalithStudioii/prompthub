@@ -3752,6 +3752,16 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         </div>
                     )}
 
+                    {/* 🍞 CYBER TOAST NOTIFICATION UI */}
+                    {cyberToast.open && (
+                        <div className="fixed bottom-24 md:bottom-12 left-1/2 -translate-x-1/2 z-[999999] animate-in slide-in-from-bottom-5 fade-in zoom-in-95 duration-300">
+                            <div className={`px-5 py-3 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] border flex items-center gap-3 backdrop-blur-xl ${cyberToast.type === 'error' ? 'bg-red-950/90 border-red-500/50 text-red-100' : cyberToast.type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-100' : 'bg-blue-950/90 border-blue-500/50 text-blue-100'}`}>
+                                <Icon name={cyberToast.type === 'error' ? 'alertcircle' : cyberToast.type === 'success' ? 'checkcircle' : 'info'} className={`w-5 h-5 ${cyberToast.type === 'error' ? 'text-red-400' : cyberToast.type === 'success' ? 'text-emerald-400' : 'text-blue-400'}`} />
+                                <span className="font-bold text-[11px] md:text-xs uppercase tracking-widest">{cyberToast.msg}</span>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             );
         };
