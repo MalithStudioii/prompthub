@@ -2484,12 +2484,12 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                     <input type="file" id="avatar-upload" accept="image/*" className="hidden" onChange={(e) => { if(e.target.files[0]) setCropModal({ open: true, file: e.target.files[0], previewUrl: URL.createObjectURL(e.target.files[0]), type: 'avatar' }); e.target.value = ''; }} disabled={uploading} /></>}
                                                 </div>
                                                 
-                                                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase flex items-center gap-2 font-outfit">
+                                                {/* 🚀 Email removed for better privacy, margin moved to the name tag */}
+                                                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase flex items-center gap-2 font-outfit mb-6">
                                                     {targetData.name} 
                                                     {!isOwnProfile && targetData.privacyLevel !== 'public' && <Icon name="lock" className="text-blue-600 dark:text-blue-400 w-4 h-4"/>} 
                                                     {getAuthorBadges(targetData.id || user?.uid)}
                                                 </h2>
-                                                <p className="text-blue-600 dark:text-blue-400 font-black text-[10px] tracking-[0.2em] uppercase mb-6">{targetData.email}</p>
                                                 
                                                 {/* Followers & Following Stats */}
                                                 <div className="flex gap-8 mb-6">
