@@ -1525,7 +1525,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
             const handleBoostPost = async (postId) => {
                 if (!user || user.isAnonymous) return;
-                const currentCoins = profileData.coins ?? 100; 
+                const currentCoins = profileData.coins ?? 100; // අලුත් අයට Default 100ක් දෙනවා
                 
                 if (currentCoins < 50) {
                     alert("Not enough Nexia Coins! You need 50 coins to boost.");
@@ -1878,7 +1878,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         disabled 
                                         className="w-full flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2 md:py-2.5 rounded-xl mb-3 border border-slate-200/40 dark:border-slate-700/40 cursor-not-allowed"
                                     >
-                                        <Icon name="lock" className="w-3.5 h-3.5" /> (Boost Post system Coming Soon)
+                                        <Icon name="lock" className="w-3.5 h-3.5" /> Boost Post (⚡ Coins System Coming Soon)
                                     </button>
                                 )}
 
@@ -2264,7 +2264,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                     {displayPosts.length === 0 ? (
                                         <div className="text-center py-32 bg-white dark:bg-slate-800 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-700"><Icon name="globe" className="text-slate-200 dark:text-slate-600 mx-auto mb-6 w-16 h-16 animate-pulse" /><p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.4em]">{t('syncing')}</p></div>
                                     ) : (
-                                        <div className="flex flex-col gap-2 md:gap-4">
+                                        <div className="flex flex-col gap-0">
                                             {displayPosts.map(post => renderPostCard(post))}
                                         </div>
                                     )}
@@ -2663,7 +2663,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                     <button onClick={() => setProfileTab('creations')} className={`pb-4 font-black text-xs uppercase tracking-widest transition-colors ${profileTab === 'creations' ? 'border-b-4 border-blue-600 text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}>{t('creations')}</button>
                                                     {isOwnProfile && <button onClick={() => setProfileTab('saved')} className={`pb-4 font-black text-xs uppercase tracking-widest transition-colors ${profileTab === 'saved' ? 'border-b-4 border-blue-600 text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}><Icon name="bookmark" className="w-3 h-3 inline mr-1"/>{t('savedIntel')}</button>}
                                                 </div>
-                                                <div className="flex flex-col gap-2 md:gap-4">
+                                                <div className="flex flex-col gap-0">
                                                     {profileTab === 'creations' && (isOwnProfile ? userPosts : targetUserPosts).length === 0 ? <div className="text-center py-10"><Icon name="image" className="w-10 h-10 text-slate-200 dark:text-slate-700 mx-auto mb-3" /><p className="text-slate-400 font-bold text-[10px] uppercase">No creations yet.</p></div> : 
                                                     profileTab === 'saved' && posts.filter(p => profileData.savedPosts?.includes(p.id)).length === 0 ? <div className="text-center py-10"><Icon name="bookmark" className="w-10 h-10 text-slate-200 dark:text-slate-700 mx-auto mb-3" /><p className="text-slate-400 font-bold text-[10px] uppercase">No saved prompts yet.</p></div> : 
                                                     (profileTab === 'creations' ? (isOwnProfile ? userPosts : targetUserPosts) : posts.filter(p => profileData.savedPosts?.includes(p.id))).map(p => renderPostCard(p))}
