@@ -342,6 +342,8 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             const [posts, setPosts] = useState([]);
             const [loading, setLoading] = useState(true);
             const [authModal, setAuthModal] = useState({ open: false, mode: 'login', email: '', password: '', name: '', error: '' });
+            // 🛡️ NEXIA SECURE DELETE CONFIRMATION STATE
+            const [deleteConfirmModal, setDeleteConfirmModal] = useState({ open: false, text: '' });
             
             const [postModal, setPostModal] = useState({ prompt: '', imageUrl: '', imageFile: null, model: 'Midjourney v6.1 Pro' });
             
@@ -3748,6 +3750,51 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 >
                                     {uploading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <><Icon name="checkcircle" className="w-5 h-5"/> CROP & UPLOAD</>}
                                 </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🛡️ SECURE ACCOUNT DELETION MODAL */}
+                    {deleteConfirmModal.open && (
+                        <div className="fixed inset-0 z-[999999] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4">
+                            <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-red-500/30 animate-in zoom-in-95 duration-300 text-center relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-2xl"></div>
+                                <div className="relative z-10">
+                                    <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner border border-red-100 dark:border-red-800">
+                                        <Icon name="alertcircle" className="w-8 h-8 animate-pulse" />
+                                    </div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Danger Zone</h2>
+                                    <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                                        This action is irreversible. All your AI intelligence, prompts, and followers will be permanently purged from the Nexia Network.
+                                    </p>
+                                    <div className="mb-6 text-left">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-2 block">Type <span className="text-red-500">DELETE</span> to confirm</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="DELETE"
+                                            value={deleteConfirmModal.text}
+                                            onChange={(e) => setDeleteConfirmModal({...deleteConfirmModal, text: e.target.value})}
+                                            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-center font-black tracking-widest text-slate-900 dark:text-white focus:outline-none focus:border-red-500 transition-colors uppercase"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button onClick={() => { playCyberClick(); setDeleteConfirmModal({ open: false, text: '' }); }} className="flex-1 py-4 font-bold text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-widest transition-colors bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">Cancel</button>
+                                        <button 
+                                            disabled={deleteConfirmModal.text !== 'DELETE'}
+                                            onClick={async () => {
+                                                playCyberClick();
+                                                try {
+                                                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, 'artifacts', window.fb.appId, 'users', user.uid, 'profile', 'info'));
+                                                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, 'artifacts', window.fb.appId, 'public', 'data', 'stats', user.uid));
+                                                    window.location.reload();
+                                                } catch(e) { triggerToast("Failed to delete account", "error"); }
+                                            }} 
+                                            className="flex-1 bg-red-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white disabled:text-slate-500 py-4 rounded-xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-red-600/30"
+                                        >
+                                            Purge
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
