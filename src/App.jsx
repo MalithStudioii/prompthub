@@ -2141,7 +2141,27 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 Reports {allReports.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-slate-800"></span>}
                                             </button>
                                             <button onClick={() => setAdminTab('official')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'official' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Official Post</button>
+                                            <button onClick={() => setAdminTab('feedbacks')} className={`flex-1 min-w-[100px] py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all ${adminTab === 'feedbacks' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}>Feedbacks</button>
                                         </div>
+
+                                        {/* 📝 ADMIN FEEDBACKS VIEW */}
+                                        {adminTab === 'feedbacks' && (
+                                            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar animate-in slide-in-from-right-4">
+                                                {allFeedbacks.length === 0 ? <p className="text-center text-slate-400 font-bold uppercase tracking-widest py-10">No Feedbacks or Bug Reports yet.</p> : allFeedbacks.map(fb => (
+                                                    <div key={fb.id} className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-[2rem] border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                                                        <div className={`absolute top-0 left-0 w-1.5 h-full ${fb.type === 'bug' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                                                        <div className="flex items-center gap-3 mb-4 pl-2">
+                                                            <img src={fb.userPhoto} className="w-10 h-10 rounded-xl object-cover bg-slate-200 dark:bg-slate-700" />
+                                                            <div>
+                                                                <p className="font-extrabold text-sm text-slate-900 dark:text-white">{fb.userName}</p>
+                                                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ${fb.type === 'bug' ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'}`}>{fb.type === 'bug' ? 'Bug Report' : 'Feature Request'}</span>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 whitespace-pre-wrap ml-2">"{fb.text}"</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
 
                                         {/* 👥 ADMIN MANAGEMENT AND NOMINATION PANEL */}
                                         {adminTab === 'nominate_admins' && isAdmin && (
@@ -3836,7 +3856,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                             </div>
                         </div>
                     )}
-                    
+
                     {/* 📝 FEEDBACK & BUG REPORT MODAL */}
                     {feedbackModal.open && (
                         <div className="fixed inset-0 z-[999998] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xl">
