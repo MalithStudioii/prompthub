@@ -1525,7 +1525,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
 
             const handleBoostPost = async (postId) => {
                 if (!user || user.isAnonymous) return;
-                const currentCoins = profileData.coins ?? 100; // අලුත් අයට Default 100ක් දෙනවා
+                const currentCoins = profileData.coins ?? 100; 
                 
                 if (currentCoins < 50) {
                     alert("Not enough Nexia Coins! You need 50 coins to boost.");
@@ -1878,7 +1878,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         disabled 
                                         className="w-full flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 font-black text-[10px] md:text-[11px] uppercase tracking-widest py-2 md:py-2.5 rounded-xl mb-3 border border-slate-200/40 dark:border-slate-700/40 cursor-not-allowed"
                                     >
-                                        <Icon name="lock" className="w-3.5 h-3.5" /> Boost Post (⚡ Coins System Coming Soon)
+                                        <Icon name="lock" className="w-3.5 h-3.5" /> (Boost Post system Coming Soon)
                                     </button>
                                 )}
 
