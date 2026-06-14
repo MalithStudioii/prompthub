@@ -766,9 +766,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 };
             }, [view, posts]);
 
-            // 🚀 100% BULLETPROOF MOBILE UPLOAD ENGINE (BASE64 METHOD)
+            // 🚀 THE ULTIMATE FIX: Direct Blob Upload Engine (Fixes Buffering & Broken Images)
             const uploadToImgBB = async (file) => {
-                const compressToBase64 = (imgFile) => {
+                const compressToBlob = (imgFile) => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onload = (e) => {
@@ -778,9 +778,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 const canvas = document.createElement('canvas');
                                 let width = img.width; let height = img.height;
                                 
-                                // Max resolution cap to prevent memory bloat on mobile
                                 const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
-                                
                                 if (width > height && width > MAX_WIDTH) { 
                                     height *= MAX_WIDTH / width; width = MAX_WIDTH; 
                                 } else if (height > MAX_HEIGHT) { 
@@ -791,25 +789,25 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0, width, height);
                                 
-                                // 🚀 Convert directly to Base64 Text String (Bypasses Mobile Blob Bugs)
-                                const base64String = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-                                resolve(base64String);
+                                // 🚀 Create a standard Blob (100% Supported by ALL mobile browsers)
+                                canvas.toBlob((blob) => {
+                                    resolve(blob || imgFile); // Fallback to original if blob fails
+                                }, 'image/jpeg', 0.8);
                             };
-                            img.onerror = () => resolve(null);
+                            img.onerror = () => resolve(imgFile);
                         };
-                        reader.onerror = () => resolve(null);
+                        reader.onerror = () => resolve(imgFile);
                         reader.readAsDataURL(imgFile);
                     });
                 };
 
                 try {
-                    // 1. Convert and compress image to pure text
-                    const base64Data = await compressToBase64(file);
-                    if (!base64Data) throw new Error("Compression failed");
-
-                    // 2. Send as text data (Mobile browsers never fail text uploads)
+                    // Apply compression only if file exceeds 300KB
+                    const optimizedBlob = file.size > 300000 ? await compressToBlob(file) : file;
+                    
                     const formData = new FormData();
-                    formData.append('image', base64Data);
+                    // 🚀 The Magic Fix: Append as a pure Blob with a definitive filename!
+                    formData.append('image', optimizedBlob, `nexia_intel_${Date.now()}.jpg`);
                     
                     const response = await fetch('https://api.imgbb.com/1/upload?key=f048c857d1c61df16a650b4b65074368', {
                         method: 'POST',
@@ -823,7 +821,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                         throw new Error("ImgBB rejected the upload");
                     }
                 } catch (error) {
-                    console.error("Mobile Upload Error:", error);
+                    console.error("Upload Error:", error);
                     return null;
                 }
             };
