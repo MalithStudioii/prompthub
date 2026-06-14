@@ -767,20 +767,22 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
             }, [view, posts]);
 
             const uploadToImgBB = async (file) => {
-                // Client-side image compression algorithm (Target: ~300KB)
-                const compressImage = (imgFile, targetSizeKB = 300) => {
+                // 🚀 OPTIMIZED FOR MOBILE: Safe, Non-recursive Compression Engine
+                const compressImage = (imgFile) => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.readAsDataURL(imgFile);
+                        
                         reader.onload = (event) => {
                             const img = new Image();
                             img.src = event.target.result;
+                            
                             img.onload = () => {
                                 const canvas = document.createElement('canvas');
                                 let width = img.width; 
                                 let height = img.height;
                                 
-                                // Max resolution cap to prevent memory bloat
+                                // Max resolution cap to prevent memory bloat on mobile
                                 const MAX_WIDTH = 1200; 
                                 const MAX_HEIGHT = 1200;
                                 
@@ -797,20 +799,22 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0, width, height);
                                 
-                                let quality = 0.9;
-                                const compress = () => {
-                                    canvas.toBlob((blob) => {
-                                        if (blob.size / 1024 > targetSizeKB && quality > 0.1) {
-                                            quality -= 0.1; // Gracefully degrade quality until target is met
-                                            compress();
-                                        } else {
-                                            resolve(new File([blob], imgFile.name, { type: 'image/jpeg', lastModified: Date.now() }));
-                                        }
-                                    }, 'image/jpeg', quality);
-                                };
-                                compress();
+                                // 🚀 FIXED: Removed the recursive loop. One-time 0.8 quality compression is perfect and fast for mobile.
+                                canvas.toBlob((blob) => {
+                                    if (blob) {
+                                        resolve(new File([blob], imgFile.name, { type: 'image/jpeg', lastModified: Date.now() }));
+                                    } else {
+                                        resolve(imgFile); // Fallback to original if blob creation fails on mobile
+                                    }
+                                }, 'image/jpeg', 0.8);
                             };
+                            
+                            // 🚀 FIXED: Error handling to prevent infinite buffering if image load fails
+                            img.onerror = () => resolve(imgFile); 
                         };
+                        
+                        // 🚀 FIXED: Error handling for file reading
+                        reader.onerror = () => resolve(imgFile); 
                     });
                 };
 
