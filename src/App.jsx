@@ -766,64 +766,50 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                 };
             }, [view, posts]);
 
+            // 🚀 100% BULLETPROOF MOBILE UPLOAD ENGINE (BASE64 METHOD)
             const uploadToImgBB = async (file) => {
-                // 🚀 OPTIMIZED FOR MOBILE: Safe, Non-recursive Compression Engine
-                const compressImage = (imgFile) => {
+                const compressToBase64 = (imgFile) => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
-                        reader.readAsDataURL(imgFile);
-                        
-                        reader.onload = (event) => {
+                        reader.onload = (e) => {
                             const img = new Image();
-                            img.src = event.target.result;
-                            
+                            img.src = e.target.result;
                             img.onload = () => {
                                 const canvas = document.createElement('canvas');
-                                let width = img.width; 
-                                let height = img.height;
+                                let width = img.width; let height = img.height;
                                 
                                 // Max resolution cap to prevent memory bloat on mobile
-                                const MAX_WIDTH = 1200; 
-                                const MAX_HEIGHT = 1200;
+                                const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
                                 
                                 if (width > height && width > MAX_WIDTH) { 
-                                    height *= MAX_WIDTH / width; 
-                                    width = MAX_WIDTH; 
+                                    height *= MAX_WIDTH / width; width = MAX_WIDTH; 
                                 } else if (height > MAX_HEIGHT) { 
-                                    width *= MAX_HEIGHT / height; 
-                                    height = MAX_HEIGHT; 
+                                    width *= MAX_HEIGHT / height; height = MAX_HEIGHT; 
                                 }
                                 
-                                canvas.width = width; 
-                                canvas.height = height;
+                                canvas.width = width; canvas.height = height;
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0, width, height);
                                 
-                                // 🚀 FIXED: Removed the recursive loop. One-time 0.8 quality compression is perfect and fast for mobile.
-                                canvas.toBlob((blob) => {
-                                    if (blob) {
-                                        resolve(new File([blob], imgFile.name, { type: 'image/jpeg', lastModified: Date.now() }));
-                                    } else {
-                                        resolve(imgFile); // Fallback to original if blob creation fails on mobile
-                                    }
-                                }, 'image/jpeg', 0.8);
+                                // 🚀 Convert directly to Base64 Text String (Bypasses Mobile Blob Bugs)
+                                const base64String = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                                resolve(base64String);
                             };
-                            
-                            // 🚀 FIXED: Error handling to prevent infinite buffering if image load fails
-                            img.onerror = () => resolve(imgFile); 
+                            img.onerror = () => resolve(null);
                         };
-                        
-                        // 🚀 FIXED: Error handling for file reading
-                        reader.onerror = () => resolve(imgFile); 
+                        reader.onerror = () => resolve(null);
+                        reader.readAsDataURL(imgFile);
                     });
                 };
 
                 try {
-                    // Apply compression only if file exceeds 300KB
-                    const optimizedFile = file.size > 300000 ? await compressImage(file) : file;
-                    
+                    // 1. Convert and compress image to pure text
+                    const base64Data = await compressToBase64(file);
+                    if (!base64Data) throw new Error("Compression failed");
+
+                    // 2. Send as text data (Mobile browsers never fail text uploads)
                     const formData = new FormData();
-                    formData.append('image', optimizedFile);
+                    formData.append('image', base64Data);
                     
                     const response = await fetch('https://api.imgbb.com/1/upload?key=f048c857d1c61df16a650b4b65074368', {
                         method: 'POST',
@@ -831,9 +817,13 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                     });
                     
                     const resData = await response.json();
-                    return resData.data.url;
+                    if (resData && resData.data && resData.data.url) {
+                        return resData.data.url;
+                    } else {
+                        throw new Error("ImgBB rejected the upload");
+                    }
                 } catch (error) {
-                    console.error("Transmission error inside image deployment stream:", error);
+                    console.error("Mobile Upload Error:", error);
                     return null;
                 }
             };
