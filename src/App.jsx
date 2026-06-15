@@ -3758,10 +3758,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             const canvas = document.createElement('canvas');
                                             const ctx = canvas.getContext('2d');
                                             
-                                            // Matrix Calculations based on type
+                                            // 🚀 OPTIMIZED MATRIX: Reduced dimensions for faster compression
                                             const isAvatar = cropModal.type === 'avatar';
-                                            const targetWidth = isAvatar ? 500 : 1200;
-                                            const targetHeight = isAvatar ? 500 : 400; // 3:1 ratio for cover
+                                            const targetWidth = isAvatar ? 400 : 900; 
+                                            const targetHeight = isAvatar ? 400 : 300; 
                                             
                                             canvas.width = targetWidth; 
                                             canvas.height = targetHeight;
@@ -3791,9 +3791,9 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             ctx.fillRect(0, 0, targetWidth, targetHeight);
                                             ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight, 0, 0, targetWidth, targetHeight);
                                             
-                                            // 🚀 MAGIC FIX: Using Fetch to bypass mobile canvas.toBlob & new File() bugs!
+                                            // 🚀 SUPER COMPRESSION FIX: Quality dropped to 0.7 for instant mobile uploads!
                                             try {
-                                                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                                                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                                                 const res = await fetch(dataUrl);
                                                 const safeBlob = await res.blob();
                                                 
