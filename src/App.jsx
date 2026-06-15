@@ -3727,7 +3727,7 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                         style={{ 
                                             width: cropModal.type === 'avatar' ? '250px' : '100%', 
                                             height: cropModal.type === 'avatar' ? '250px' : '160px', 
-                                            borderRadius: cropModal.type === 'avatar' ? '50%' : '1rem' 
+                                            borderRadius: cropModal.type === 'avatar' ? '2.5rem' : '1rem' 
                                         }}
                                     >
                                         <img 
@@ -3758,10 +3758,10 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             const canvas = document.createElement('canvas');
                                             const ctx = canvas.getContext('2d');
                                             
-                                            // 🚀 OPTIMIZED MATRIX: Reduced dimensions for faster compression
+                                            // 🚀 OPTIMIZED MATRIX: High-Quality Smooth Scaling Engine
                                             const isAvatar = cropModal.type === 'avatar';
-                                            const targetWidth = isAvatar ? 400 : 900; 
-                                            const targetHeight = isAvatar ? 400 : 300; 
+                                            const targetWidth = isAvatar ? 600 : 1200; 
+                                            const targetHeight = isAvatar ? 600 : 400; 
                                             
                                             canvas.width = targetWidth; 
                                             canvas.height = targetHeight;
@@ -3772,7 +3772,6 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                             let drawHeight = img.height;
                                             let offsetX = 0; let offsetY = 0;
 
-                                            // Simulate CSS object-fit: cover
                                             if (sourceAspect > targetAspect) {
                                                 drawWidth = img.height * targetAspect;
                                                 offsetX = (img.width - drawWidth) / 2;
@@ -3781,19 +3780,24 @@ const IMGBB_API_KEY = "f048c857d1c61df16a650b4b65074368";
                                                 offsetY = (img.height - drawHeight) / 2;
                                             }
 
-                                            // Apply Zoom coordinates directly to canvas
                                             drawWidth /= cropZoom; 
                                             drawHeight /= cropZoom;
                                             offsetX += (drawWidth * (cropZoom - 1)) / 2;
                                             offsetY += (drawHeight * (cropZoom - 1)) / 2;
 
+                                            const ctx = canvas.getContext('2d');
+                                            
+                                            // 🚀 FIX 1: Enable High-Quality Smoothing to prevent 8K images from getting pixelated
+                                            ctx.imageSmoothingEnabled = true;
+                                            ctx.imageSmoothingQuality = 'high';
+
                                             ctx.fillStyle = '#000'; 
                                             ctx.fillRect(0, 0, targetWidth, targetHeight);
                                             ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight, 0, 0, targetWidth, targetHeight);
                                             
-                                            // 🚀 SUPER COMPRESSION FIX: Quality dropped to 0.7 for instant mobile uploads!
+                                            // 🚀 FIX 2: Set quality back to the Web Sweet Spot (0.85)
                                             try {
-                                                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                                                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
                                                 const res = await fetch(dataUrl);
                                                 const safeBlob = await res.blob();
                                                 
